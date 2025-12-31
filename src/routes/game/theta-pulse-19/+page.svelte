@@ -5,7 +5,7 @@
 <MissionPage
     title="Theta Pulse"
     missionCode="THETA-PULSE-19"
-    description="Luister naar de frequenties van de stad. Ergens in de ruis zit een patroon dat je naar de volgende stap leidt."
+    description="Luister naar de frequenties. Morse code rhythm game komt binnenkort!"
     icon="📡"
     color="#ef4444"
     qrName="theta-pulse"

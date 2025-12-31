@@ -5,7 +5,7 @@
 <MissionPage
     title="Rho System"
     missionCode="RHO-SYSTEM-88"
-    description="De laatste stop op je reis. Hier vallen alle puzzelstukjes samen. Ben je klaar voor de ontknoping?"
+    description="De laatste stop. Quantum lock finale komt binnenkort - de ultieme uitdaging!"
     icon="🔑"
     color="#d946ef"
     qrName="rho-system"

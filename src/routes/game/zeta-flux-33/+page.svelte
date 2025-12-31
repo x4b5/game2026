@@ -5,7 +5,7 @@
 <MissionPage
     title="Zeta Flux"
     missionCode="ZETA-FLUX-33"
-    description="De energiestromen komen hier samen. Manipuleer de stroom om de verborgen boodschap te onthullen."
+    description="De energiestromen komen hier samen. Circuit connector game komt binnenkort!"
     icon="⚡"
     color="#8b5cf6"
     qrName="zeta-flux"
