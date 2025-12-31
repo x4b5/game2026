@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import fs from 'fs';
 import path from 'path';
 
-const DOMAIN = 'https://game2026.com'; // Pas dit aan naar je uiteindelijke domein
+const DOMAIN = 'https://game2026-beta.vercel.app'; // Jouw Vercel URL
 const MISSIONS = [
     { name: 'nebula-post', slug: 'x7-alpha-92' },
     { name: 'vortex-hub', slug: 'delta-vortex-11' },
