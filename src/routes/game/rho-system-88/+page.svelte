@@ -8,4 +8,5 @@
     description="De laatste stop op je reis. Hier vallen alle puzzelstukjes samen. Ben je klaar voor de ontknoping?"
     icon="🔑"
     color="#d946ef"
+    qrName="rho-system"
 />

@@ -8,4 +8,5 @@
     description="De energiestromen komen hier samen. Manipuleer de stroom om de verborgen boodschap te onthullen."
     icon="⚡"
     color="#8b5cf6"
+    qrName="zeta-flux"
 />

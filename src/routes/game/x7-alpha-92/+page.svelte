@@ -8,4 +8,5 @@
     description="Je bent aangekomen bij de buitenste post van de Nebula sector. Hier vind je de eerste aanwijzingen voor het 2026 protocol."
     icon="🌌"
     color="#6366f1"
+    qrName="nebula-post"
 />

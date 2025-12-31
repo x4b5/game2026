@@ -5,6 +5,7 @@
         description,
         icon = "🚀",
         color = "var(--primary)",
+        qrName = "",
     } = $props();
 </script>
 
@@ -26,6 +27,18 @@
         </div>
 
         <div class="content">
+            {#if qrName}
+                <div class="qr-confirmation">
+                    <div class="mini-qr-box">
+                        <img src="/qr-codes/{qrName}.png" alt="QR Protocol" />
+                    </div>
+                    <div class="qr-text">
+                        <strong>Protocol Geactiveerd</strong>
+                        <span>Scan bevestigd via QR</span>
+                    </div>
+                </div>
+            {/if}
+
             <p>{description}</p>
 
             <div class="task-box">
@@ -131,6 +144,45 @@
         font-family: monospace;
         color: var(--accent-color);
         font-weight: 700;
+    }
+
+    .qr-confirmation {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
+        margin-bottom: 1.5rem;
+    }
+
+    .mini-qr-box {
+        background: white;
+        padding: 0.25rem;
+        border-radius: 4px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .mini-qr-box img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .qr-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .qr-text strong {
+        font-size: 0.85rem;
+        color: var(--text-main);
+    }
+
+    .qr-text span {
+        font-size: 0.7rem;
+        color: var(--text-muted);
     }
 
     .content p {

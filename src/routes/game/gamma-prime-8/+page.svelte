@@ -8,4 +8,5 @@
     description="De hoogste toren van de sector. Vanaf hier heb je overzicht over alle andere locaties. Tijd om te speuren."
     icon="🗼"
     color="#3b82f6"
+    qrName="gamma-prime"
 />

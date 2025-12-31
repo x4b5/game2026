@@ -8,4 +8,5 @@
     description="Een breuk in de ruimte-tijd continuïteit. Wees voorzichtig, de realiteit is hier minder stabiel dan normaal."
     icon="⚛️"
     color="#f59e0b"
+    qrName="omega-rift"
 />
