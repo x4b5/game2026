@@ -158,8 +158,9 @@
 
                 <div class="briefing-content">
                     <p class="intel-text">
-                        <strong>> SYSTEM ALERT:</strong> U heeft volledige toegang
-                        tot het lokale netwerk.
+                        <strong>> SYSTEM ALERT:</strong> U heeft volledige
+                        toegang tot het lokale netwerk. Het is nu de beurt aan
+                        <span class="highlight">The Minck</span>.
                     </p>
                     <p>
                         <strong>> CRITICAL INTEL:</strong> Een enorme
