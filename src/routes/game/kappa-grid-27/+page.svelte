@@ -14,6 +14,7 @@
             imgIdle: "/heroes/lord-mosa.png",
             imgAction: "/heroes/lord-mosa.png",
             color: "#3b82f6",
+            playerNumber: 1,
         },
         {
             id: "stella",
@@ -22,6 +23,7 @@
             imgIdle: "/heroes/stella.png",
             imgAction: "/heroes/stella.png",
             color: "#ef4444",
+            playerNumber: 2,
         },
         {
             id: "the-minck",
@@ -30,6 +32,7 @@
             imgIdle: "/heroes/the-minck.png",
             imgAction: "/heroes/the-minck.png",
             color: "#06b6d4",
+            playerNumber: 3,
         },
     ];
 
@@ -134,6 +137,7 @@
             const hero = heroes.find((h) => h.id === heroId);
             if (hero) {
                 heroName = hero.name;
+                playerNumber = hero.playerNumber;
             }
             // Refresh status immediately
             fetchHeroStatus();
@@ -252,6 +256,7 @@
                             class="hero-image"
                             class:action-pose={selectedHero === hero.id}
                         />
+                        <div class="player-id-badge">P{hero.playerNumber}</div>
                         {#if selectedHero === hero.id}
                             <div class="selected-badge">✓</div>
                         {/if}
@@ -773,6 +778,21 @@
         to {
             transform: scale(1);
         }
+    }
+
+    .player-id-badge {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.7rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 5;
     }
 
     .hero-info {

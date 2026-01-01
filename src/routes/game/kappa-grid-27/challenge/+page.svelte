@@ -103,11 +103,11 @@
         {:else}
             <div class="briefing-text">
                 <p>
-                    Agent, goed dat je er bent. De aliens hebben een energieveld
-                    opgezet in de binnenstad van Maastricht.
+                    Agenten, goed dat jullie er zijn. De aliens hebben een
+                    energieveld opgezet in de binnenstad van Maastricht.
                 </p>
                 <p>
-                    Jouw doel: Vind de frequentie-sleutel om het veld te
+                    Jullie doel: Vind de frequentie-sleutel om het veld te
                     neutraliseren.
                 </p>
             </div>
