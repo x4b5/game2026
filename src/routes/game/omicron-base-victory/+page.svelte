@@ -3,21 +3,56 @@
     import { fade, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
 
+    import { Html5QrcodeScanner } from "html5-qrcode";
+
     let visible = $state(false);
     let showHint = $state(false);
     let intelScanned = $state(false);
+    let isScanning = $state(false);
+    let scanner: any = null;
 
     async function handleNext() {
-        try {
-            // Update global state so players aren't forced back by the layout poll
-            await fetch("/api/mission", {
-                method: "POST",
-                body: JSON.stringify({ step: "zeta-flux" }),
-            });
-        } catch (e) {
-            console.error(e);
+        isScanning = true;
+        setTimeout(() => {
+            scanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                false,
+            );
+            scanner.render(onScanSuccess, () => {});
+        }, 100);
+    }
+
+    function onScanSuccess(decodedText: string) {
+        const code = decodedText.toLowerCase().trim();
+
+        if (scanner) {
+            scanner
+                .clear()
+                .then(() => {
+                    isScanning = false;
+                    scanner = null;
+                    // Update mission state and go to quiz
+                    goto("/game/sint-pieter/safe");
+                })
+                .catch(console.error);
+        } else {
+            goto("/game/sint-pieter/safe");
         }
-        goto("/game/zeta-flux-33");
+    }
+
+    function stopScanner() {
+        if (scanner) {
+            scanner
+                .clear()
+                .then(() => {
+                    isScanning = false;
+                    scanner = null;
+                })
+                .catch(console.error);
+        } else {
+            isScanning = false;
+        }
     }
 
     onMount(() => {
@@ -73,27 +108,46 @@
         </div>
 
         <div class="action-section">
-            <button class="hint-toggle" onclick={() => (showHint = !showHint)}>
-                {showHint ? "❌ SLUIT COÖRDINATEN" : "🔍 TOON LOCATIE DATA"}
-            </button>
-
-            {#if showHint}
-                <div class="hint-box" transition:slide>
-                    <p>
-                        📍 <strong>SINT PIETER:</strong> "Vind de viool in Sint Pieter.
-                        Maar eerst... los deze versleutelde som op:"
-                    </p>
-                    <div class="riddle-math">((14 × 3) + 6) ÷ 6 = ?</div>
-                    <p class="riddle-instruction">
-                        Het cijfer is het <strong>aantal letters</strong> van het
-                        woord van deze woonruimte.
-                    </p>
+            {#if isScanning}
+                <div class="scanner-wrapper" transition:slide>
+                    <div class="scanner-briefing">
+                        <h3>BEVESTIG LOCATIE</h3>
+                        <p>
+                            Scan de QR-code op de bestemming om de
+                            kluis-interface te activeren.
+                        </p>
+                    </div>
+                    <div id="reader"></div>
+                    <button class="cancel-scan-btn" onclick={stopScanner}>
+                        ❌ ANNULEER SCAN
+                    </button>
                 </div>
-            {/if}
+            {:else}
+                <button
+                    class="hint-toggle"
+                    onclick={() => (showHint = !showHint)}
+                >
+                    {showHint ? "❌ SLUIT COÖRDINATEN" : "🔍 TOON LOCATIE DATA"}
+                </button>
 
-            <button class="next-btn" onclick={handleNext}>
-                GA NAAR LOCATIE
-            </button>
+                {#if showHint}
+                    <div class="hint-box" transition:slide>
+                        <p>
+                            📍 <strong>SINT PIETER:</strong> "Vind de viool in Sint
+                            Pieter. Maar eerst... los deze versleutelde som op:"
+                        </p>
+                        <div class="riddle-math">((14 × 3) + 6) ÷ 6 = ?</div>
+                        <p class="riddle-instruction">
+                            Het cijfer is het <strong>aantal letters</strong> van
+                            het woord van deze woonruimte.
+                        </p>
+                    </div>
+                {/if}
+
+                <button class="next-btn" onclick={handleNext}>
+                    📷 BEVESTIG LOCATIE
+                </button>
+            {/if}
         </div>
     </div>
 </div>
@@ -316,5 +370,57 @@
         background: #16a34a;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
+    }
+
+    /* Scanner Styles */
+    .scanner-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    #reader {
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid #22c55e;
+        background: black;
+    }
+
+    .scanner-briefing h3 {
+        font-family: "Orbitron", sans-serif;
+        color: #4ade80;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .scanner-briefing p {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .cancel-scan-btn {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid #ef4444;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+    }
+
+    .cancel-scan-btn:hover {
+        background: #ef4444;
+        color: white;
     }
 </style>
