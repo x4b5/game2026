@@ -1313,4 +1313,120 @@
         border-color: #3b82f6;
         box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
+
+    /* New Player Input Styling */
+    .section-subtitle {
+        font-family: "Inter", sans-serif;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: -1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .hero-card.added {
+        border-color: #22c55e;
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+        background: rgba(34, 197, 94, 0.05);
+    }
+
+    .added-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #22c55e;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        animation: scale-in 0.3s ease;
+        z-index: 5;
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+    }
+
+    .player-input {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .player-input input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        padding: 1.2rem;
+        border-radius: 12px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.1rem;
+        text-align: center;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .player-input input:focus {
+        border-color: var(--hero-color);
+        box-shadow: 0 0 20px var(--hero-color);
+        background: rgba(0, 0, 0, 0.7);
+        transform: scale(1.02);
+    }
+
+    .player-input input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.95rem;
+    }
+
+    .add-player-btn {
+        width: 100%;
+        background: linear-gradient(
+            135deg,
+            var(--hero-color),
+            var(--hero-color)
+        );
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .add-player-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px var(--hero-color);
+        filter: brightness(1.2);
+    }
+
+    .add-player-btn:active {
+        transform: translateY(0);
+    }
+
+    .player-added {
+        margin-top: 1.5rem;
+        padding: 1.2rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 2px solid #22c55e;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .player-name {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #22c55e;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
 </style>
