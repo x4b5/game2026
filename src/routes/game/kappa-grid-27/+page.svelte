@@ -1431,19 +1431,46 @@
     .player-added {
         margin-top: 1.5rem;
         padding: 1.2rem;
-        background: rgba(34, 197, 94, 0.1);
+        background: rgba(34, 197, 94, 0.15);
         border: 2px solid #22c55e;
         border-radius: 12px;
         text-align: center;
+        animation: pulse-success 0.6s ease-out;
+    }
+
+    @keyframes pulse-success {
+        0% {
+            transform: scale(0.95);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 
     .player-name {
         font-family: "Orbitron", sans-serif;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         font-weight: 700;
         color: #22c55e;
         text-transform: uppercase;
         letter-spacing: 1px;
-        text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        text-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+        display: block;
+        animation: glow-text 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-text {
+        0%,
+        100% {
+            text-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+        }
+        50% {
+            text-shadow: 0 0 25px rgba(34, 197, 94, 0.9);
+        }
     }
 </style>
