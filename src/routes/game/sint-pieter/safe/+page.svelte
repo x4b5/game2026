@@ -196,23 +196,6 @@
                         >
                             GA VERDER
                         </button>
-                    {:else}
-                        <div class="result-icon failure">🔒</div>
-                        <h2>TOEGANG GEWEIGERD</h2>
-                        <p>
-                            Slechts {score} van de {questions.length} vragen waren
-                            correct. De kluis blijft potdicht. Probeer het opnieuw!
-                        </p>
-                        <button class="primary-btn retry" onclick={handleReset}>
-                            OPNIEUW
-                        </button>
-                        <button
-                            class="secondary-btn"
-                            style="margin-top: 1rem; width: 100%;"
-                            onclick={() => goto("/game/sint-pieter/victory")}
-                        >
-                            DOORGAAN
-                        </button>
                     {/if}
                 </div>
             {/if}

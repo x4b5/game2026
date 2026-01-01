@@ -62,7 +62,6 @@
     });
 </script>
 
-```typescript
 <div class="game-layout">
     <!-- Player HUD: Top Right -->
     {#if $gameProgress.player}

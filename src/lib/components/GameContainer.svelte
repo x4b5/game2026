@@ -94,9 +94,17 @@
                                 window.location.pathname.replace(/\/$/, "");
                             const idx = MISSION_ORDER.indexOf(currentPath);
                             if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                                goto(MISSION_ORDER[idx + 1]);
+                                const nextPath = MISSION_ORDER[idx + 1];
+                                // Tell everyone else to follow
+                                fetch("/api/mission", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ navTo: nextPath }),
+                                }).catch(console.error);
+                                goto(nextPath);
                             } else {
-                                // Default fallback if not in MISSION_ORDER
                                 window.history.back();
                             }
                         }}
