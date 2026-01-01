@@ -134,58 +134,65 @@
     }
 </script>
 
+<div class="scanlines"></div>
+<div class="animated-bg"></div>
+
 <GameContainer
     bind:this={gameContainer}
     gameId="iota-stream"
     title="🌊 Iota Stream"
 >
+    <!-- ... existing content ... -->
     <div class="stream-game">
         {#if briefingVisible}
             <div class="intel-briefing" in:fade>
                 <div class="briefing-header">
-                    <span class="alert-tag">⚠️ DREIGINGSNIVEAU: CRITIEK</span>
-                    <h1>SITUATIE RAPPORT</h1>
+                    <span class="alert-tag">⚠️ THREAT: CRITICAL</span>
+                    <h1>MISSION BRIEFING</h1>
                 </div>
 
                 <div class="briefing-content">
                     <p class="intel-text">
-                        <strong>INTEL BEVESTIGD:</strong> Onze sensoren hebben grootschalige
-                        alien-mobilisatie gedetecteerd. De vijand bereidt zich voor
-                        op een frontale aanval op de binnenstad.
+                        <strong>> INCOMING INTEL:</strong> High-frequency alien signals
+                        detected. Hostile mobilization imminent. Target sector: Inner
+                        City.
                     </p>
                     <p>
-                        <strong>MISSIE:</strong> Schakel The Minck in. We moeten
-                        hun geavanceerde wapenarsenaal uitschakelen door het volledig
-                        te verbranden. Gebruik de gedetecteerde data-impulsen om
-                        de energie-kern van hun wapens te overbelasten en te vernietigen.
+                        <strong>> OBJECTIVE:</strong> Intercept data streams.
+                        Overload enemy weapon core using their own energy. Catch
+                        <span class="highlight">GREEN</span>
+                        signals. Avoid <span class="highlight">RED</span> corruption.
                     </p>
                     <div class="warning-box">
-                        GEVECHTSKLAAR MAKEN. ELKE SECONDE TELT.
+                        COMBAT READY. EXECUTE PROTOCOL.
                     </div>
                 </div>
 
                 <button class="accept-btn" onclick={acceptBriefing}>
-                    EXECUTE
+                    [ INITIATE MISSION ]
                 </button>
             </div>
         {:else}
             <div class="game-stats" in:fade>
                 <div class="stat good">
-                    <span class="stat-label">✓ Goede Data</span>
+                    <span class="stat-label">DATA INTEGRITY</span>
                     <span class="stat-value">{goodCaught}/{TARGET_GOOD}</span>
                 </div>
                 <div class="stat bad">
-                    <span class="stat-label">✗ Corrupte Data</span>
+                    <span class="stat-label">CORRUPTION</span>
                     <span class="stat-value">{badCaught}/{MAX_BAD}</span>
                 </div>
             </div>
         {/if}
 
-        <div class="stream-field">
-            role="slider" tabindex="0" aria-label="Data catcher position"
+        <div
+            class="stream-field"
+            role="slider"
+            tabindex="0"
+            aria-label="Data catcher position"
             onpointermove={handlePointerMove}
             ontouchmove={handleTouchMove}
-            >
+        >
             <!-- Data fragments -->
             {#each fragments as fragment (fragment.id)}
                 <div
@@ -195,7 +202,6 @@
                     style:left="{fragment.x}%"
                     style:top="{fragment.y}%"
                 >
-                    <div class="fragment-glow"></div>
                     <div class="fragment-core">
                         {fragment.type === "good" ? "1" : "0"}
                     </div>
@@ -212,271 +218,316 @@
 
             <!-- Grid background -->
             <div class="grid-background"></div>
+            <div class="scan-line-sweep"></div>
         </div>
 
-        <div class="hint">
-            Sleep horizontaal om data te vangen • Vang groene data, vermijd
-            rode!
-        </div>
+        <div class="hint">> SWIPE TO CAPTURE DATA STREAMS</div>
     </div>
 </GameContainer>
 
 <style>
+    /* Military / Tactical Theme Global Overrides */
+    :global(body) {
+        background-color: #050505;
+        color: #10b981;
+    }
+
+    /* Scanlines Overlay */
+    .scanlines {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        z-index: 10;
+        opacity: 0.7;
+    }
+
+    /* Animated Background */
+    .animated-bg {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: radial-gradient(
+                circle at center,
+                transparent 30%,
+                rgba(16, 185, 129, 0.05) 70%
+            ),
+            linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+            linear-gradient(
+                90deg,
+                rgba(16, 185, 129, 0.03) 1px,
+                transparent 1px
+            );
+        background-size:
+            100% 100%,
+            40px 40px,
+            40px 40px;
+        z-index: -1;
+    }
+
     .stream-game {
         width: 100%;
         max-width: 600px;
         margin: 0 auto;
+        font-family: "Courier New", Courier, monospace;
+        position: relative;
+        z-index: 20;
     }
 
+    /* Stats Panel */
     .game-stats {
         display: flex;
         gap: 1rem;
         margin-bottom: 2rem;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        background: rgba(0, 0, 0, 0.6);
     }
 
     .stat {
         flex: 1;
         padding: 1rem;
-        background: var(--glass);
-        border-radius: 12px;
-        border: 2px solid var(--glass-border);
         text-align: center;
+        border-right: 1px solid rgba(16, 185, 129, 0.3);
     }
-
-    .stat.good {
-        border-color: rgba(34, 197, 94, 0.5);
-    }
-
-    .stat.bad {
-        border-color: rgba(239, 68, 68, 0.5);
+    .stat:last-child {
+        border-right: none;
     }
 
     .stat-label {
         display: block;
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        margin-bottom: 0.5rem;
+        font-size: 0.7rem;
+        color: #64748b;
+        letter-spacing: 1px;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
     }
 
     .stat-value {
+        font-family: "Orbitron", sans-serif;
         font-size: 1.5rem;
         font-weight: 700;
-        color: var(--primary);
+        color: #10b981;
     }
 
+    .stat.bad .stat-value {
+        color: #ef4444;
+    }
+
+    /* Game Field (Radar/Grid) */
     .stream-field {
         position: relative;
         width: 100%;
         height: 500px;
-        background: linear-gradient(
-            to bottom,
-            rgba(99, 102, 241, 0.1),
-            rgba(236, 72, 153, 0.1)
-        );
-        border-radius: 20px;
-        border: 2px solid var(--glass-border);
+        background: rgba(0, 20, 10, 0.8);
+        border: 2px solid #10b981;
         overflow: hidden;
         touch-action: none;
-        cursor: none;
+        cursor: crosshair;
         margin-bottom: 1rem;
+        clip-path: polygon(
+            0 0,
+            20px 0,
+            20px 20px,
+            calc(100% - 20px) 20px,
+            calc(100% - 20px) 0,
+            100% 0,
+            100% calc(100% - 20px),
+            calc(100% - 20px) 100%,
+            20px 100%,
+            0 calc(100% - 20px)
+        );
     }
 
     .grid-background {
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-                90deg,
-                transparent 49%,
-                rgba(255, 255, 255, 0.05) 50%,
-                transparent 51%
+        background-image: linear-gradient(
+                rgba(16, 185, 129, 0.1) 1px,
+                transparent 1px
             ),
-            linear-gradient(
-                0deg,
-                transparent 49%,
-                rgba(255, 255, 255, 0.05) 50%,
-                transparent 51%
-            );
+            linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px);
         background-size: 40px 40px;
         pointer-events: none;
-        opacity: 0.3;
     }
 
+    .scan-line-sweep {
+        position: absolute;
+        width: 100%;
+        height: 10px;
+        background: rgba(16, 185, 129, 0.2);
+        top: 0;
+        left: 0;
+        animation: scanSweep 3s linear infinite;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    @keyframes scanSweep {
+        0% {
+            top: -10%;
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            top: 110%;
+            opacity: 0;
+        }
+    }
+
+    /* Data Fragments */
     .data-fragment {
         position: absolute;
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
         transform: translate(-50%, -50%);
         pointer-events: none;
     }
 
-    .fragment-glow {
-        position: absolute;
-        inset: -5px;
-        border-radius: 50%;
-        filter: blur(8px);
-    }
-
-    .data-fragment.good .fragment-glow {
-        background: #22c55e;
-        animation: pulse-good 2s ease-in-out infinite;
-    }
-
-    .data-fragment.bad .fragment-glow {
-        background: #ef4444;
-        animation: pulse-bad 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-good {
-        0%,
-        100% {
-            opacity: 0.6;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-    }
-
-    @keyframes pulse-bad {
-        0%,
-        100% {
-            opacity: 0.6;
-            transform: scale(1);
-        }
-        50% {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-    }
-
     .fragment-core {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 1.25rem;
-        border: 2px solid;
+        font-size: 1rem;
+        background: #000;
+        border: 1px solid;
     }
 
     .data-fragment.good .fragment-core {
-        background: rgba(34, 197, 94, 0.3);
-        border-color: #22c55e;
-        color: #22c55e;
+        color: #10b981;
+        border-color: #10b981;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
     }
 
     .data-fragment.bad .fragment-core {
-        background: rgba(239, 68, 68, 0.3);
-        border-color: #ef4444;
         color: #ef4444;
+        border-color: #ef4444;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
     }
 
+    /* Catcher */
     .catcher {
         position: absolute;
-        bottom: 5%;
+        bottom: 20px;
         width: 20%;
         transform: translateX(-50%);
-        transition: left 0.1s ease-out;
+        transition: left 0.05s linear;
         pointer-events: none;
-    }
-
-    .catcher-beam {
-        position: absolute;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 2px;
-        height: 100px;
-        background: linear-gradient(to bottom, transparent, var(--primary));
-        box-shadow: 0 0 10px var(--primary);
     }
 
     .catcher-body {
         position: relative;
         width: 100%;
-        height: 40px;
-        background: var(--glass);
-        border: 2px solid var(--primary);
-        border-radius: 20px;
-        box-shadow: 0 0 20px var(--primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        height: 15px;
+        background: #10b981;
+        border: 1px solid #10b981;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+    }
+
+    .catcher-beam {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 80px;
+        background: linear-gradient(
+            to top,
+            rgba(16, 185, 129, 0.2),
+            transparent
+        );
+        border-left: 1px dashed rgba(16, 185, 129, 0.3);
+        border-right: 1px dashed rgba(16, 185, 129, 0.3);
     }
 
     .catcher-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--primary);
-        animation: blink 1s ease-in-out infinite;
-    }
-
-    @keyframes blink {
-        0%,
-        100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.3;
-        }
+        display: none;
     }
 
     .hint {
         text-align: center;
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        font-style: italic;
+        font-size: 0.8rem;
+        color: #10b981;
+        font-family: monospace;
+        margin-top: 1rem;
+        opacity: 0.7;
     }
 
-    /* Intel Briefing Styles */
+    /* Intel Briefing */
     .intel-briefing {
-        background: rgba(0, 0, 0, 0.8);
-        border: 2px solid var(--primary);
-        border-radius: 15px;
+        background: rgba(10, 20, 15, 0.95);
+        border: 2px solid #10b981;
         padding: 2rem;
         margin-bottom: 2rem;
-        box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
-        border-left-width: 8px;
-    }
-
-    .briefing-header {
-        margin-bottom: 1.5rem;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        clip-path: polygon(
+            0 0,
+            20px 0,
+            20px 20px,
+            calc(100% - 20px) 20px,
+            calc(100% - 20px) 0,
+            100% 0,
+            100% calc(100% - 20px),
+            calc(100% - 20px) 100%,
+            20px 100%,
+            0 calc(100% - 20px)
+        );
     }
 
     .alert-tag {
         display: inline-block;
         background: #ef4444;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 4px;
+        color: #000;
+        padding: 2px 8px;
         font-family: "Orbitron", sans-serif;
-        font-size: 0.75rem;
-        font-weight: 700;
+        font-size: 0.7rem;
+        font-weight: 900;
         margin-bottom: 0.5rem;
     }
 
     .briefing-header h1 {
         font-family: "Orbitron", sans-serif;
         font-size: 1.5rem;
-        color: white;
+        color: #fff;
         margin: 0;
         letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+        padding-bottom: 0.5rem;
     }
 
     .briefing-content {
-        margin-bottom: 2rem;
+        margin: 1.5rem 0;
         line-height: 1.6;
-        color: #e2e8f0;
+        color: #10b981;
+        font-size: 0.95rem;
     }
 
     .intel-text {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 1rem;
         margin-bottom: 1rem;
+    }
+
+    .highlight {
+        color: #fff;
+        font-weight: bold;
     }
 
     .warning-box {
@@ -488,39 +539,53 @@
         font-weight: 700;
         font-family: "Orbitron", sans-serif;
         margin-top: 1.5rem;
+        animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 0.5;
+        }
     }
 
     .accept-btn {
         width: 100%;
-        padding: 1rem;
-        background: var(--primary);
-        color: white;
+        padding: 1.2rem;
+        background: #10b981;
+        color: #000;
         border: none;
-        border-radius: 8px;
         font-family: "Orbitron", sans-serif;
-        font-weight: 700;
+        font-weight: 900;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
         letter-spacing: 1px;
+        text-transform: uppercase;
+        clip-path: polygon(
+            10px 0,
+            100% 0,
+            100% calc(100% - 10px),
+            calc(100% - 10px) 100%,
+            0 100%,
+            0 10px
+        );
     }
 
     .accept-btn:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        background: #34d399;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
     }
 
     @media (max-width: 640px) {
         .stream-field {
             height: 400px;
         }
-
         .data-fragment {
-            width: 35px;
-            height: 35px;
+            width: 25px;
+            height: 25px;
         }
-
         .fragment-core {
-            font-size: 1rem;
+            font-size: 0.8rem;
         }
     }
 </style>
