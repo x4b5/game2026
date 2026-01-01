@@ -48,8 +48,7 @@
                     </p>
                     <p class="warning">
                         🎻 <strong>NIEUWE MISSIE:</strong> Vind de viool en gebruik
-                        de muziek als biologisch wapen om de invasie definitief te
-                        stoppen.
+                        de muziek als biologisch wapen om de invasie te stoppen.
                     </p>
                 </div>
             {:else}
@@ -68,9 +67,13 @@
             {#if showHint}
                 <div class="hint-box" transition:slide>
                     <p>
-                        📍 <strong>SINT PIETER:</strong> "De coördinaten leiden naar
-                        een plek in **Sint Pieter**. De viool ligt verborgen waar
-                        de kalkstenen muren de geheimen van de stad bewaren."
+                        📍 <strong>SINT PIETER:</strong> "Vind de viool in Sint Pieter.
+                        Maar eerst... los deze versleutelde som op:"
+                    </p>
+                    <div class="riddle-math">((14 × 3) + 6) ÷ 6 = ?</div>
+                    <p class="riddle-instruction">
+                        Het cijfer is het <strong>aantal letters</strong> van het
+                        woord van deze woonruimte.
                     </p>
                 </div>
             {/if}
@@ -256,11 +259,28 @@
     .hint-box {
         background: rgba(59, 130, 246, 0.1);
         border: 1px solid #3b82f6;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 8px;
         color: #dbeafe;
-        font-size: 0.9rem;
-        text-align: left;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+
+    .riddle-math {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        color: #fbbf24;
+        margin: 1.5rem 0;
+        letter-spacing: 2px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1rem;
+        border-radius: 6px;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .riddle-instruction {
+        font-style: italic;
+        color: #94a3b8;
     }
 
     .next-btn {
