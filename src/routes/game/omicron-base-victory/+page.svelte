@@ -23,22 +23,24 @@
         }, 100);
     }
 
-    function onScanSuccess(decodedText: string) {
+    async function onScanSuccess(decodedText: string) {
         const code = decodedText.toLowerCase().trim();
+        const nextPath = "/game/sint-pieter/safe";
 
         if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                    // Update mission state and go to quiz
-                    goto("/game/sint-pieter/safe");
-                })
-                .catch(console.error);
-        } else {
-            goto("/game/sint-pieter/safe");
+            await scanner.clear();
+            isScanning = false;
+            scanner = null;
         }
+
+        // Tell everyone else to follow
+        await fetch("/api/mission", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ navTo: nextPath }),
+        }).catch(console.error);
+
+        goto(nextPath);
     }
 
     function stopScanner() {

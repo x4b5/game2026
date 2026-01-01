@@ -143,7 +143,7 @@
                     gameActive = false;
                     stopGame();
 
-                    const nextPath = "/game/delta-vortex-11";
+                    const nextPath = "/game/omicron-base-victory";
 
                     // Tell everyone else to follow
                     fetch("/api/mission", {

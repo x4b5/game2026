@@ -12,16 +12,18 @@
     });
 
     async function handleNextMission() {
+        const nextPath = "/game/sint-pieter/scan";
         try {
             // Update global mission state to the next phase
             await fetch("/api/mission", {
                 method: "POST",
-                body: JSON.stringify({ step: "final-stand" }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ navTo: nextPath }),
             });
         } catch (e) {
             console.error(e);
         }
-        goto("/game/sint-pieter/scan");
+        goto(nextPath);
     }
 </script>
 

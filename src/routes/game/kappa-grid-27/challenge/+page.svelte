@@ -34,23 +34,31 @@
         }
 
         // Handle navigation
-        // Expecting URL or game code. For now, basic handling:
+        let targetPath = "";
         if (decodedText.startsWith("http")) {
-            // If it's a URL within our app, navigate
             try {
                 const url = new URL(decodedText);
                 if (url.pathname.startsWith("/game")) {
-                    goto(url.pathname);
-                } else {
-                    window.location.href = decodedText;
+                    targetPath = url.pathname;
                 }
             } catch (e) {
-                // Fallback
-                window.location.href = decodedText;
+                console.error(e);
             }
         } else {
-            // Assume it's a game code like "DELTA-11"
-            goto(`/game/${decodedText}`);
+            targetPath = `/game/${decodedText.toLowerCase()}`;
+        }
+
+        if (targetPath) {
+            // Tell everyone else to follow
+            fetch("/api/mission", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ navTo: targetPath }),
+            }).catch(console.error);
+
+            goto(targetPath);
+        } else if (decodedText.startsWith("http")) {
+            window.location.href = decodedText;
         }
     }
 
