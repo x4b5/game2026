@@ -529,9 +529,9 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(8rem, 45vw, 32rem);
+        font-size: clamp(12rem, 70vw, 50rem);
         font-weight: 950;
-        letter-spacing: -12px;
+        letter-spacing: -15px;
         filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
         line-height: 1;
         margin-bottom: 2.5rem;
