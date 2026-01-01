@@ -1,37 +1,81 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { fade, fly } from "svelte/transition";
+    import { fade, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
 
     let visible = $state(false);
+    let showHint = $state(false);
+    let intelScanned = $state(false);
 
     onMount(() => {
         visible = true;
+        setTimeout(() => (intelScanned = true), 1500);
     });
 </script>
 
 <div class="victory-page" in:fade={{ duration: 1000 }}>
     <div class="content-card glass-panel">
-        <div class="success-badge">MISSIE VOLTOOID</div>
-        <h1>OMICRON BASE GEVONDEN</h1>
-
-        <div class="intel-report">
-            <p in:fly={{ y: 20, duration: 800, delay: 500 }}>
-                Het is gelukt! Door de wapens van de aliens te verbranden is hun
-                aanval gestopt voordat deze begon.
-            </p>
-            <p in:fly={{ y: 20, duration: 800, delay: 1500 }}>
-                De data die we hebben onderschept heeft ons naar hun geheime
-                hoofdkwartier geleid: **Omicron Base**.
-            </p>
-            <p in:fly={{ y: 20, duration: 800, delay: 2500 }}>
-                Alle agenten worden nu opgeroepen voor de finale confrontatie.
-            </p>
+        <div class="header-section">
+            <div class="success-badge">DECRYPTIE VOLTOOID</div>
+            <h1>INKOMEND INTEL RAPPORT</h1>
         </div>
 
-        <button class="next-btn" onclick={() => goto("/game")}>
-            GA NAAR DASHBOARD
-        </button>
+        <div class="intel-grid">
+            <div class="intel-block" in:fly={{ x: -20, delay: 500 }}>
+                <span class="label">STATUS</span>
+                <span class="value success">VIJAND GESTOPT</span>
+            </div>
+            <div class="intel-block" in:fly={{ x: 20, delay: 700 }}>
+                <span class="label">LOCATIE GEVONDEN</span>
+                <span class="value highlight">OMICRON BASE</span>
+            </div>
+        </div>
+
+        <div class="report-content">
+            {#if intelScanned}
+                <div class="report-text" in:fade>
+                    <p>
+                        <strong>SITUATIE:</strong> De verbranding van het wapenarsenaal
+                        heeft een massale energie-feedback veroorzaakt in het alien-netwerk.
+                        Hierdoor hebben we hun stealth-protocol kunnen omzeilen.
+                    </p>
+                    <p>
+                        <strong>DECRYPTIE:</strong> We hebben coördinaten gevonden
+                        die wijzen naar een ondergronds complex. Dit is de bron van
+                        het Iota Stream signaal.
+                    </p>
+                    <p class="warning">
+                        ⚠️ <strong>WAARSCHUWING:</strong> De aliens zijn zich bewust
+                        van onze ontdekking. Ze hergroeperen zich bij de basis.
+                    </p>
+                </div>
+            {:else}
+                <div class="scanning-loader">
+                    <div class="scan-bar"></div>
+                    DATA DECRYPTEN...
+                </div>
+            {/if}
+        </div>
+
+        <div class="action-section">
+            <button class="hint-toggle" onclick={() => (showHint = !showHint)}>
+                {showHint ? "❌ SLUIT EXTRA INFO" : "🔍 EXTRA INFORMATIE"}
+            </button>
+
+            {#if showHint}
+                <div class="hint-box" transition:slide>
+                    <p>
+                        📍 <strong>COÖRDINATEN:</strong> "Zoek de plek waar de **stokoude
+                        boeken** rusten en de stilte heerst. Scan daar de verborgen
+                        code."
+                    </p>
+                </div>
+            {/if}
+
+            <button class="next-btn" onclick={() => goto("/game")}>
+                TERUG NAAR DASHBOARD
+            </button>
+        </div>
     </div>
 </div>
 
@@ -41,66 +85,200 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
     .content-card {
         max-width: 600px;
         width: 100%;
-        padding: 3rem;
-        background: rgba(0, 0, 0, 0.7);
+        padding: 2.5rem;
+        background: rgba(0, 0, 0, 0.8);
         border: 2px solid #22c55e;
-        box-shadow: 0 0 40px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 50px rgba(34, 197, 94, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .header-section {
         text-align: center;
+        margin-bottom: 0.5rem;
     }
 
     .success-badge {
         display: inline-block;
-        background: #22c55e;
-        color: white;
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
         padding: 0.4rem 1.2rem;
         border-radius: 4px;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 0.8rem;
-        margin-bottom: 1.5rem;
+        font-size: 0.75rem;
+        border: 1px solid #22c55e;
+        margin-bottom: 1rem;
+        letter-spacing: 1px;
     }
 
     h1 {
         font-family: "Orbitron", sans-serif;
-        font-size: 2.2rem;
+        font-size: 1.8rem;
         color: white;
-        margin-bottom: 2rem;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
+        margin: 0;
     }
 
-    .intel-report {
+    .intel-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .intel-block {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 3px solid #22c55e;
+    }
+
+    .intel-block .label {
+        display: block;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+    }
+
+    .intel-block .value {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .value.success {
+        color: #4ade80;
+    }
+    .value.highlight {
+        color: #3b82f6;
+    }
+
+    .report-content {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1.5rem;
+        border-radius: 12px;
+        min-height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .report-text {
         color: #cbd5e1;
-        font-size: 1.1rem;
-        line-height: 1.7;
-        margin-bottom: 3rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        text-align: left;
     }
 
-    .intel-report p {
-        margin-bottom: 1.5rem;
+    .report-text p {
+        margin-bottom: 1rem;
+    }
+
+    .warning {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+        padding: 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+
+    .scanning-loader {
+        font-family: "Orbitron", sans-serif;
+        color: #22c55e;
+        letter-spacing: 2px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .scan-bar {
+        width: 150px;
+        height: 2px;
+        background: rgba(34, 197, 94, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-bar::after {
+        content: "";
+        position: absolute;
+        width: 40px;
+        height: 100%;
+        background: #22c55e;
+        box-shadow: 0 0 10px #22c55e;
+        animation: scan 1.5s linear infinite;
+    }
+
+    @keyframes scan {
+        from {
+            left: -40px;
+        }
+        to {
+            left: 150px;
+        }
+    }
+
+    .action-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .hint-toggle {
+        background: rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        border: 1px dashed rgba(255, 255, 255, 0.3);
+        padding: 0.6rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .hint-toggle:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+
+    .hint-box {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid #3b82f6;
+        padding: 1rem;
+        border-radius: 8px;
+        color: #dbeafe;
+        font-size: 0.9rem;
+        text-align: left;
     }
 
     .next-btn {
         width: 100%;
-        padding: 1.2rem;
+        padding: 1rem;
         background: #22c55e;
         color: white;
         border: none;
         border-radius: 8px;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
 
     .next-btn:hover {
+        background: #16a34a;
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
     }
 </style>
