@@ -60,17 +60,8 @@
             soundManager.startAmbientMusic();
         });
 
-        // Typewriter effect
-        let i = 0;
-        const speed = 40;
-        const type = () => {
-            if (i < briefingText.length) {
-                displayedBriefing += briefingText.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            }
-        };
-        setTimeout(type, 1000);
+        // Show briefing text immediately
+        displayedBriefing = briefingText;
 
         // Check if players already exist
         if ($gameProgress.players.length > 0) {
