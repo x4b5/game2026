@@ -45,6 +45,10 @@
     let isStarting = $state(false);
     let mounted = $state(false);
 
+    let briefingText =
+        "Systeem geactiveerd... Verbinding maken met satellieten over Maastricht... Aliens hebben strategische punten bezet. Jouw missie: infiltreer hun netwerk, los de raadsels op en verdrijf de indringers uit onze stad!";
+    let displayedBriefing = $state("");
+
     // Multiplayer State
     let takenHeroes = $state<Set<string>>(new Set());
     let deviceId = $state("");
@@ -52,6 +56,18 @@
     onMount(() => {
         mounted = true;
         soundManager.init();
+
+        // Typewriter effect
+        let i = 0;
+        const speed = 40;
+        const type = () => {
+            if (i < briefingText.length) {
+                displayedBriefing += briefingText.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
+        };
+        setTimeout(type, 1000); // Start after 1s delay
 
         // 1. Get or Create Device ID
         let storedId = localStorage.getItem("game2026_deviceId");
@@ -194,8 +210,10 @@
 <div class="welcome-page" class:mounted>
     <!-- Animated Background -->
     <div class="animated-bg"></div>
+    <div class="cyber-grid"></div>
+    <div class="scanline-overlay"></div>
     <div class="particles">
-        {#each Array(20) as _, i}
+        {#each Array(30) as _, i}
             <div class="particle" style:--i={i}></div>
         {/each}
     </div>
@@ -223,14 +241,16 @@
         </div>
 
         <!-- Mission Brief -->
-        <div class="mission-brief glass-panel">
-            <h2>🎯 Jouw Missie</h2>
-            <p>
-                Scan QR-codes verspreid door het huis om aanwijzingen te
-                verzamelen, puzzels op te lossen en de zwakke plekken van de
-                aliens te ontdekken. Elke code brengt je dichter bij de
-                bevrijding van Maastricht!
-            </p>
+        <div class="mission-brief glass-panel has-corners">
+            <div class="corner tl"></div>
+            <div class="corner tr"></div>
+            <div class="corner bl"></div>
+            <div class="corner br"></div>
+            <h2>🎯 DE BRIEFING</h2>
+            <div class="typewriter-content">
+                {displayedBriefing}
+                <span class="cursor">_</span>
+            </div>
         </div>
     </div>
 
@@ -373,11 +393,71 @@
         background: rgba(255, 255, 255, 0.5);
         border-radius: 50%;
         top: -10px;
-        left: calc(var(--i) * 5%);
+        left: calc(var(--i) * 3.3%);
         animation: fall linear infinite;
-        animation-duration: calc(10s + var(--i) * 1s);
-        animation-delay: calc(var(--i) * -0.5s);
+        animation-duration: calc(8s + var(--i) * 0.5s);
+        animation-delay: calc(var(--i) * -0.3s);
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Cyber Grid Overlay */
+    .cyber-grid {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(
+                rgba(59, 130, 246, 0.05) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                90deg,
+                rgba(59, 130, 246, 0.05) 1px,
+                transparent 1px
+            );
+        background-size: 50px 50px;
+        perspective: 1000px;
+        z-index: -1.5;
+        animation: gridFade 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes gridFade {
+        from {
+            opacity: 0.3;
+        }
+        to {
+            opacity: 0.6;
+        }
+    }
+
+    /* Scanline Effect */
+    .scanline-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(59, 130, 246, 0.1) 50%,
+            transparent 100%
+        );
+        background-size: 100% 10px;
+        animation: scanlineScroll 10s linear infinite;
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.2;
+    }
+
+    @keyframes scanlineScroll {
+        from {
+            transform: translateY(-100%);
+        }
+        to {
+            transform: translateY(100%);
+        }
     }
 
     @keyframes fall {
@@ -461,6 +541,36 @@
         letter-spacing: 0.05em;
         text-transform: uppercase;
         word-wrap: break-word;
+        position: relative;
+    }
+
+    .line1::after,
+    .line2::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 100%
+        );
+        background-size: 100% 200%;
+        animation: holo-scan 2s linear infinite;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    @keyframes holo-scan {
+        0% {
+            transform: translateY(-100%);
+        }
+        100% {
+            transform: translateY(100%);
+        }
     }
 
     .line1 {
@@ -603,34 +713,94 @@
     }
 
     .mission-brief {
-        padding: 2rem;
+        padding: 2.5rem;
         margin-top: 2rem;
         backdrop-filter: blur(20px);
-        animation: float 6s ease-in-out infinite;
+        position: relative;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
-    @keyframes float {
-        0%,
-        100% {
-            transform: translateY(0px);
+    .has-corners .corner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #3b82f6;
+        filter: drop-shadow(0 0 5px #3b82f6);
+    }
+
+    .corner.tl {
+        top: -2px;
+        left: -2px;
+        border-right: none;
+        border-bottom: none;
+    }
+    .corner.tr {
+        top: -2px;
+        right: -2px;
+        border-left: none;
+        border-bottom: none;
+    }
+    .corner.bl {
+        bottom: -2px;
+        left: -2px;
+        border-right: none;
+        border-top: none;
+    }
+    .corner.br {
+        bottom: -2px;
+        right: -2px;
+        border-left: none;
+        border-top: none;
+    }
+
+    .typewriter {
+        color: var(--text-muted);
+        line-height: 1.7;
+        font-family: "Courier New", Courier, monospace;
+        letter-spacing: 0.5px;
+        overflow: hidden;
+        border-right: 2px solid #3b82f6;
+        white-space: wrap;
+        margin: 0 auto;
+        animation: blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes blink-caret {
+        from,
+        to {
+            border-color: transparent;
         }
         50% {
-            transform: translateY(-10px);
+            border-color: #3b82f6;
+        }
+    }
+
+    .typewriter {
+        animation:
+            typing 3.5s steps(40, end) forwards,
+            blink-caret 0.75s step-end infinite;
+        max-width: fit-content;
+    }
+
+    @keyframes typing {
+        from {
+            width: 0;
+        }
+        to {
+            width: 100%;
         }
     }
 
     .mission-brief h2 {
-        margin-bottom: 1rem;
-        color: #fbbf24;
-        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+        color: #3b82f6;
+        font-size: 1.5rem;
         font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-    }
-
-    .mission-brief p {
-        color: var(--text-muted);
-        line-height: 1.7;
+        font-weight: 900;
+        letter-spacing: 3px;
+        text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
     }
 
     /* Selection Section */
@@ -661,26 +831,28 @@
     }
 
     .hero-card {
-        padding: 1rem;
+        padding: 1.25rem;
         cursor: pointer;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid transparent;
         position: relative;
         overflow: hidden;
+        background: rgba(255, 255, 255, 0.03);
     }
 
     .hero-card:hover {
-        transform: translateY(-8px) scale(1.08) rotate(2deg);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        transform: translateY(-12px) scale(1.05);
+        box-shadow:
+            0 20px 50px rgba(0, 0, 0, 0.6),
+            0 0 20px var(--hero-color);
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .hero-card.selected {
         border-color: var(--hero-color);
-        box-shadow: 0 0 40px var(--hero-color);
-        animation:
-            pulse-selected 1.5s infinite,
-            float 3s ease-in-out infinite;
-        transform: translateY(-5px);
+        box-shadow: 0 0 50px var(--hero-color);
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-5px) scale(1.02);
     }
 
     @keyframes pulse-selected {
@@ -697,15 +869,19 @@
         position: relative;
         width: 100%;
         aspect-ratio: 1;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
         border-radius: 12px;
         overflow: hidden;
-        background: #050510;
+        background: radial-gradient(
+            circle at center,
+            rgba(59, 130, 246, 0.1),
+            #050510
+        );
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid rgba(255, 255, 255, 0.05);
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9);
     }
 
     .hero-image {
