@@ -7,15 +7,13 @@
     let gameContainer: any;
 
     async function acceptBriefing() {
-        // Proceed to next stage (Kazematten / Finale link)
-        // Since there is no specific game yet, we route to the finale or placeholder
-        // Updating mission progress for current step if needed
+        // Proceed to next stage (Kazematten Scan)
         await fetch("/api/mission", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ navTo: "/game/rho-system-88/finale" }),
+            body: JSON.stringify({ navTo: "/game/rho-system-88/scan" }),
         });
-        goto("/game/rho-system-88/finale");
+        goto("/game/rho-system-88/scan");
     }
 </script>
 
