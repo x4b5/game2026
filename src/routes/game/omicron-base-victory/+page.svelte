@@ -145,8 +145,13 @@
                 {#if showHint}
                     <div class="hint-box" transition:slide>
                         <p>
-                            📍 <strong>ZETA FLUX:</strong> "Zoek de ingang bij 'De
-                            Bovenkamer'. Activeer de scanner."
+                            📍 <strong>LOCATIE PUZZEL:</strong> Waar is Zeta Flux?
+                            Los op:
+                        </p>
+                        <div class="riddle-math">((14 × 3) + 6) ÷ 6 = ?</div>
+                        <p class="riddle-instruction">
+                            De uitkomst is het <strong>aantal letters</strong> van
+                            de ruimte waar je moet zoeken.
                         </p>
                     </div>
                 {/if}
