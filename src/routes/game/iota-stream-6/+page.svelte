@@ -3,6 +3,7 @@
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
+    import { goto } from "$app/navigation";
 
     interface DataFragment {
         id: number;
@@ -37,9 +38,7 @@
     });
 
     function acceptBriefing() {
-        briefingVisible = false;
-        gameActive = true;
-        startGame();
+        goto("/game/iota-stream-6/burner");
     }
 
     function startGame() {
@@ -166,7 +165,7 @@
                 </div>
 
                 <button class="accept-btn" onclick={acceptBriefing}>
-                    BEVESTIG & START SCAN
+                    EXECUTE
                 </button>
             </div>
         {:else}
