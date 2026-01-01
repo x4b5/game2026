@@ -90,11 +90,11 @@
         <div class="intel-grid">
             <div class="intel-block" in:fly={{ x: -20, delay: 500 }}>
                 <span class="label">STATUS</span>
-                <span class="value success">VIJAND GESTOPT</span>
+                <span class="value success">WAPENS VERBRAND</span>
             </div>
             <div class="intel-block" in:fly={{ x: 20, delay: 700 }}>
-                <span class="label">LOCATIE GEVONDEN</span>
-                <span class="value highlight">OMICRON BASE</span>
+                <span class="label">SITUATIE</span>
+                <span class="value highlight">VIJAND VERZWAKT</span>
             </div>
         </div>
 
