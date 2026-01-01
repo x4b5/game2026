@@ -63,27 +63,6 @@
 </script>
 
 <div class="game-layout">
-    <!-- Player HUD: Top Right -->
-    {#if $gameProgress.player}
-        <div class="player-hud glass-panel">
-            <div class="hud-content">
-                <div class="hud-avatar-container">
-                    {#if heroImage}
-                        <img src={heroImage} alt="Hero" class="hud-avatar" />
-                    {:else}
-                        <div class="hud-placeholder">?</div>
-                    {/if}
-                </div>
-                <div class="hud-info">
-                    <span class="hud-name">{$gameProgress.player.name}</span>
-                    <span class="hud-player-num"
-                        >P{$gameProgress.player.playerNumber}</span
-                    >
-                </div>
-            </div>
-        </div>
-    {/if}
-
     <main>
         {@render children()}
     </main>

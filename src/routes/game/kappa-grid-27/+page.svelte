@@ -202,7 +202,6 @@
                             alt={hero.name}
                             class="hero-image"
                         />
-                        <div class="player-id-badge">P{hero.playerNumber}</div>
                         {#if addedPlayers.includes(hero.id)}
                             <div class="added-badge">✓ Toegevoegd</div>
                         {/if}
