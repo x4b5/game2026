@@ -181,6 +181,7 @@
 
         isStarting = true;
         soundManager.playClick();
+        soundManager.stopAmbientMusic(); // Kill music immediately
 
         const playerData: PlayerData = {
             name: heroName.trim(),
