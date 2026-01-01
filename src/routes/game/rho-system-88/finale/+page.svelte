@@ -3,6 +3,7 @@
     import { fade, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { Html5QrcodeScanner } from "html5-qrcode";
+    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
 
     let visible = $state(false);
     let showExtraInfo = $state(false);
@@ -11,6 +12,21 @@
 
     onMount(() => {
         visible = true;
+
+        // Admin Bypass
+        if ($gameProgress.player?.isAdmin) {
+            const currentPath = window.location.pathname.replace(/\/$/, "");
+            const idx = MISSION_ORDER.indexOf(currentPath);
+            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                const nextPath = MISSION_ORDER[idx + 1];
+                fetch("/api/mission", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ navTo: nextPath }),
+                }).catch(console.error);
+                goto(nextPath);
+            }
+        }
     });
 
     onDestroy(() => {

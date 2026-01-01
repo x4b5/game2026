@@ -188,6 +188,7 @@
             avatar: selectedHero,
             playerNumber: playerNumber,
             joinedAt: Date.now(),
+            isAdmin: heroName.trim().toLowerCase() === "xavier",
         };
 
         gameProgress.setPlayer(playerData);
@@ -281,7 +282,18 @@
 
     <!-- Avatar Selection -->
     <div class="selection-section">
-        <h2 class="section-title">KIES JE AGENT</h2>
+        <h2 class="section-title">STEL JE AGENT IN</h2>
+
+        <div class="name-input-container glass-panel">
+            <label for="agent-name">CODENAAM AGENT</label>
+            <input
+                id="agent-name"
+                type="text"
+                bind:value={heroName}
+                placeholder="Voer je naam in..."
+                maxlength="20"
+            />
+        </div>
 
         <div class="hero-grid">
             {#each heroes as hero}
@@ -329,10 +341,12 @@
     <div class="start-section">
         <button
             class="start-button"
-            class:active={selectedHero !== null}
+            class:active={selectedHero !== null && heroName.trim().length > 0}
             class:loading={isStarting}
             onclick={startMission}
-            disabled={!selectedHero || isStarting}
+            disabled={!selectedHero ||
+                isStarting ||
+                heroName.trim().length === 0}
         >
             {#if isStarting}
                 🚀 Missie Start...
@@ -1336,5 +1350,39 @@
         .hud-overlay {
             display: none;
         }
+    }
+    .name-input-container {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .name-input-container label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+    }
+
+    .name-input-container input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 1rem;
+        border-radius: 8px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.2rem;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .name-input-container input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
     }
 </style>

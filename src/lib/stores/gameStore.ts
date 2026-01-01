@@ -5,6 +5,7 @@ export interface PlayerData {
     avatar: string;  // Avatar identifier
     playerNumber: number;  // 1-6
     joinedAt: number;  // Timestamp
+    isAdmin?: boolean;
 }
 
 export interface GameProgress {
