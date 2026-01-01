@@ -10,12 +10,10 @@
     let scanner: any = null;
 
     let isNewMission = $state(false);
+    let adminPassword = $state("");
 
-    onMount(() => {
-        visible = true;
-
-        // Admin Bypass
-        if ($gameProgress.player?.isAdmin) {
+    function handleAdminBypass() {
+        if (adminPassword.toLowerCase() === "xavier") {
             const currentPath = window.location.pathname.replace(/\/$/, "");
             const idx = MISSION_ORDER.indexOf(currentPath);
             if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
@@ -28,6 +26,10 @@
                 goto(nextPath);
             }
         }
+    }
+
+    onMount(() => {
+        visible = true;
     });
 
     onDestroy(() => {
