@@ -4,7 +4,7 @@
     import { goto } from "$app/navigation";
     import { gameProgress } from "$lib/stores/gameStore";
 
-    const TARGET_LOCATION = "SLAAPKAMERLUCA";
+    const TARGET_LOCATION = "SERVAASBRUG";
     const CLEAN_TARGET = TARGET_LOCATION;
 
     let currentGuess = $state("");
@@ -28,6 +28,7 @@
         result.push(...required);
 
         // Fill rest with random letters until 15 (3x5 grid)
+        // Adjust for "SERVAASBRUG" which is 11 letters
         while (result.length < 15) {
             result.push(letters[Math.floor(Math.random() * letters.length)]);
         }
@@ -53,8 +54,8 @@
     }
 
     function handleComplete() {
-        // Navigate to the specific scan page for Luca's bedroom
-        goto("/game/theta-pulse-19/luca-scan");
+        // Navigate to the Mosa mission in Wyck
+        goto("/game/mosa-bridge-44");
     }
 </script>
 
@@ -108,7 +109,7 @@
                         <span class="icon">📍</span>
                         <div class="text">
                             <strong>LOCATIE GEVONDEN:</strong>
-                            <h2>SLAAPKAMER LUCA</h2>
+                            <h2>DE SERVAASBRUG</h2>
                         </div>
                     </div>
                 {:else}
@@ -126,7 +127,7 @@
                 onclick={handleComplete}
                 in:fly={{ y: 20 }}
             >
-                NAAR DE SLAAPKAMER 🔦
+                NAAR DE BRUG 🌉
             </button>
         {/if}
     </div>
