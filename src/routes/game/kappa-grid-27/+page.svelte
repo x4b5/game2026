@@ -820,6 +820,33 @@
         text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
     }
 
+    .typewriter-content {
+        font-family: "Courier New", monospace;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.9);
+        min-height: 3rem;
+    }
+
+    .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1.2em;
+        background: #3b82f6;
+        margin-left: 2px;
+        animation: blink-cursor 1s step-end infinite;
+    }
+
+    @keyframes blink-cursor {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
+    }
+
     /* Selection Section */
     .selection-section {
         margin-bottom: 2.5rem;
