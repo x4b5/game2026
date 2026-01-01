@@ -53,8 +53,8 @@
     }
 
     function handleComplete() {
-        // This will be the next step in the mission
-        goto("/game");
+        // Navigate to the specific scan page for Luca's bedroom
+        goto("/game/theta-pulse-19/luca-scan");
     }
 </script>
 
