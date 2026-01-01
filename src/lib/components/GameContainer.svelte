@@ -8,11 +8,13 @@
         title,
         children,
         onComplete = () => {},
+        onReset = () => {},
     }: {
         gameId: string;
         title: string;
         children: any;
         onComplete?: (score: number) => void;
+        onReset?: () => void;
     } = $props();
 
     let gameState = $state<"playing" | "won" | "lost">("playing");
@@ -45,6 +47,7 @@
         gameState = "playing";
         score = 0;
         showVictory = false;
+        onReset();
     }
 </script>
 

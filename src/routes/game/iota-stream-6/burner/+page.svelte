@@ -11,6 +11,8 @@
     >([]);
     let explosions = $state<{ id: number; x: number; y: number }[]>([]);
     let weaponsDestroyed = $state(0);
+    let timeLeft = $state(30);
+    let attempts = $state(3);
     let isShaking = $state(false);
     let gameActive = $state(false);
     let currentId = 0;
@@ -18,8 +20,10 @@
     let accessDenied = $state(false);
 
     const TARGET_WEAPONS = 15;
+    const INITIAL_TIME = 30;
     let spawnTimer: any;
     let updateTimer: any;
+    let countdownTimer: any;
 
     onMount(() => {
         // Hero check
@@ -32,14 +36,55 @@
         startGame();
 
         return () => {
-            clearInterval(spawnTimer);
-            clearInterval(updateTimer);
+            stopGame();
         };
     });
 
+    function stopGame() {
+        clearInterval(spawnTimer);
+        clearInterval(updateTimer);
+        clearInterval(countdownTimer);
+    }
+
     function startGame() {
-        spawnTimer = setInterval(spawnWeapon, 1200);
+        weapons = [];
+        weaponsDestroyed = 0;
+        timeLeft = INITIAL_TIME;
+        gameActive = true;
+
+        spawnTimer = setInterval(spawnWeapon, 1000);
         updateTimer = setInterval(updateWeapons, 50);
+        countdownTimer = setInterval(() => {
+            if (gameActive) {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    loseLife();
+                }
+            }
+        }, 1000);
+    }
+
+    function loseLife() {
+        gameActive = false;
+        stopGame();
+        attempts--;
+
+        if (attempts > 0) {
+            // Show custom failure message or just use GameContainer's lose
+            gameContainer?.lose();
+        } else {
+            gameContainer?.lose();
+        }
+    }
+
+    function handleReset() {
+        if (attempts > 0) {
+            startGame();
+        } else {
+            // If completely out of attempts, reset all
+            attempts = 3;
+            startGame();
+        }
     }
 
     function spawnWeapon() {
@@ -95,9 +140,8 @@
 
                 if (weaponsDestroyed >= TARGET_WEAPONS) {
                     gameActive = false;
-                    clearInterval(spawnTimer);
-                    clearInterval(updateTimer);
-                    gameContainer?.win(weaponsDestroyed * 200);
+                    stopGame();
+                    gameContainer?.win(weaponsDestroyed * 200 + timeLeft * 50);
                 }
                 return false;
             }
@@ -127,14 +171,25 @@
             bind:this={gameContainer}
             gameId="iota-burner"
             title="🔥 The Minck: Weapon Burner"
+            onReset={handleReset}
         >
             <div class="burner-game">
                 <div class="objective-header">
-                    <div class="stat">
+                    <div class="stat time">
+                        <span class="label">TIJD OVER</span>
+                        <span class="value" class:urgent={timeLeft < 10}
+                            >{timeLeft}s</span
+                        >
+                    </div>
+                    <div class="stat destroyed">
                         <span class="label">WAPENS VERNIETIGD</span>
                         <span class="value"
                             >{weaponsDestroyed}/{TARGET_WEAPONS}</span
                         >
+                    </div>
+                    <div class="stat lives">
+                        <span class="label">POGINGEN</span>
+                        <span class="value">{attempts}</span>
                     </div>
                 </div>
 
@@ -265,15 +320,33 @@
     }
 
     .objective-header {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
         margin-bottom: 1.5rem;
     }
 
     .stat {
         background: rgba(251, 146, 60, 0.1);
-        border: 1px solid #fb923c;
-        padding: 1rem;
+        border: 1px solid rgba(251, 146, 60, 0.3);
+        padding: 0.8rem;
         border-radius: 12px;
         text-align: center;
+    }
+
+    .stat.time .value.urgent {
+        color: #ef4444;
+        animation: pulse-red 0.5s infinite alternate;
+    }
+
+    @keyframes pulse-red {
+        from {
+            transform: scale(1);
+        }
+        to {
+            transform: scale(1.1);
+            text-shadow: 0 0 10px #ef4444;
+        }
     }
 
     .label {
