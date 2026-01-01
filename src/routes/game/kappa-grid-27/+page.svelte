@@ -427,7 +427,7 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(2rem, 8vw, 5rem);
+        font-size: clamp(1.8rem, 7vw, 4.5rem);
         line-height: 1.1;
         margin-bottom: 2rem;
         width: 100%;
@@ -941,15 +941,15 @@
         }
 
         .title {
-            font-size: clamp(1.6rem, 7vw, 2.5rem);
+            font-size: clamp(1.4rem, 6vw, 2.2rem);
         }
 
         .line1 {
-            font-size: 1em;
+            font-size: 0.95em;
         }
 
         .line2 {
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
 
         .subtitle {
