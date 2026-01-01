@@ -155,9 +155,10 @@
                         op een frontale aanval op de binnenstad.
                     </p>
                     <p>
-                        <strong>MISSIE:</strong> Onderschep de gecodeerde datafragments
-                        uit de Iota Stream. We hebben deze intel nodig om hun aanvalsvector
-                        te bepalen.
+                        <strong>MISSIE:</strong> Schakel The Minck in. We moeten
+                        hun geavanceerde wapenarsenaal uitschakelen door het volledig
+                        te verbranden. Gebruik de gedetecteerde data-impulsen om
+                        de energie-kern van hun wapens te overbelasten en te vernietigen.
                     </p>
                     <div class="warning-box">
                         GEVECHTSKLAAR MAKEN. ELKE SECONDE TELT.
