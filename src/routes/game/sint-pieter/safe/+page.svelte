@@ -127,7 +127,7 @@
                         START DECODERING
                     </button>
                 </div>
-            {:else}
+            {:else if gamePhase === "quiz"}
                 <div class="quiz-container">
                     <div class="quiz-header">
                         <div class="progress-info">
