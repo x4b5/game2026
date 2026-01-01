@@ -42,13 +42,14 @@
     }
 
     function handleNavigation(rawCode: string, code: string) {
-        // Points to the finale or next step
+        // Redirigé naar Theta Pulse na de scan op het Vrijthof
         if (
             code === "vrijthof" ||
             code === "finale" ||
-            code.includes("rho-system")
+            code === "theta-pulse" ||
+            code.includes("theta")
         ) {
-            goto("/game/rho-system-88/finale");
+            goto("/game/theta-pulse-19");
             return;
         }
 
