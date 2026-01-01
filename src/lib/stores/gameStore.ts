@@ -103,7 +103,6 @@ export const MISSION_ORDER = [
     '/game/rho-system-88/finale',
     '/game/omicron-base-victory',
     '/game/zeta-flux-33',
-    '/game/zeta-flux-33/circuit-overload',
     '/game/sint-pieter/safe',
     '/game/sint-pieter/victory',
     '/game/sint-pieter/scan',

@@ -6,7 +6,7 @@
     let gameContainer: any;
 
     function proceed() {
-        goto("/game/zeta-flux-33/circuit-overload");
+        goto("/game/sint-pieter/safe");
     }
 </script>
 
