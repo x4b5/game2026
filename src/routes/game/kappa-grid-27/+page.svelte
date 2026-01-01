@@ -310,6 +310,10 @@
         animation: fadeIn 0.8s ease forwards;
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .welcome-page.mounted {
@@ -423,13 +427,12 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(2.5rem, 10vw, 6rem);
-        line-height: 1;
+        font-size: clamp(2rem, 8vw, 5rem);
+        line-height: 1.1;
         margin-bottom: 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         width: 100%;
+        display: flex;
+        justify-content: center;
     }
 
     .title-wrapper {
@@ -437,8 +440,7 @@
         flex-direction: column;
         gap: 0.5rem;
         width: 100%;
-        max-width: 100vw;
-        overflow-x: hidden;
+        max-width: 100%;
     }
 
     .line1,
@@ -449,7 +451,7 @@
         font-weight: 900;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        word-break: break-all;
+        word-wrap: break-word;
     }
 
     .line1 {
@@ -457,6 +459,7 @@
         background: linear-gradient(135deg, #60a5fa, #a78bfa, #3b82f6);
         background-size: 200% 200%;
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         animation:
             glow-blue 3s infinite,
@@ -534,6 +537,7 @@
         background: linear-gradient(135deg, #f87171, #fbbf24, #ef4444);
         background-size: 200% 200%;
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         animation:
             glow-red 3s infinite,
@@ -634,6 +638,7 @@
         background: linear-gradient(135deg, #a855f7, #ec4899, #f472b6);
         background-size: 200% 200%;
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         animation: gradientMove 4s ease infinite;
         text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
@@ -936,19 +941,15 @@
         }
 
         .title {
-            font-size: clamp(1.8rem, 8vw, 2.5rem);
-        }
-
-        .title-wrapper {
-            gap: 0.1rem;
+            font-size: clamp(1.6rem, 7vw, 2.5rem);
         }
 
         .line1 {
-            font-size: 1.1em;
+            font-size: 1em;
         }
 
         .line2 {
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .subtitle {
