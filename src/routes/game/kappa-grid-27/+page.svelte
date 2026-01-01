@@ -11,7 +11,7 @@
             id: "lord-mosa",
             name: "Lord Mosa",
             power: "🌊 De Heerser van de Maas",
-            origin: "Maastricht's waterwereld-beschermer uit de verborgen tunnels.",
+            origin: "Geboren met de gave om de Maas te beheersen.",
             imgIdle: "/heroes/lord-mosa.png",
             imgAction: "/heroes/lord-mosa.png",
             color: "#3b82f6",
