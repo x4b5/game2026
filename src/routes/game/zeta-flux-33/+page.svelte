@@ -84,27 +84,8 @@
             </div>
         {:else}
             <div class="briefing-section">
-                <h1>SISTEEM OVERLOAD</h1>
-                <p in:fly={{ y: 20, duration: 800 }}>
-                    De energiestromen van de Zeta Flux sector zijn onstabiel. We
-                    detecteren een verborgen frequentie die alleen via een
-                    fysieke interface kan worden gedecodeerd.
-                </p>
-                <p in:fly={{ y: 20, duration: 800, delay: 500 }}>
-                    Zoek de <strong>Zeta-Node</strong> in de omgeving en scan de
-                    code om het circuit te stabiliseren.
-                </p>
-
-                <div
-                    class="warning-box"
-                    in:fly={{ y: 20, duration: 800, delay: 1000 }}
-                >
-                    ⚠️ <strong>WAARSCHUWING:</strong> Zonder de juiste code zal het
-                    systeem binnen 5 minuten kritiek worden.
-                </div>
-
                 <button class="action-button" onclick={startScanner}>
-                    📷 SCAN ZETA-NODE
+                    📷 SCAN QR-SLEUTEL
                 </button>
             </div>
         {/if}
