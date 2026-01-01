@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { fade, fly, scale, scale as svelteScale } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { gameProgress } from "$lib/stores/gameStore";
+    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
 
     const TARGET_LOCATION = "SLAAPKAMERLUCA";
     const CLEAN_TARGET = TARGET_LOCATION;
@@ -10,6 +10,7 @@
     let currentGuess = $state("");
     let solved = $state(false);
     let mounted = $state(false);
+    let adminPassword = $state("");
 
     // Generate a grid of letters including the target location
     let grid = $state<string[]>([]);
@@ -55,6 +56,22 @@
     function handleComplete() {
         // Navigate to the specific scan page for Luca's bedroom
         goto("/game/theta-pulse-19/luca-scan");
+    }
+
+    function handleAdminBypass() {
+        if (adminPassword.toLowerCase() === "xavier") {
+            const currentPath = window.location.pathname.replace(/\/$/, "");
+            const idx = MISSION_ORDER.indexOf(currentPath);
+            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                const nextPath = MISSION_ORDER[idx + 1];
+                fetch("/api/mission", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ navTo: nextPath }),
+                }).catch(console.error);
+                goto(nextPath);
+            }
+        }
     }
 </script>
 
@@ -129,6 +146,17 @@
                 NAAR DE SLAAPKAMER 🔦
             </button>
         {/if}
+
+        <!-- Admin Password Field -->
+        <div class="admin-bypass">
+            <input
+                type="password"
+                bind:value={adminPassword}
+                placeholder="Admin wachtwoord..."
+                onkeydown={(e) => e.key === "Enter" && handleAdminBypass()}
+            />
+            <button onclick={handleAdminBypass}>Doorgaan</button>
+        </div>
     </div>
 </div>
 
@@ -364,5 +392,38 @@
         .success-message .icon {
             font-size: 2rem;
         }
+    }
+
+    .admin-bypass {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .admin-bypass input {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 6px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+    }
+
+    .admin-bypass button {
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid #3b82f6;
+        color: #60a5fa;
+        padding: 0.8rem 1.2rem;
+        border-radius: 6px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
     }
 </style>
