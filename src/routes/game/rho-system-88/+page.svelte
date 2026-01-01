@@ -9,8 +9,15 @@
         visible = true;
     });
 
-    function nextMission() {
-        goto("/game/rho-system-88/finale");
+    async function nextMission() {
+        const target = "/game/rho-system-88/finale";
+        // Tell everyone else to follow
+        await fetch("/api/mission", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ navTo: target }),
+        });
+        goto(target);
     }
 </script>
 

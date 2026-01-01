@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { gameProgress } from "$lib/stores/gameStore";
     import "../../app.css";
@@ -27,6 +28,29 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ deviceId, path: $page.url.pathname }),
         }).catch(() => {});
+    });
+
+    onMount(() => {
+        // Simple listener for navigation overrides (Follow the Leader)
+        const syncInterval = setInterval(async () => {
+            try {
+                const res = await fetch("/api/mission");
+                const data = await res.json();
+
+                // If there is a navigation target and we aren't already there
+                if (
+                    data.navTo &&
+                    $page.url.pathname !== data.navTo &&
+                    !$page.url.pathname.includes(data.navTo)
+                ) {
+                    goto(data.navTo);
+                }
+            } catch (e) {
+                // Ignore sync errors to avoid spamming console
+            }
+        }, 3000);
+
+        return () => clearInterval(syncInterval);
     });
 </script>
 
