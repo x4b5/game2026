@@ -48,8 +48,10 @@
                 </p>
                 <p>
                     <strong>> OBJECTIVE:</strong> Verplaats onmiddellijk naar de
-                    Kazematten. Observeer en rapporteer. Wees op uw hoede voor vijandelijke
-                    resten.
+                    Kazematten. Zoek de
+                    <span class="highlight"
+                        >koudste plek van de laagste ruimte</span
+                    >. Observeer en rapporteer.
                 </p>
                 <div class="warning-box">MOVE OUT. STAY FROSTY.</div>
             </div>
