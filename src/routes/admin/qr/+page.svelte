@@ -46,7 +46,7 @@
 
 <div class="admin-container">
     <header class="animate-fade-in">
-        <h1>QR Code Dashboard</h1>
+        <h1>QR Code Dashboard (v3.0 - NETLIFY PREVIEW)</h1>
         <p>
             Gegenereerd voor: <strong>{origin}</strong>
         </p>
