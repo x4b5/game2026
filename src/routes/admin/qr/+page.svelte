@@ -1,4 +1,7 @@
 <script lang="ts">
+    import { onMount } from "svelte";
+    import QRCode from "qrcode";
+
     const MISSIONS = [
         { name: "Nebula Post", slug: "x7-alpha-92", id: "nebula-post" },
         { name: "Vortex Hub", slug: "delta-vortex-11", id: "vortex-hub" },
@@ -11,14 +14,41 @@
         { name: "Iota Stream", slug: "iota-stream-6", id: "iota-stream" },
         { name: "Rho System", slug: "rho-system-88", id: "rho-system" },
     ];
+
+    let qrCodes: Record<string, string> = $state({});
+    let origin = $state("");
+
+    onMount(async () => {
+        if (typeof window !== "undefined") {
+            origin = window.location.origin;
+
+            for (const mission of MISSIONS) {
+                const url = `${origin}/game/${mission.slug}`;
+                try {
+                    qrCodes[mission.id] = await QRCode.toDataURL(url, {
+                        color: {
+                            dark: "#0f172a",
+                            light: "#ffffff",
+                        },
+                        width: 600,
+                        margin: 2,
+                    });
+                } catch (err) {
+                    console.error(
+                        `Error generating QR for ${mission.name}:`,
+                        err,
+                    );
+                }
+            }
+        }
+    });
 </script>
 
 <div class="admin-container">
     <header class="animate-fade-in">
         <h1>QR Code Dashboard</h1>
         <p>
-            Download of scan de codes om de missies te koppelen aan fysieke
-            locaties.
+            Gegenereerd voor: <strong>{origin}</strong>
         </p>
     </header>
 
@@ -26,21 +56,31 @@
         {#each MISSIONS as mission}
             <div class="qr-card glass-panel animate-fade-in">
                 <div class="qr-preview">
-                    <img
-                        src="/qr-codes/{mission.id}.png"
-                        alt="QR for {mission.name}"
-                    />
+                    {#if qrCodes[mission.id]}
+                        <img
+                            src={qrCodes[mission.id]}
+                            alt="QR for {mission.name}"
+                        />
+                    {:else}
+                        <div class="loading">Gen...</div>
+                    {/if}
                 </div>
                 <div class="info">
                     <h3>{mission.name}</h3>
                     <code class="slug">/game/{mission.slug}</code>
-                    <a
-                        href="/qr-codes/{mission.id}.png"
-                        download="{mission.id}-qr.png"
-                        class="btn-download"
-                    >
-                        Download PNG
-                    </a>
+
+                    {#if qrCodes[mission.id]}
+                        <a
+                            href={qrCodes[mission.id]}
+                            download="{mission.id}-qr.png"
+                            class="btn-download"
+                        >
+                            Download PNG
+                        </a>
+                    {:else}
+                        <button class="btn-download" disabled>Laden...</button>
+                    {/if}
+
                     <a
                         href="/game/{mission.slug}"
                         class="btn-view"
