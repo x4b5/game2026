@@ -304,4 +304,75 @@
         background: rgba(255, 255, 255, 0.2);
         color: white;
     }
+
+    .admin-section {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .admin-toggle {
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.7);
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+        backdrop-filter: blur(10px);
+    }
+
+    .admin-toggle:hover {
+        background: rgba(0, 0, 0, 0.9);
+        border-color: rgba(255, 255, 255, 0.6);
+        color: white;
+    }
+
+    .admin-bypass {
+        margin-top: 0.5rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        display: flex;
+        gap: 0.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .admin-bypass input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.6rem;
+        border-radius: 6px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+    }
+
+    .admin-bypass input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .admin-bypass button {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .admin-bypass button:hover {
+        background: var(--secondary);
+        transform: translateY(-1px);
+    }
 </style>
