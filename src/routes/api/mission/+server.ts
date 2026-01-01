@@ -4,7 +4,7 @@ import { json } from '@sveltejs/kit';
 // deviceId -> { path: string, lastSeen: number }
 const playerPositions = new Map<string, { path: string, lastSeen: number }>();
 
-// Ordered list of mission steps
+// Ordered list of mission steps (Must match gameStore.ts)
 const MISSION_ORDER = [
     '/game/kappa-grid-27',
     '/game/kappa-grid-27/challenge',
@@ -31,50 +31,41 @@ const MISSION_ORDER = [
 ];
 
 function getPathIndex(path: string) {
-    // Exact match
-    let index = MISSION_ORDER.indexOf(path);
-    if (index !== -1) return index;
-
-    // Partial match (handles trailing slashes)
     const normalized = path.replace(/\/$/, '');
-    index = MISSION_ORDER.indexOf(normalized);
-    if (index !== -1) return index;
-
-    // Not a tracked path, assume it's "before" the mission starts
-    return -1;
+    return MISSION_ORDER.indexOf(normalized);
 }
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET() {
     const now = Date.now();
-    // Cleanup inactive players (older than 30 seconds)
+    // Cleanup inactive players (OLDER THAN 10 SECONDS instead of 30)
     for (const [id, pos] of playerPositions.entries()) {
-        if (now - pos.lastSeen > 30000) {
+        if (now - pos.lastSeen > 10000) {
             playerPositions.delete(id);
         }
     }
 
     if (playerPositions.size === 0) {
-        return json({ step: MISSION_ORDER[0], totalPlayers: 0 });
+        return json({ step: null, totalPlayers: 0 });
     }
 
     // Find the minimum index across all active players
     let minIndex = Infinity;
     for (const pos of playerPositions.values()) {
         const idx = getPathIndex(pos.path);
-        // Only consider tracked paths for the "sync"
         if (idx !== -1) {
             minIndex = Math.min(minIndex, idx);
         }
     }
 
-    // If no tracked paths found, default to start
-    if (minIndex === Infinity) minIndex = 0;
+    // If everyone is on untracked pages, return null to avoid blocking
+    if (minIndex === Infinity) {
+        return json({ step: null, totalPlayers: playerPositions.size });
+    }
 
     return json({
         step: MISSION_ORDER[minIndex],
-        totalPlayers: playerPositions.size,
-        allPaths: Array.from(playerPositions.values()).map(p => p.path)
+        totalPlayers: playerPositions.size
     });
 }
 
@@ -83,6 +74,7 @@ export async function POST({ request }) {
     const { deviceId, path } = await request.json();
     if (!deviceId || !path) return json({ error: 'Missing data' }, { status: 400 });
 
+    // Update or set player position
     playerPositions.set(deviceId, {
         path,
         lastSeen: Date.now()

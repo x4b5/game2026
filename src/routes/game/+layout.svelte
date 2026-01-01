@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { gameProgress } from "$lib/stores/gameStore";
+    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
     import "../../app.css";
 
     let { children } = $props();
@@ -24,16 +24,23 @@
     let isSpeeding = $state(false);
 
     onMount(() => {
-        const deviceId = localStorage.getItem("game2026_deviceId") || "unknown";
+        // Ensure unique device ID
+        let deviceId = localStorage.getItem("game2026_deviceId");
+        if (!deviceId) {
+            deviceId = crypto.randomUUID();
+            localStorage.setItem("game2026_deviceId", deviceId);
+        }
 
         const syncInterval = setInterval(async () => {
             try {
+                const myPath = $page.url.pathname.replace(/\/$/, "");
+
                 const res = await fetch("/api/mission", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         deviceId,
-                        path: $page.url.pathname,
+                        path: myPath,
                     }),
                 });
 
@@ -41,56 +48,33 @@
                     const data = await res.json();
 
                     if (data.step) {
-                        const MISSION_ORDER = [
-                            "/game/kappa-grid-27",
-                            "/game/kappa-grid-27/challenge",
-                            "/game/iota-stream-6",
-                            "/game/iota-stream-6/burner",
-                            "/game/delta-vortex-11",
-                            "/game/gamma-prime-8",
-                            "/game/mosa-bridge-44",
-                            "/game/sigma-nexus-4",
-                            "/game/x7-alpha-92",
-                            "/game/theta-pulse-19",
-                            "/game/theta-pulse-19/track",
-                            "/game/theta-pulse-19/luca-scan",
-                            "/game/theta-pulse-19/airborne-concerto",
-                            "/game/theta-pulse-19/victory",
-                            "/game/zeta-flux-33",
-                            "/game/zeta-flux-33/circuit-overload",
-                            "/game/sint-pieter/scan",
-                            "/game/sint-pieter/safe",
-                            "/game/sint-pieter/victory",
-                            "/game/rho-system-88",
-                            "/game/rho-system-88/finale",
-                            "/game/omicron-base-victory",
-                        ];
+                        const slowPath = data.step.replace(/\/$/, "");
+                        const myIdx = MISSION_ORDER.indexOf(myPath);
+                        const slowIdx = MISSION_ORDER.indexOf(slowPath);
 
-                        const myIdx = MISSION_ORDER.indexOf(
-                            $page.url.pathname.replace(/\/$/, ""),
-                        );
-                        const slowIdx = MISSION_ORDER.indexOf(data.step);
-
-                        if (myIdx > slowIdx && slowIdx !== -1) {
+                        // Only block if we are actually FURTHER than the slowest player
+                        if (myIdx !== -1 && slowIdx !== -1 && myIdx > slowIdx) {
                             isSpeeding = true;
                             currentSlowestPath = data.step;
                         } else {
                             isSpeeding = false;
                         }
-                    }
 
-                    // Special case for forced victory move
-                    if (
-                        data.step === "/game/omicron-base-victory" &&
-                        !$page.url.pathname.includes("omicron-base-victory")
-                    ) {
-                        goto("/game/omicron-base-victory");
+                        // Forced move to victory if slowest player is there
+                        if (
+                            data.step === "/game/omicron-base-victory" &&
+                            !myPath.includes("omicron-base-victory")
+                        ) {
+                            goto("/game/omicron-base-victory");
+                        }
+                    } else {
+                        isSpeeding = false;
                     }
                 }
             } catch (e) {
                 console.error("Sync failed:", e);
             }
-        }, 3000);
+        }, 2000); // More frequent sync for better responsiveness
 
         return () => clearInterval(syncInterval);
     });

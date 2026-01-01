@@ -73,3 +73,28 @@ function createGameStore() {
 }
 
 export const gameProgress = createGameStore();
+
+export const MISSION_ORDER = [
+    '/game/kappa-grid-27',
+    '/game/kappa-grid-27/challenge',
+    '/game/iota-stream-6',
+    '/game/iota-stream-6/burner',
+    '/game/delta-vortex-11',
+    '/game/gamma-prime-8',
+    '/game/mosa-bridge-44',
+    '/game/sigma-nexus-4',
+    '/game/x7-alpha-92',
+    '/game/theta-pulse-19',
+    '/game/theta-pulse-19/track',
+    '/game/theta-pulse-19/luca-scan',
+    '/game/theta-pulse-19/airborne-concerto',
+    '/game/theta-pulse-19/victory',
+    '/game/zeta-flux-33',
+    '/game/zeta-flux-33/circuit-overload',
+    '/game/sint-pieter/scan',
+    '/game/sint-pieter/safe',
+    '/game/sint-pieter/victory',
+    '/game/rho-system-88',
+    '/game/rho-system-88/finale',
+    '/game/omicron-base-victory'
+];
