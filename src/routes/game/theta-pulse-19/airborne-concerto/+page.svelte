@@ -230,6 +230,14 @@
                                 >
                                     PROBEER OPNIEUW
                                 </button>
+                                <button
+                                    class="result-btn continue"
+                                    style="margin-top: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);"
+                                    onclick={() =>
+                                        goto("/game/theta-pulse-19/victory")}
+                                >
+                                    GA VERDER
+                                </button>
                             {/if}
                         </div>
                     </div>

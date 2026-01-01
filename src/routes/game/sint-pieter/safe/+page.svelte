@@ -206,6 +206,13 @@
                         <button class="primary-btn retry" onclick={handleReset}>
                             OPNIEUW
                         </button>
+                        <button
+                            class="secondary-btn"
+                            style="margin-top: 1rem; width: 100%;"
+                            onclick={() => goto("/game/sint-pieter/victory")}
+                        >
+                            DOORGAAN
+                        </button>
                     {/if}
                 </div>
             {/if}

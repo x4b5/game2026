@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { gameProgress } from "$lib/stores/gameStore";
+    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
+    import { goto } from "$app/navigation";
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
 
@@ -81,9 +82,28 @@
             <div class="defeat-content">
                 <div class="defeat-icon">😔</div>
                 <h1>Helaas!</h1>
-                <button class="btn-try-again" onclick={reset}>
-                    Probeer Opnieuw
-                </button>
+                <div class="defeat-actions">
+                    <button class="btn-try-again" onclick={reset}>
+                        Probeer Opnieuw
+                    </button>
+
+                    <button
+                        class="btn-continue-anyway"
+                        onclick={() => {
+                            const currentPath =
+                                window.location.pathname.replace(/\/$/, "");
+                            const idx = MISSION_ORDER.indexOf(currentPath);
+                            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                                goto(MISSION_ORDER[idx + 1]);
+                            } else {
+                                // Default fallback if not in MISSION_ORDER
+                                window.history.back();
+                            }
+                        }}
+                    >
+                        Doorgaan
+                    </button>
+                </div>
             </div>
         </div>
     {/if}
@@ -195,20 +215,46 @@
         margin-bottom: 2rem;
     }
 
+    .defeat-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
     .btn-play-again,
-    .btn-try-again {
+    .btn-try-again,
+    .btn-continue-anyway {
         padding: 1rem 2.5rem;
         border-radius: 12px;
-        background: var(--primary);
-        color: white;
         font-weight: 700;
         font-size: 1.1rem;
         transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-play-again,
+    .btn-try-again {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-continue-anyway {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .btn-play-again:hover,
-    .btn-try-again:hover {
+    .btn-try-again:hover,
+    .btn-continue-anyway:hover {
         transform: translateY(-2px);
         filter: brightness(1.2);
+    }
+
+    .btn-continue-anyway:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
     }
 </style>
