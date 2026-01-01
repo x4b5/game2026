@@ -51,7 +51,7 @@
     let addedPlayers = $state<string[]>([]); // Track which heroes have players
 
     let briefingText =
-        "Systeem geactiveerd... Verbinding maken met satellieten over Maastricht... Aliens hebben strategische punten bezet. Jouw missie: infiltreer hun netwerk, los de raadsels op en verdrijf de indringers uit onze stad!";
+        "Systeem geactiveerd... (v2.1) Verbinding maken met satellieten... Aliens hebben strategische punten bezet. Jouw missie: kraak het slot van de badkamer, en spoel ze weg bij de Servaasbrug!";
     let displayedBriefing = $state("");
 
     onMount(() => {
