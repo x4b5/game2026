@@ -848,18 +848,6 @@
         border-top: none;
     }
 
-    .typewriter {
-        color: var(--text-muted);
-        line-height: 1.7;
-        font-family: "Courier New", Courier, monospace;
-        letter-spacing: 0.5px;
-        overflow: hidden;
-        border-right: 2px solid #3b82f6;
-        white-space: wrap;
-        margin: 0 auto;
-        animation: blink-caret 0.75s step-end infinite;
-    }
-
     @keyframes blink-caret {
         from,
         to {
@@ -868,13 +856,6 @@
         50% {
             border-color: #3b82f6;
         }
-    }
-
-    .typewriter {
-        animation:
-            typing 3.5s steps(40, end) forwards,
-            blink-caret 0.75s step-end infinite;
-        max-width: fit-content;
     }
 
     @keyframes typing {
@@ -1229,14 +1210,6 @@
 
     .start-button:disabled {
         cursor: not-allowed;
-    }
-
-    /* Footer */
-    .footer-info {
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 0.875rem;
-        line-height: 1.8;
     }
 
     /* Responsive */

@@ -19,19 +19,24 @@
                 "De Koning van Spanje & de Paus",
                 "De Hertog van Brabant & de Prins-bisschop van Luik",
                 "De Graaf van Vlaanderen & de Keizer",
-                "De Stadhouder & de Staten-Generaal"
+                "De Stadhouder & de Staten-Generaal",
             ],
-            correct: 1
+            correct: 1,
         },
         {
             q: "In 1673 sneuvelde een wereldberoemde Franse kapitein-luitenant van de musketiers bij de Tongersepoort. Wie was dit?",
             options: ["Athos", "Porthos", "D'Artagnan", "Cyrano de Bergerac"],
-            correct: 2
+            correct: 2,
         },
         {
             q: "Wat is de naam van de oudste stadspoort van Nederland (bouwjaar ca. 1229), te vinden in Maastricht?",
-            options: ["Onze Lieve Vrouwepoort", "De Helpoort", "Sint Pieterspoort", "De Gevangenpoort"],
-            correct: 1
+            options: [
+                "Onze Lieve Vrouwepoort",
+                "De Helpoort",
+                "Sint Pieterspoort",
+                "De Gevangenpoort",
+            ],
+            correct: 1,
         },
         {
             q: "In welk iconisch gebouw aan de Maas werd in 1991-1992 het Verdrag van Maastricht onderhandeld en getekend?",
@@ -39,9 +44,9 @@
                 "Het Stadhuis op de Markt",
                 "Het Gouvernement (Provinciehuis)",
                 "Het Dinghuis",
-                "De Jezuïetenkerk"
+                "De Jezuïetenkerk",
             ],
-            correct: 1
+            correct: 1,
         },
         {
             q: "Maastricht beschikt over een uniek stelsel van droge vestingwerken (de Hoge Fronten). Hoe heet de beroemde linie die tussen 1772 en 1777 werd aangelegd?",
@@ -49,10 +54,10 @@
                 "De Linie van Orange",
                 "De Linie van Du Moulin",
                 "De Vesting van Vauban",
-                "De Linie van Menno van Coehoorn"
+                "De Linie van Menno van Coehoorn",
             ],
-            correct: 1
-        }
+            correct: 1,
+        },
     ];
 
     function startQuiz() {
@@ -65,11 +70,11 @@
 
     function handleOptionClick(index: number) {
         if (showFeedback) return;
-        
+
         selectedOption = index;
         lastAnswerCorrect = index === questions[currentQuestionIndex].correct;
         if (lastAnswerCorrect) score++;
-        
+
         showFeedback = true;
 
         setTimeout(() => {
@@ -114,8 +119,10 @@
                     <div class="vault-icon">🔒</div>
                     <h2>Identiteitscontrole</h2>
                     <p>
-                        De kluis is beveiligd met een bio-metrische Maastricht-check. 
-                        Beantwoord 5 vragen over de stad. Minimaal <strong>3 goed</strong> om de kluis te openen en de viool te bevrijden.
+                        De kluis is beveiligd met een bio-metrische
+                        Maastricht-check. Beantwoord 5 vragen over de stad.
+                        Minimaal <strong>3 goed</strong> om de kluis te openen en
+                        de viool te bevrijden.
                     </p>
                     <button class="primary-btn" onclick={startQuiz}>
                         START DECODERING
@@ -134,28 +141,43 @@
 
                     <div class="question-card" in:scale={{ duration: 300 }}>
                         <h3>{questions[currentQuestionIndex].q}</h3>
-                        
+
                         <div class="options-grid">
                             {#each questions[currentQuestionIndex].options as option, i}
-                                <button 
+                                <button
                                     class="option-btn"
                                     class:selected={selectedOption === i}
-                                    class:correct={showFeedback && i === questions[currentQuestionIndex].correct}
-                                    class:wrong={showFeedback && selectedOption === i && i !== questions[currentQuestionIndex].correct}
+                                    class:correct={showFeedback &&
+                                        i ===
+                                            questions[currentQuestionIndex]
+                                                .correct}
+                                    class:wrong={showFeedback &&
+                                        selectedOption === i &&
+                                        i !==
+                                            questions[currentQuestionIndex]
+                                                .correct}
                                     disabled={showFeedback}
                                     onclick={() => handleOptionClick(i)}
                                 >
-                                    <span class="letter">{String.fromCharCode(65 + i)}</span>
+                                    <span class="letter"
+                                        >{String.fromCharCode(65 + i)}</span
+                                    >
                                     <span class="text">{option}</span>
                                 </button>
                             {/each}
                         </div>
 
                         {#if showFeedback}
-                            <div class="feedback-msg" in:slide class:success={lastAnswerCorrect}>
-                                {lastAnswerCorrect ? 'CORRECT! TOEGANG VERLEEND' : 'FOUT! DATA CORRUPT'}
+                            <div
+                                class="feedback-msg"
+                                in:slide
+                                class:success={lastAnswerCorrect}
+                            >
+                                {lastAnswerCorrect
+                                    ? "CORRECT! TOEGANG VERLEEND"
+                                    : "FOUT! DATA CORRUPT"}
                             </div>
-                        /if}
+                        {/if}
                     </div>
                 </div>
             {:else if gamePhase === "result"}
@@ -164,18 +186,22 @@
                         <div class="result-icon success">🔓</div>
                         <h2>TOEGANG VERLEEND</h2>
                         <p>
-                            Je hebt {score} van de {questions.length} vragen goed beantwoord. 
-                            De kluis springt open... de viool is van jou!
+                            Je hebt {score} van de {questions.length} vragen goed
+                            beantwoord. De kluis springt open... de viool is van
+                            jou!
                         </p>
-                        <button class="primary-btn success" onclick={() => goto('/game/sint-pieter/victory')}>
+                        <button
+                            class="primary-btn success"
+                            onclick={() => goto("/game/sint-pieter/victory")}
+                        >
                             GA VERDER
                         </button>
                     {:else}
                         <div class="result-icon failure">🔒</div>
                         <h2>TOEGANG GEWEIGERD</h2>
                         <p>
-                            Slechts {score} van de {questions.length} vragen waren correct. 
-                            De kluis blijft potdicht. Probeer het opnieuw!
+                            Slechts {score} van de {questions.length} vragen waren
+                            correct. De kluis blijft potdicht. Probeer het opnieuw!
                         </p>
                         <button class="primary-btn retry" onclick={handleReset}>
                             OPNIEUW
@@ -217,7 +243,7 @@
     }
 
     h2 {
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         color: #fbbf24;
         margin-bottom: 1.5rem;
         text-transform: uppercase;
@@ -238,7 +264,7 @@
         color: #000;
         border: none;
         border-radius: 12px;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-weight: 900;
         font-size: 1.1rem;
         cursor: pointer;
@@ -260,7 +286,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-size: 0.8rem;
         color: #94a3b8;
         letter-spacing: 1px;
@@ -336,7 +362,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-weight: 700;
         color: white;
         font-size: 0.9rem;
@@ -345,7 +371,7 @@
     .feedback-msg {
         margin-top: 2rem;
         text-align: center;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-weight: 700;
         font-size: 0.9rem;
         color: #ef4444;
@@ -375,11 +401,16 @@
     }
 
     @media (max-width: 480px) {
-        .card, .question-card {
+        .card,
+        .question-card {
             padding: 1.5rem;
         }
-        
-        h1 { font-size: 1.5rem; }
-        h3 { font-size: 1.1rem; }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.1rem;
+        }
     }
 </style>
