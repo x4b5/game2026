@@ -48,14 +48,14 @@
             correct: 1,
         },
         {
-            q: "Wat wordt gesymboliseerd door het standbeeld van de 'Mestreechter Geis' op de Varkensmarkt?",
+            q: "Maastricht beschikt over een uniek stelsel van droge vestingwerken (de Hoge Fronten). Hoe heet de beroemde linie die tussen 1772 en 1777 werd aangelegd?",
             options: [
-                "De speelse en vrolijke volksaard van de Maastrichter",
-                "Een historische verzetsheld tegen de Spanjaarden",
-                "De beschermheilige van de lokale brouwers",
-                "Een legendarische stadsomroeper",
+                "De Linie van Orange",
+                "De Linie van Du Moulin",
+                "De Vesting van Vauban",
+                "De Linie van Menno van Coehoorn",
             ],
-            correct: 0,
+            correct: 1,
         },
     ];
 
