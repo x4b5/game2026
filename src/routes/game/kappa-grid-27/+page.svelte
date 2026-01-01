@@ -535,6 +535,7 @@
         width: 100%;
         display: flex;
         justify-content: center;
+        perspective: 1200px;
     }
 
     .title-wrapper {
@@ -543,6 +544,19 @@
         gap: 0.5rem;
         width: 100%;
         max-width: 100%;
+        transform-style: preserve-3d;
+        transform: rotateX(15deg) rotateY(-5deg);
+        animation: titleFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes titleFloat {
+        0%,
+        100% {
+            transform: rotateX(15deg) rotateY(-5deg) translateY(0);
+        }
+        50% {
+            transform: rotateX(20deg) rotateY(5deg) translateY(-10px);
+        }
     }
 
     .line1,
@@ -595,8 +609,34 @@
         -webkit-text-fill-color: transparent;
         animation:
             glow-blue 3s infinite,
-            gradientMove 4s ease infinite;
-        filter: drop-shadow(0 0 20px rgba(96, 165, 250, 0.7));
+            gradientMove 4s ease infinite,
+            glitch 5s infinite;
+        text-shadow:
+            2px 2px 0px rgba(30, 58, 138, 0.8),
+            4px 4px 0px rgba(30, 58, 138, 0.5),
+            6px 6px 20px rgba(0, 0, 0, 1);
+        filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5));
+        transform: translateZ(80px);
+    }
+
+    @keyframes glitch {
+        0%,
+        90%,
+        100% {
+            transform: translateZ(80px) translate(0);
+        }
+        92% {
+            transform: translateZ(80px) translate(-5px, 2px) skewX(5deg);
+        }
+        94% {
+            transform: translateZ(80px) translate(5px, -2px) skewX(-5deg);
+        }
+        96% {
+            transform: translateZ(80px) translate(-2px, -2px);
+        }
+        98% {
+            transform: translateZ(80px) translate(2px, 2px);
+        }
     }
 
     /* Green Alien Scanline Effect */
@@ -673,8 +713,34 @@
         -webkit-text-fill-color: transparent;
         animation:
             glow-red 3s infinite,
-            gradientMove 4s ease infinite reverse;
-        filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.7));
+            gradientMove 4s ease infinite reverse,
+            glitch-alt 5.2s infinite;
+        text-shadow:
+            2px 2px 0px rgba(153, 27, 27, 0.8),
+            4px 4px 0px rgba(153, 27, 27, 0.5),
+            6px 6px 20px rgba(0, 0, 0, 1);
+        filter: drop-shadow(0 0 10px rgba(248, 113, 113, 0.5));
+        transform: translateZ(60px);
+    }
+
+    @keyframes glitch-alt {
+        0%,
+        90%,
+        100% {
+            transform: translateZ(60px) translate(0);
+        }
+        91% {
+            transform: translateZ(60px) translate(3px, -1px) skewX(-3deg);
+        }
+        93% {
+            transform: translateZ(60px) translate(-3px, 1px) skewX(3deg);
+        }
+        95% {
+            transform: translateZ(60px) translate(1px, 2px);
+        }
+        97% {
+            transform: translateZ(60px) translate(-1px, -2px);
+        }
     }
 
     @keyframes alienScan {
