@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fade, fly, scale } from "svelte/transition";
+    import { goto } from "$app/navigation";
     import { gameProgress } from "$lib/stores/gameStore";
     import GameContainer from "$lib/components/GameContainer.svelte";
     import { soundManager } from "$lib/utils/SoundManager";
@@ -142,13 +143,22 @@
                     gameActive = false;
                     stopGame();
 
-                    // Update global mission state for all players
+                    const nextPath = "/game/delta-vortex-11";
+
+                    // Tell everyone else to follow
                     fetch("/api/mission", {
                         method: "POST",
-                        body: JSON.stringify({ step: "victory-omicron" }),
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ navTo: nextPath }),
                     }).catch(console.error);
 
+                    // Immediate win for leader
                     gameContainer?.win(weaponsDestroyed * 200 + timeLeft * 50);
+
+                    // Direct redirect after a tiny delay for the win sound/impact
+                    setTimeout(() => {
+                        goto(nextPath);
+                    }, 2000);
                 }
                 return false;
             }
