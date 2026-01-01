@@ -55,7 +55,9 @@
 
     onMount(() => {
         mounted = true;
-        soundManager.init();
+        soundManager.init().then(() => {
+            soundManager.startAmbientMusic();
+        });
 
         // Typewriter effect
         let i = 0;
@@ -97,7 +99,10 @@
             }
         }
 
-        return () => clearInterval(pollInterval);
+        return () => {
+            clearInterval(pollInterval);
+            soundManager.stopAmbientMusic();
+        };
     });
 
     async function fetchHeroStatus() {
