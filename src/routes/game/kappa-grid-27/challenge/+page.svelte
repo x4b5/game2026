@@ -201,106 +201,12 @@
 </div>
 
 <style>
-    /* Animated Background & Effects */
-    .animated-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            -45deg,
-            #0f172a,
-            #1e1b4b,
-            #312e81,
-            #1e293b,
-            #0c4a6e
-        );
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
-        z-index: -2;
+    /* Military / Tactical Theme */
+    :global(body) {
+        background-color: #0a0a0a;
+        color: #e2e8f0;
     }
 
-    @keyframes gradientShift {
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
-        }
-    }
-
-    .particles {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: -1;
-        pointer-events: none;
-    }
-
-    .particle {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 50%;
-        top: -10px;
-        left: calc(var(--i) * 5%);
-        animation: fall linear infinite;
-        animation-duration: calc(6s + var(--i) * 0.5s);
-        animation-delay: calc(var(--i) * -0.5s);
-        box-shadow:
-            0 0 10px rgba(255, 255, 255, 0.8),
-            0 0 20px rgba(59, 130, 246, 0.6);
-    }
-
-    @keyframes fall {
-        to {
-            transform: translateY(110vh) rotate(360deg);
-            opacity: 0;
-        }
-    }
-
-    .cyber-grid {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: linear-gradient(
-                rgba(59, 130, 246, 0.08) 2px,
-                transparent 2px
-            ),
-            linear-gradient(
-                90deg,
-                rgba(59, 130, 246, 0.08) 2px,
-                transparent 2px
-            );
-        background-size: 60px 60px;
-        perspective: 1000px;
-        transform: perspective(500px) rotateX(20deg);
-        z-index: -1.5;
-        animation: gridPulse 8s ease-in-out infinite alternate;
-    }
-
-    @keyframes gridPulse {
-        from {
-            opacity: 0.3;
-            transform: perspective(500px) rotateX(20deg) scale(1);
-        }
-        to {
-            opacity: 0.6;
-            transform: perspective(500px) rotateX(20deg) scale(1.05);
-        }
-    }
-
-    /* Page Layout */
     .challenge-page {
         min-height: 100vh;
         display: flex;
@@ -309,62 +215,96 @@
         padding: 1rem;
         position: relative;
         overflow: hidden;
+        background: #050505;
+        font-family: "Courier New", Courier, monospace;
     }
 
-    /* Glass Panel Card */
+    /* Scanlines Overlay */
+    .challenge-page::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    /* Targeting Reticle Background */
+    .animated-bg {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+                circle at center,
+                transparent 30%,
+                rgba(16, 185, 129, 0.03) 70%
+            ),
+            linear-gradient(rgba(16, 185, 129, 0.02) 1px, transparent 1px),
+            linear-gradient(
+                90deg,
+                rgba(16, 185, 129, 0.02) 1px,
+                transparent 1px
+            );
+        background-size:
+            100% 100%,
+            40px 40px,
+            40px 40px;
+        z-index: -1;
+        animation: none;
+    }
+
+    .particles,
+    .cyber-grid {
+        display: none;
+    }
+
+    /* Tactical Card */
     .content-card {
         max-width: 600px;
         width: 100%;
-        padding: 3rem;
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        background: rgba(10, 20, 15, 0.95);
+        border: 2px solid #10b981;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        padding: 2.5rem;
         position: relative;
-    }
-
-    /* Cyber Corners */
-    .has-corners {
         clip-path: polygon(
             0 0,
             20px 0,
-            0 20px,
-            0 calc(100% - 20px),
-            20px 100%,
-            100% 100%,
+            20px 20px,
+            calc(100% - 20px) 20px,
+            calc(100% - 20px) 0,
+            100% 0,
             100% calc(100% - 20px),
-            calc(100% - 20px) 0
+            calc(100% - 20px) 100%,
+            20px 100%,
+            0 calc(100% - 20px)
         );
     }
 
-    .corner {
+    /* HUD Decorations */
+    .has-corners::after {
+        content: "STATUS: ACTIVE // ID: KG-27";
         position: absolute;
-        width: 15px;
-        height: 15px;
-        border-color: #60a5fa;
-        border-style: solid;
-        transition: all 0.3s ease;
+        bottom: 5px;
+        right: 25px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.6rem;
+        color: #10b981;
+        opacity: 0.7;
+        letter-spacing: 1px;
     }
 
-    .tl {
-        top: 0;
-        left: 0;
-        border-width: 2px 0 0 2px;
-    }
-    .tr {
-        top: 0;
-        right: 0;
-        border-width: 2px 2px 0 0;
-    }
-    .bl {
-        bottom: 0;
-        left: 0;
-        border-width: 0 0 2px 2px;
-    }
-    .br {
-        bottom: 0;
-        right: 0;
-        border-width: 0 2px 2px 0;
+    .corner {
+        display: none;
     }
 
     /* Typography */
