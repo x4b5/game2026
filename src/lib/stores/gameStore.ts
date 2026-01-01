@@ -97,6 +97,7 @@ export const MISSION_ORDER = [
     '/game/kappa-grid-27',
     '/game/kappa-grid-27/challenge',
     '/game/rho-system-88',
+    '/game/rho-system-88/scan',
     '/game/rho-system-88/finale',
     '/game/iota-stream-6',
     '/game/iota-stream-6/burner',
