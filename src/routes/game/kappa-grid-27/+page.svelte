@@ -130,6 +130,11 @@
         if (success) {
             selectedHero = heroId;
             soundManager.playClick();
+            // Auto-set the hero name from the selected hero
+            const hero = heroes.find((h) => h.id === heroId);
+            if (hero) {
+                heroName = hero.name;
+            }
             // Refresh status immediately
             fetchHeroStatus();
         } else {
@@ -141,7 +146,7 @@
     }
 
     function startMission() {
-        if (!selectedHero || !heroName.trim()) {
+        if (!selectedHero) {
             soundManager.playError();
             return;
         }
@@ -160,7 +165,7 @@
 
         // Navigate to next game after short delay
         setTimeout(() => {
-            goto("/game");
+            goto("/game/kappa-grid-27/challenge");
         }, 800);
     }
 </script>
@@ -264,39 +269,19 @@
         </div>
     </div>
 
-    <!-- Player Info -->
-    <div class="player-section">
-        <div class="input-group glass-panel">
-            <label for="heroName">
-                <strong>Jouw Helden Naam</strong>
-            </label>
-            <input
-                id="heroName"
-                type="text"
-                bind:value={heroName}
-                placeholder="Vul je naam in..."
-                maxlength="20"
-            />
-        </div>
-
-        <div class="player-number glass-panel">
-            <span>Speler #{playerNumber}</span>
-        </div>
-    </div>
-
     <!-- Start Button -->
     <div class="start-section">
         <button
             class="start-button"
-            class:active={selectedHero && heroName.trim()}
+            class:active={selectedHero !== null}
             class:loading={isStarting}
             onclick={startMission}
-            disabled={!selectedHero || !heroName.trim() || isStarting}
+            disabled={!selectedHero || isStarting}
         >
             {#if isStarting}
                 🚀 Missie Start...
             {:else}
-                🦸 Start Missie om Maastricht te Redden
+                START MISSIE
             {/if}
         </button>
     </div>
@@ -825,52 +810,6 @@
         text-shadow: 0 0 10px var(--hero-color);
     }
 
-    /* Player Section */
-    .player-section {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .input-group {
-        flex: 1;
-        padding: 1.5rem;
-    }
-
-    .input-group label {
-        display: block;
-        margin-bottom: 0.75rem;
-        color: var(--text-muted);
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 2px solid var(--glass-border);
-        border-radius: 8px;
-        color: white;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .input-group input:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-    }
-
-    .player-number {
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: var(--primary);
-        min-width: 120px;
-    }
-
     /* Start Button */
     .start-section {
         margin-bottom: 2rem;
@@ -919,12 +858,29 @@
 
     .start-button.active {
         opacity: 1;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+        animation: pulse-glow 2s infinite ease-in-out;
     }
 
     .start-button.active:hover:not(:disabled) {
         transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 20px 50px rgba(99, 102, 241, 0.6);
-        animation: gradientMove 2s ease infinite;
+        box-shadow: 0 20px 50px rgba(99, 102, 241, 0.8);
+        animation: pulse-glow 1s infinite ease-in-out; /* Faster pulse on hover */
+    }
+
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+            transform: scale(1);
+        }
+        50% {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.9);
+            transform: scale(1.02);
+        }
+        100% {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+            transform: scale(1);
+        }
     }
 
     .start-button.loading {

@@ -74,6 +74,12 @@
         overflow: hidden;
     }
 
+    @media (max-width: 640px) {
+        .mission-card {
+            padding: 1.5rem;
+        }
+    }
+
     .mission-card::before {
         content: "";
         position: absolute;
@@ -121,6 +127,15 @@
         align-items: center;
         gap: 1.5rem;
         margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+        .header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
     }
 
     .icon-circle {
@@ -217,11 +232,13 @@
     .btn-action {
         width: 100%;
         padding: 1rem;
+        min-height: 48px; /* Tap target size */
         border-radius: 12px;
         color: white;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        touch-action: manipulation;
         transition:
             transform 0.2s ease,
             filter 0.2s ease;

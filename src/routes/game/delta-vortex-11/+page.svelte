@@ -150,7 +150,7 @@
                     class="time-shard"
                     class:aligned={isAligned(shard)}
                     style:transform="rotate({shard.currentAngle}deg)
-                    translateY(-120px)"
+                    translateY(max(-120px, -24vw))"
                     style:--shard-color={shard.color}
                 >
                     <div
@@ -166,7 +166,7 @@
                 <div
                     class="target-marker"
                     style:transform="rotate({shard.targetAngle}deg)
-                    translateY(-120px)"
+                    translateY(max(-120px, -24vw))"
                 >
                     <div
                         class="marker-dot"

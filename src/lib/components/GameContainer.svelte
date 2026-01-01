@@ -136,7 +136,9 @@
     .victory-content,
     .defeat-content {
         text-align: center;
-        padding: 3rem 2rem;
+        padding: 2rem 1.5rem;
+        width: 100%;
+        max-width: 400px;
     }
 
     .animate-victory {
@@ -159,7 +161,7 @@
 
     .victory-icon,
     .defeat-icon {
-        font-size: 5rem;
+        font-size: clamp(3rem, 15vw, 5rem);
         margin-bottom: 1rem;
         animation: float 2s ease-in-out infinite;
     }
@@ -175,7 +177,7 @@
     }
 
     h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.75rem, 5vw, 2.5rem);
         margin-bottom: 1rem;
         background: linear-gradient(135deg, var(--primary), var(--secondary));
         -webkit-background-clip: text;
