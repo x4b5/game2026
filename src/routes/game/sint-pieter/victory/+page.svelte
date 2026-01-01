@@ -21,7 +21,7 @@
         } catch (e) {
             console.error(e);
         }
-        goto("/game");
+        goto("/game/sint-pieter/scan");
     }
 </script>
 
@@ -48,7 +48,8 @@
                     <p>
                         Agenten, uitstekend werk. De viool van André Rieu is in
                         veiligheid. Sensoren vangen nu een massale
-                        alien-concentratie op bij het <strong>Vrijthof</strong>.
+                        alien-concentratie op bij het <strong>Vrijthof</strong
+                        >(lees: brievenbus).
                     </p>
                     <div class="objective-box">
                         <strong>DOEL:</strong> Gebruik de sonische kracht van de
@@ -57,7 +58,7 @@
                     <p class="warning">
                         ⚠️ <strong>LET OP:</strong> De aliens zullen alles doen om
                         dit concert van de ondergang te stoppen. Wees voorbereid
-                        op de ultieme confrontatie!
+                        op een hevige confrontatie!
                     </p>
                 </div>
 
