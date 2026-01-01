@@ -38,8 +38,7 @@
     });
 
     function acceptBriefing() {
-        briefingVisible = false;
-        startGame();
+        goto("/game/iota-stream-6/burner");
     }
 
     function startGame() {
@@ -153,7 +152,7 @@
             <div class="intel-briefing" in:fade>
                 <div class="briefing-header">
                     <span class="alert-tag">✅ SYSTEM ACCESS: GRANTED</span>
-                    <h1>THE MINCK: ONLINE</h1>
+                    <h1>DE KAZEMATTEN</h1>
                 </div>
 
                 <div class="briefing-content">
