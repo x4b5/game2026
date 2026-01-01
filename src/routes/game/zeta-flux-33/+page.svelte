@@ -1,7 +1,7 @@
 <script lang="ts">
     import MissionPage from "$lib/components/MissionPage.svelte";
     import { onMount, onDestroy } from "svelte";
-    import { fade, slide } from "svelte/transition";
+    import { fade, slide, fly } from "svelte/transition";
     import { goto } from "$app/navigation";
     import { Html5QrcodeScanner } from "html5-qrcode";
 
@@ -68,101 +68,152 @@
     }
 </script>
 
-<div class="zeta-page">
-    {#if isScanning}
-        <div class="scanner-container glass-panel" in:fade>
-            <div class="scanner-header">
-                <h2>CAMERA SYNC</h2>
-                <div class="status-indicator">VOER OMGEVINGSCAN UIT</div>
-            </div>
-            <div id="reader"></div>
-            <button class="stop-btn" onclick={stopScanner}>
-                ❌ ANNULEER SCAN
-            </button>
+<div class="zeta-page" in:fade={{ duration: 1000 }}>
+    <div class="content-card glass-panel">
+        <div class="status-indicator">
+            <div class="pulse-dot"></div>
+            <span>LOCATIE BEREIKT: ZETA FLUX</span>
         </div>
-    {:else}
-        <div class="mission-wrapper">
-            <MissionPage
-                title="Zeta Flux"
-                missionCode="ZETA-FLUX-33"
-                description="De energiestromen komen hier samen. Circuit connector game komt binnenkort!"
-                icon="⚡"
-                color="#8b5cf6"
-                qrName="zeta-flux"
-            />
-            <div class="action-bar">
-                <button class="scan-btn" onclick={startScanner}>
-                    📷 SCAN OMGEVING
+
+        {#if isScanning}
+            <div class="scanner-wrapper" transition:slide>
+                <div id="reader"></div>
+                <button class="cancel-scan-btn" onclick={stopScanner}>
+                    ❌ Stop Scannen
                 </button>
             </div>
+        {:else}
+            <div class="briefing-section">
+                <h1>SISTEEM OVERLOAD</h1>
+                <p in:fly={{ y: 20, duration: 800 }}>
+                    De energiestromen van de Zeta Flux sector zijn onstabiel. We
+                    detecteren een verborgen frequentie die alleen via een
+                    fysieke interface kan worden gedecodeerd.
+                </p>
+                <p in:fly={{ y: 20, duration: 800, delay: 500 }}>
+                    Zoek de <strong>Zeta-Node</strong> in de omgeving en scan de
+                    code om het circuit te stabiliseren.
+                </p>
+
+                <div
+                    class="warning-box"
+                    in:fly={{ y: 20, duration: 800, delay: 1000 }}
+                >
+                    ⚠️ <strong>WAARSCHUWING:</strong> Zonder de juiste code zal het
+                    systeem binnen 5 minuten kritiek worden.
+                </div>
+
+                <button class="action-button" onclick={startScanner}>
+                    📷 SCAN ZETA-NODE
+                </button>
+            </div>
+        {/if}
+
+        <div class="footer-status">
+            <div class="loading-line"></div>
+            <span>Status: Wachten op decryptie...</span>
         </div>
-    {/if}
+    </div>
 </div>
+```
 
 <style>
     .zeta-page {
         min-height: 80vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
-    .mission-wrapper {
+    .content-card {
+        max-width: 600px;
         width: 100%;
-        max-width: 500px;
+        padding: 3rem 2rem;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(139, 92, 246, 0.4);
+        box-shadow: 0 0 40px rgba(139, 92, 246, 0.15);
+        text-align: center;
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 2rem;
     }
 
-    .action-bar {
-        padding: 0 1rem;
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+        color: #a78bfa;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
     }
 
-    .scan-btn {
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #8b5cf6;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #8b5cf6;
+        animation: pulse 2s infinite;
+    }
+
+    h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.2rem;
+        color: white;
+        margin-bottom: 1rem;
+        letter-spacing: 2px;
+        text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+    }
+
+    .briefing-section p {
+        color: #cbd5e1;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .warning-box {
+        background: rgba(139, 92, 246, 0.1);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        padding: 1rem;
+        border-radius: 8px;
+        color: #d8b4fe;
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .action-button {
         width: 100%;
         padding: 1.2rem;
         background: #8b5cf6;
         color: white;
-        border: none;
-        border-radius: 12px;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
+        font-size: 1.1rem;
         letter-spacing: 1px;
+        border: none;
+        border-radius: 12px;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        text-transform: uppercase;
     }
 
-    .scan-btn:hover {
+    .action-button:hover {
+        background: #7c3aed;
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
     }
 
     /* Scanner Styles */
-    .scanner-container {
+    .scanner-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
         width: 100%;
-        max-width: 450px;
-        padding: 2rem;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.8);
-        border: 1px solid #8b5cf6;
-    }
-
-    .scanner-header h2 {
-        font-family: "Orbitron", sans-serif;
-        color: white;
-        margin-bottom: 0.5rem;
-    }
-
-    .status-indicator {
-        color: #8b5cf6;
-        font-size: 0.8rem;
-        margin-bottom: 1.5rem;
-        letter-spacing: 2px;
-        animation: pulse 2s infinite;
     }
 
     #reader {
@@ -170,32 +221,73 @@
         border-radius: 12px;
         overflow: hidden;
         border: 2px solid #8b5cf6;
-        margin-bottom: 1.5rem;
+        background: black;
     }
 
-    .stop-btn {
+    .cancel-scan-btn {
         background: rgba(239, 68, 68, 0.2);
         color: #ef4444;
         border: 1px solid #ef4444;
         padding: 0.8rem 1.5rem;
         border-radius: 8px;
         font-family: "Orbitron", sans-serif;
+        font-weight: 700;
         cursor: pointer;
         transition: all 0.2s;
     }
 
-    .stop-btn:hover {
+    .cancel-scan-btn:hover {
         background: #ef4444;
         color: white;
+    }
+
+    .footer-status {
+        margin-top: auto;
+    }
+
+    .loading-line {
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        margin-bottom: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .loading-line::after {
+        content: "";
+        position: absolute;
+        width: 30%;
+        height: 100%;
+        background: #8b5cf6;
+        animation: scan-line 2s linear infinite;
+    }
+
+    @keyframes scan-line {
+        from {
+            left: -30%;
+        }
+        to {
+            left: 100%;
+        }
+    }
+
+    .footer-status span {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        letter-spacing: 1px;
     }
 
     @keyframes pulse {
         0%,
         100% {
             opacity: 1;
+            transform: scale(1);
         }
         50% {
             opacity: 0.5;
+            transform: scale(1.2);
         }
     }
 </style>
