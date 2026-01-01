@@ -74,15 +74,23 @@
     });
 
     function addPlayer(heroId: string) {
-        const name = playerNames[heroId].trim();
+        console.log("addPlayer called with heroId:", heroId);
+        console.log("playerNames:", playerNames);
+
+        const name = playerNames[heroId]?.trim();
+        console.log("name:", name);
+
         if (!name) {
-            soundManager.playError();
+            soundManager.playError().catch(() => {});
             alert("Voer eerst een naam in!");
             return;
         }
 
         const hero = heroes.find((h) => h.id === heroId);
-        if (!hero) return;
+        if (!hero) {
+            console.error("Hero not found:", heroId);
+            return;
+        }
 
         const playerData: PlayerData = {
             name: name,
@@ -92,9 +100,11 @@
             isAdmin: name.toLowerCase() === "xavier",
         };
 
+        console.log("Adding player:", playerData);
         gameProgress.addPlayer(playerData);
         addedPlayers = [...addedPlayers, heroId];
-        soundManager.playClick();
+        console.log("addedPlayers:", addedPlayers);
+        soundManager.playClick().catch(() => {});
     }
 
     function startMission() {
