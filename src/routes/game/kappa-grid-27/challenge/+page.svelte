@@ -201,169 +201,368 @@
 </div>
 
 <style>
+    /* Animated Background & Effects */
+    .animated-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            -45deg,
+            #0f172a,
+            #1e1b4b,
+            #312e81,
+            #1e293b,
+            #0c4a6e
+        );
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        z-index: -2;
+    }
+
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        top: -10px;
+        left: calc(var(--i) * 5%);
+        animation: fall linear infinite;
+        animation-duration: calc(6s + var(--i) * 0.5s);
+        animation-delay: calc(var(--i) * -0.5s);
+        box-shadow:
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(59, 130, 246, 0.6);
+    }
+
+    @keyframes fall {
+        to {
+            transform: translateY(110vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    .cyber-grid {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(
+                rgba(59, 130, 246, 0.08) 2px,
+                transparent 2px
+            ),
+            linear-gradient(
+                90deg,
+                rgba(59, 130, 246, 0.08) 2px,
+                transparent 2px
+            );
+        background-size: 60px 60px;
+        perspective: 1000px;
+        transform: perspective(500px) rotateX(20deg);
+        z-index: -1.5;
+        animation: gridPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes gridPulse {
+        from {
+            opacity: 0.3;
+            transform: perspective(500px) rotateX(20deg) scale(1);
+        }
+        to {
+            opacity: 0.6;
+            transform: perspective(500px) rotateX(20deg) scale(1.05);
+        }
+    }
+
+    /* Page Layout */
     .challenge-page {
-        min-height: 80vh;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 1rem;
+        position: relative;
+        overflow: hidden;
     }
 
+    /* Glass Panel Card */
     .content-card {
         max-width: 600px;
         width: 100%;
-        padding: 2.5rem;
-        background: rgba(0, 0, 0, 0.6);
+        padding: 3rem;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(20px);
         border: 1px solid rgba(59, 130, 246, 0.3);
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        position: relative;
     }
 
+    /* Cyber Corners */
+    .has-corners {
+        clip-path: polygon(
+            0 0,
+            20px 0,
+            0 20px,
+            0 calc(100% - 20px),
+            20px 100%,
+            100% 100%,
+            100% calc(100% - 20px),
+            calc(100% - 20px) 0
+        );
+    }
+
+    .corner {
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        border-color: #60a5fa;
+        border-style: solid;
+        transition: all 0.3s ease;
+    }
+
+    .tl {
+        top: 0;
+        left: 0;
+        border-width: 2px 0 0 2px;
+    }
+    .tr {
+        top: 0;
+        right: 0;
+        border-width: 2px 2px 0 0;
+    }
+    .bl {
+        bottom: 0;
+        left: 0;
+        border-width: 0 0 2px 2px;
+    }
+    .br {
+        bottom: 0;
+        right: 0;
+        border-width: 0 2px 2px 0;
+    }
+
+    /* Typography */
     h1 {
         font-family: "Orbitron", sans-serif;
-        color: rgba(255, 255, 255, 0.5);
+        color: #94a3b8;
         font-size: 1rem;
-        letter-spacing: 4px;
+        letter-spacing: 6px;
         margin-bottom: 0.5rem;
         text-align: center;
+        text-transform: uppercase;
     }
 
-    h2 {
+    .mission-title {
         font-family: "Orbitron", sans-serif;
-        color: white;
-        font-size: 2rem;
+        font-size: clamp(2rem, 5vw, 3rem);
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         text-transform: uppercase;
-        text-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+        background: linear-gradient(135deg, white, #60a5fa);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+        position: relative;
+        display: inline-block;
+        width: 100%;
     }
 
     .briefing-text {
-        font-size: 1.1rem;
-        line-height: 1.6;
+        font-size: 1.15rem;
+        line-height: 1.8;
         color: #e2e8f0;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         text-align: center;
+        background: rgba(59, 130, 246, 0.1);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 3px solid #60a5fa;
     }
 
+    /* Buttons */
+    .primary-action {
+        width: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--primary), #2563eb);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .primary-action .text {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1.3rem;
+        letter-spacing: 2px;
+    }
+
+    .primary-action .icon {
+        font-size: 1.5rem;
+    }
+
+    .primary-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+    }
+
+    .primary-action::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent
+        );
+        transform: rotate(45deg) translate(-100%, -100%);
+        transition: transform 0.6s;
+    }
+
+    .primary-action:hover::after {
+        transform: rotate(45deg) translate(100%, 100%);
+    }
+
+    .info-toggle-btn {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(96, 165, 250, 0.3);
+        color: #94a3b8;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .info-toggle-btn:hover,
+    .info-toggle-btn.active {
+        background: rgba(59, 130, 246, 0.2);
+        border-color: #60a5fa;
+        color: white;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Status Panel */
     .mission-status {
         display: flex;
         justify-content: center;
         gap: 2rem;
         margin-bottom: 2.5rem;
         padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        position: relative;
-    }
-
-    .info-toggle-btn {
-        background: none;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: rgba(255, 255, 255, 0.8);
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-
-    .info-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.6);
-        color: white;
-    }
-
-    .info-toggle-btn.active {
-        background: rgba(59, 130, 246, 0.2);
-        border-color: #3b82f6;
-        color: #60a5fa;
-    }
-
-    .extra-info-panel {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid #3b82f6;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        border-radius: 0 8px 8px 0;
-        text-align: center;
-    }
-
-    .extra-info-panel p {
-        margin: 0;
-        color: white;
-        font-size: 1rem;
     }
 
     .status-item {
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: 0.5rem;
     }
 
     .label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.6);
-        margin-bottom: 0.3rem;
+        color: #94a3b8;
+        letter-spacing: 1px;
     }
 
     .value {
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+        color: white;
     }
 
     .value.high {
         color: #ef4444;
-        text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        text-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+        animation: pulse-red 2s infinite;
     }
 
-    .action-button {
-        width: 100%;
-        padding: 1.5rem;
-        background: var(--primary);
-        color: white;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        font-size: 1.2rem;
-        letter-spacing: 2px;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+    @keyframes pulse-red {
+        0%,
+        100% {
+            text-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+        }
+        50% {
+            text-shadow: 0 0 25px rgba(239, 68, 68, 0.9);
+        }
     }
 
-    .action-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-    }
-
-    /* Scanner Styles */
+    /* Scanner & Other UI */
     .scanner-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1rem;
+        gap: 1.5rem;
         width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1rem;
+        border-radius: 12px;
     }
 
     #reader {
         width: 100%;
-        min-height: 250px;
         background: black;
-        border-radius: 12px;
+        border-radius: 8px;
         overflow: hidden;
-        border: 2px solid var(--primary);
+        border: 2px solid #3b82f6;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
     }
 
     .cancel-scan-btn {
-        background: #ef4444;
-        color: white;
-        border: none;
-        padding: 0.8rem 1.5rem;
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        border: 1px solid #ef4444;
+        padding: 1rem 2rem;
         border-radius: 8px;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
@@ -372,34 +571,46 @@
     }
 
     .cancel-scan-btn:hover {
-        background: #dc2626;
-        transform: scale(1.05);
+        background: rgba(239, 68, 68, 0.4);
+        color: white;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .extra-info-panel {
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 3px solid #3b82f6;
+        padding: 1.2rem;
+        margin-bottom: 2rem;
+        border-radius: 0 8px 8px 0;
+        text-align: center;
+        animation: slideIn 0.3s ease-out;
     }
 
     .admin-bypass {
         margin-top: 2rem;
         padding: 1rem;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px dashed rgba(255, 255, 255, 0.2);
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         display: flex;
         gap: 0.5rem;
+        opacity: 0.5;
+        transition: opacity 0.3s;
+    }
+
+    .admin-bypass:hover {
+        opacity: 1;
     }
 
     .admin-bypass input {
         flex: 1;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 0.8rem;
         border-radius: 6px;
         color: white;
         font-family: "Orbitron", sans-serif;
         font-size: 0.9rem;
-    }
-
-    .admin-bypass input:focus {
-        outline: none;
-        border-color: #3b82f6;
     }
 
     .admin-bypass button {
@@ -412,10 +623,5 @@
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s;
-    }
-
-    .admin-bypass button:hover {
-        background: rgba(59, 130, 246, 0.3);
-        transform: translateY(-1px);
     }
 </style>
