@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { gameProgress } from "$lib/stores/gameStore";
+    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
     import "../../app.css";
 
     let { children } = $props();
@@ -28,25 +28,33 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ deviceId, path: $page.url.pathname }),
         }).catch(() => {});
-    });
 
-    onMount(() => {
-        // Simple listener for navigation overrides (Follow the Leader)
+        // "Follow the Leader" synchronization
         const syncInterval = setInterval(async () => {
             try {
                 const res = await fetch("/api/mission");
+                if (!res.ok) return;
+
                 const data = await res.json();
 
-                // If there is a navigation target and we aren't already there
-                if (
-                    data.navTo &&
-                    $page.url.pathname !== data.navTo &&
-                    !$page.url.pathname.includes(data.navTo)
-                ) {
-                    goto(data.navTo);
+                if (data.navTo) {
+                    const currentPath = $page.url.pathname.replace(/\/$/, "");
+                    const targetPath = data.navTo.replace(/\/$/, "");
+
+                    if (currentPath === targetPath) return;
+
+                    const currentIdx = MISSION_ORDER.indexOf(currentPath);
+                    const targetIdx = MISSION_ORDER.indexOf(targetPath);
+
+                    // ONLY move forward:
+                    // 1. If we are not in the mission yet (currentIdx === -1)
+                    // 2. OR if the target is further ahead than we are
+                    if (currentIdx === -1 || targetIdx > currentIdx) {
+                        goto(data.navTo);
+                    }
                 }
             } catch (e) {
-                // Ignore sync errors to avoid spamming console
+                // Silent catch for network hiccups
             }
         }, 3000);
 
@@ -54,6 +62,7 @@
     });
 </script>
 
+```typescript
 <div class="game-layout">
     <!-- Player HUD: Top Right -->
     {#if $gameProgress.player}
