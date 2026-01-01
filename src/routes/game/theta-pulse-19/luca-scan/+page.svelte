@@ -139,9 +139,9 @@
                     >
                 </div>
                 <p>
-                    De elitaire aliens zijn geretecteerd in Wyck! Ze proberen op
-                    dit moment de <strong>Servaasbrug</strong> over te steken richting
-                    de binnenstad.
+                    De aliens zijn ontsnapt! We moeten ze onmiddellijk
+                    terugvinden. Scan de QR-code om de coördinaten van de
+                    ontsnapte aliens te achterhalen.
                 </p>
                 <div class="objective-list">
                     <div class="objective-item">
@@ -161,8 +161,8 @@
             <div class="scanner-container" transition:slide>
                 <div class="scanner-info">
                     <p>
-                        Scan de QR-code bij <strong>Wyck</strong> om de ontsnapte
-                        aliens in de val te lokken.
+                        Scan de QR-code om de coördinaten van de ontsnapte
+                        aliens te achterhalen.
                     </p>
                 </div>
                 <div id="reader"></div>
