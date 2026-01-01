@@ -8,6 +8,8 @@
     let isScanning = $state(false);
     let scanner: any = null;
 
+    let isNewMission = $state(false);
+
     onMount(() => {
         visible = true;
     });
@@ -112,7 +114,36 @@
 
         <h1>MISSIE: WYCK</h1>
 
-        {#if isScanning}
+        {#if isNewMission}
+            <div class="new-mission-briefing" in:fly={{ y: 20 }}>
+                <div class="mission-header">
+                    <span class="pulse-tag"
+                        >NIEUWE OPDRACHT: DE SCHUILPLAATS</span
+                    >
+                </div>
+                <p>
+                    De elite-aliens hebben zich verschanst in de slaapkamer. We
+                    hebben informatie dat ze een <strong
+                        >interdimensionaal portaal</strong
+                    > proberen te openen.
+                </p>
+                <div class="objective-list">
+                    <div class="objective-item">
+                        <span class="icon">🔍</span>
+                        <span>Vind de verborgen QR-code in de kamer.</span>
+                    </div>
+                    <div class="objective-item">
+                        <span class="icon">⚡</span>
+                        <span
+                            >Neutraliseer het portaal voor het te laat is.</span
+                        >
+                    </div>
+                </div>
+                <button class="scan-btn pulse" onclick={startScanner}>
+                    📷 START SCAN & NEUTRALISEER
+                </button>
+            </div>
+        {:else if isScanning}
             <div class="scanner-container" transition:slide>
                 <div class="scanner-info">
                     <p>
@@ -133,7 +164,7 @@
                     Wees voorzichtig, ze zijn in het nauw gedreven!
                 </p>
                 <div class="location-hint">📍 LOCATIE: Wyck</div>
-                <button class="scan-btn" onclick={startScanner}>
+                <button class="scan-btn" onclick={() => (isNewMission = true)}>
                     📷 BEVESTIG ARRIVAL
                 </button>
             </div>
@@ -299,6 +330,75 @@
         font-size: 0.7rem;
         color: #64748b;
         letter-spacing: 1px;
+    }
+
+    .new-mission-briefing {
+        padding: 1.5rem;
+        background: rgba(59, 130, 246, 0.05);
+        border-radius: 16px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        text-align: left;
+    }
+
+    .mission-header {
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .pulse-tag {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        color: #60a5fa;
+        background: rgba(59, 130, 246, 0.1);
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        letter-spacing: 1px;
+    }
+
+    .new-mission-briefing p {
+        color: #cbd5e1;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .objective-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .objective-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: white;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .objective-item .icon {
+        font-size: 1.2rem;
+    }
+
+    .scan-btn.pulse {
+        animation: subtlePulse 2s infinite;
+    }
+
+    @keyframes subtlePulse {
+        0%,
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 35px rgba(59, 130, 246, 0.4);
+        }
     }
 
     @keyframes pulse {
