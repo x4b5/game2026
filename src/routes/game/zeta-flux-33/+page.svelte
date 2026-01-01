@@ -26,21 +26,21 @@
         }
 
         const code = decodedText.toLowerCase();
+
+        // If they scan Zeta Flux code, it leads to the safe quiz in Sint Pieter
         if (
-            code === "zeta-flux-circuit" ||
-            code === "circuit" ||
-            code === "zeta-flux-33/circuit-overload"
+            code === "zeta-flux" ||
+            code === "zeta" ||
+            code === "zeta-flux-33" ||
+            code === "safe" ||
+            code === "kluis"
         ) {
-            goto("/game/zeta-flux-33/circuit-overload");
+            goto("/game/sint-pieter/safe");
             return;
         }
 
-        if (
-            code === "safe" ||
-            code === "kluis" ||
-            code === "sint-pieter-safe"
-        ) {
-            goto("/game/sint-pieter/safe");
+        if (code === "circuit" || code === "zeta-flux-33/circuit-overload") {
+            goto("/game/zeta-flux-33/circuit-overload");
             return;
         }
 
