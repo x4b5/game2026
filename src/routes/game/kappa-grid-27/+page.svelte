@@ -314,9 +314,16 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+        background: linear-gradient(
+            -45deg,
+            #0f172a,
+            #1e1b4b,
+            #312e81,
+            #1e293b,
+            #0c4a6e
+        );
         background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
+        animation: gradientShift 12s ease infinite;
         z-index: -2;
     }
 
@@ -346,16 +353,26 @@
 
     .particle {
         position: absolute;
-        width: 3px;
-        height: 3px;
-        background: rgba(255, 255, 255, 0.5);
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 50%;
         top: -10px;
         left: calc(var(--i) * 3.3%);
         animation: fall linear infinite;
-        animation-duration: calc(8s + var(--i) * 0.5s);
+        animation-duration: calc(6s + var(--i) * 0.4s);
         animation-delay: calc(var(--i) * -0.3s);
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        box-shadow:
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(59, 130, 246, 0.6),
+            0 0 30px rgba(139, 92, 246, 0.4);
+    }
+
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
     }
 
     /* Cyber Grid Overlay */
@@ -366,26 +383,28 @@
         width: 100%;
         height: 100%;
         background-image: linear-gradient(
-                rgba(59, 130, 246, 0.05) 1px,
-                transparent 1px
+                rgba(59, 130, 246, 0.08) 2px,
+                transparent 2px
             ),
             linear-gradient(
                 90deg,
-                rgba(59, 130, 246, 0.05) 1px,
-                transparent 1px
+                rgba(59, 130, 246, 0.08) 2px,
+                transparent 2px
             );
         background-size: 50px 50px;
         perspective: 1000px;
         z-index: -1.5;
-        animation: gridFade 4s ease-in-out infinite alternate;
+        animation: gridPulse 6s ease-in-out infinite alternate;
     }
 
-    @keyframes gridFade {
+    @keyframes gridPulse {
         from {
-            opacity: 0.3;
+            opacity: 0.4;
+            transform: perspective(1000px) rotateX(60deg) scale(1);
         }
         to {
-            opacity: 0.6;
+            opacity: 0.7;
+            transform: perspective(1000px) rotateX(60deg) scale(1.1);
         }
     }
 
