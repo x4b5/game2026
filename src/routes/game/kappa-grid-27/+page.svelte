@@ -351,7 +351,7 @@
     .welcome-page {
         min-height: 100vh;
         padding: 1rem;
-        padding-top: 5rem;
+        padding-top: 3rem;
         max-width: 900px;
         margin: 0 auto;
         opacity: 0;
@@ -535,15 +535,16 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(15rem, 85vw, 65rem);
+        font-size: clamp(2rem, 9vw, 5rem);
         font-weight: 950;
-        letter-spacing: -20px;
-        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
-        line-height: 1;
-        margin-bottom: 2.5rem;
+        letter-spacing: -1px;
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+        line-height: 0.8;
+        margin-bottom: 1rem;
         width: 100%;
         display: flex;
         justify-content: center;
+        text-transform: uppercase;
     }
 
     .title-wrapper {
@@ -560,10 +561,9 @@
         display: block;
         width: 100%;
         text-align: center;
-        font-weight: 900;
-        letter-spacing: 0.05em;
+        font-weight: 950;
+        letter-spacing: -0.02em;
         text-transform: uppercase;
-        word-wrap: break-word;
         position: relative;
     }
 
@@ -648,8 +648,8 @@
         24%,
         55% {
             opacity: 0.2;
-            filter: brightness(4) contrast(3) grayscale(1);
-            transform: scaleY(1.5) skewX(20deg);
+            filter: brightness(3) contrast(2) grayscale(1);
+            transform: scaleY(1.1) skewX(10deg);
         }
     }
 
@@ -797,12 +797,13 @@
     }
 
     .subtitle {
-        font-size: 1.25rem;
-        color: rgba(255, 255, 255, 0.9);
+        font-size: clamp(0.9rem, 4vw, 1.25rem);
+        color: rgba(255, 255, 255, 0.8);
         font-weight: 500;
         max-width: 600px;
         margin: 0 auto;
-        line-height: 1.6;
+        line-height: 1.5;
+        padding: 0 1rem;
     }
 
     .mission-brief {
