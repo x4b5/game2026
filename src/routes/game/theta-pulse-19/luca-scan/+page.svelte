@@ -110,15 +110,14 @@
             <span>TARGET GELOKALISEERD</span>
         </div>
 
-        <h1>SLAAPKAMER LUCA</h1>
+        <h1>MISSIE: WYCKJ</h1>
 
         {#if isScanning}
             <div class="scanner-container" transition:slide>
                 <div class="scanner-info">
                     <p>
-                        Scan de QR-code in de <strong
-                            >Slaapkamer van Luca</strong
-                        > om de ontsnapte aliens in de val te lokken.
+                        Scan de QR-code bij <strong>Wyckj</strong> om de ontsnapte
+                        aliens in de val te lokken.
                     </p>
                 </div>
                 <div id="reader"></div>
@@ -129,11 +128,11 @@
         {:else}
             <div class="briefing">
                 <p>
-                    Het signaal is kristalhelder. De aliens hebben zich
-                    verschanst in de slaapkamer. <br />
+                    Het signaal is kristalhelder. De aliens blijken te vluchten
+                    naar Wyckj. <br />
                     Wees voorzichtig, ze zijn in het nauw gedreven!
                 </p>
-                <div class="location-hint">📍 LOCATIE: BOVENVERDIEPING</div>
+                <div class="location-hint">📍 LOCATIE: Wyckj</div>
                 <button class="scan-btn" onclick={startScanner}>
                     📷 BEVESTIG ARRIVAL
                 </button>
