@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fade, fly, slide, scale } from "svelte/transition";
+    import { goto } from "$app/navigation";
     import GameContainer from "$lib/components/GameContainer.svelte";
 
     let gameContainer: any;
@@ -179,6 +180,34 @@
                         {/if}
                     </div>
                 </div>
+            {:else if gamePhase === "result"}
+                <div class="card result-card" in:fly={{ y: 20 }}>
+                    {#if score >= 3}
+                        <div class="result-icon success">🔓</div>
+                        <h2>TOEGANG VERLEEND</h2>
+                        <p>
+                            Je hebt {score} van de {questions.length} vragen goed
+                            beantwoord. De kluis springt open... de viool is van
+                            jou!
+                        </p>
+                        <button
+                            class="primary-btn success"
+                            onclick={() => goto("/game/sint-pieter/victory")}
+                        >
+                            GA VERDER
+                        </button>
+                    {:else}
+                        <div class="result-icon failure">🔒</div>
+                        <h2>TOEGANG GEWEIGERD</h2>
+                        <p>
+                            Slechts {score} van de {questions.length} vragen waren
+                            correct. De kluis blijft potdicht. Probeer het opnieuw!
+                        </p>
+                        <button class="primary-btn retry" onclick={handleReset}>
+                            OPNIEUW
+                        </button>
+                    {/if}
+                </div>
             {/if}
         </div>
     </GameContainer>
@@ -354,6 +383,21 @@
     .feedback-msg.success {
         color: #22c55e;
         background: rgba(34, 197, 94, 0.1);
+    }
+
+    .result-icon {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .primary-btn.success {
+        background: #22c55e;
+        color: white;
+    }
+
+    .primary-btn.retry {
+        background: #ef4444;
+        color: white;
     }
 
     @media (max-width: 480px) {
