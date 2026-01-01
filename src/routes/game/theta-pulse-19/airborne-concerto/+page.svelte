@@ -3,6 +3,7 @@
     import { fade, fly, scale } from "svelte/transition";
     import { goto } from "$app/navigation";
     import GameContainer from "$lib/components/GameContainer.svelte";
+    import { gameProgress } from "$lib/stores/gameStore";
 
     let gameContainer: any;
     let score = $state(0);
@@ -11,6 +12,7 @@
     let stellaPos = $state({ x: 50, y: 70 });
     let targets = $state<any[]>([]);
     let bursts = $state<any[]>([]);
+    let isStella = $derived($gameProgress.player?.avatar === "stella");
 
     let gameLoop: any;
 
@@ -107,6 +109,10 @@
     }
 
     onMount(() => {
+        if (!isStella) {
+            goto("/game/theta-pulse-19");
+            return;
+        }
         initGame();
     });
 
