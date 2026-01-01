@@ -48,16 +48,16 @@
                     agenten.
                 </p>
                 <p>
-                    <strong>> NEW INTEL:</strong> Sensoren detecteren nu activiteit
-                    in Sector **KAZEMATTEN**. The Minck vertoont ongebruikelijke
-                    energie-pieken.
+                    <strong>> CRITICAL INTEL:</strong> Een enorme buitenaardse wapenopslag
+                    gedetecteerd in de **KAZEMATTEN**. De vijand staat op het punt
+                    de Binnenstad aan te vallen.
                 </p>
                 <p>
-                    <strong>> OBJECTIVE:</strong> Verplaats onmiddellijk naar de
-                    Kazematten. Zoek de
+                    <strong>> OBJECTIVE:</strong> Activeer 'The Minck' om het
+                    arsenaal te <strong>verbranden</strong>. Zoek de
                     <span class="highlight"
                         >koudste plek van de laagste ruimte</span
-                    >. Observeer en rapporteer.
+                    > voor toegang.
                 </p>
                 <div class="warning-box">MOVE OUT. STAY FROSTY.</div>
             </div>
