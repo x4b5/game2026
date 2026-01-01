@@ -31,7 +31,7 @@
         <div class="status-line"></div>
 
         <p class="description">
-            Goed werk, agent. De binnenstad is weer veilig... voor nu. De
+            Goed werk, agenten. De binnenstad is weer veilig... voor nu. De
             frequentie-sleutel is geaccepteerd en het krachtveld is
             gedeactiveerd.
         </p>
