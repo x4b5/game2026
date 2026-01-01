@@ -35,6 +35,15 @@
             return;
         }
 
+        if (
+            code === "safe" ||
+            code === "kluis" ||
+            code === "sint-pieter-safe"
+        ) {
+            goto("/game/sint-pieter/safe");
+            return;
+        }
+
         if (decodedText.startsWith("http")) {
             try {
                 const url = new URL(decodedText);

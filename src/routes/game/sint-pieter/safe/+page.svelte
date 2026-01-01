@@ -1,0 +1,377 @@
+<script lang="ts">
+    import { onMount } from "svelte";
+    import { fade, fly, slide, scale } from "svelte/transition";
+    import GameContainer from "$lib/components/GameContainer.svelte";
+
+    let gameContainer: any;
+    let currentQuestionIndex = $state(0);
+    let score = $state(0);
+    let gamePhase = $state<"intro" | "quiz" | "result">("intro");
+    let selectedOption = $state<number | null>(null);
+    let showFeedback = $state(false);
+    let lastAnswerCorrect = $state(false);
+
+    const questions = [
+        {
+            q: "Hoe noemen Maastrichtenaren hun stad in het eigen dialect?",
+            options: [
+                "Mestreech",
+                "Maastricht-City",
+                "Mosae Trajectum",
+                "De Maasstad",
+            ],
+            correct: 0,
+        },
+        {
+            q: "Op welk beroemd plein geeft André Rieu elk jaar zijn zomerconcerten?",
+            options: [
+                "Markt",
+                "Onze Lieve Vrouweplein",
+                "Vrijthof",
+                "Mosae Forum",
+            ],
+            correct: 2,
+        },
+        {
+            q: "Welke 'berg' bij Maastricht herbergt de geheime gangen waar de viool mogelijk ligt?",
+            options: [
+                "Vaalserberg",
+                "Sint-Pietersberg",
+                "Cauberg",
+                "Gulperberg",
+            ],
+            correct: 1,
+        },
+        {
+            q: "Welk historisch verdrag werd in 1992 in Maastricht ondertekend?",
+            options: [
+                "Verdrag van de Maas",
+                "Verdrag van Maastricht",
+                "De Vrede van Mestreech",
+                "Het Rome-pact",
+            ],
+            correct: 1,
+        },
+        {
+            q: "Wat is de typische vlaai-variant die onlosmakelijk met Maastricht verbonden is?",
+            options: [
+                "Kersenvlaai",
+                "Appelvlaai",
+                "Linzenvlaai",
+                "Pruimenvlaai",
+            ],
+            correct: 2,
+        },
+    ];
+
+    function startQuiz() {
+        gamePhase = "quiz";
+        currentQuestionIndex = 0;
+        score = 0;
+        selectedOption = null;
+        showFeedback = false;
+    }
+
+    function handleOptionClick(index: number) {
+        if (showFeedback) return;
+
+        selectedOption = index;
+        lastAnswerCorrect = index === questions[currentQuestionIndex].correct;
+        if (lastAnswerCorrect) score++;
+
+        showFeedback = true;
+
+        setTimeout(() => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                selectedOption = null;
+                showFeedback = false;
+            } else {
+                finishQuiz();
+            }
+        }, 1500);
+    }
+
+    function finishQuiz() {
+        gamePhase = "result";
+        if (score >= 3) {
+            gameContainer?.win(score * 1000);
+        } else {
+            gameContainer?.lose();
+        }
+    }
+
+    function handleReset() {
+        gamePhase = "intro";
+        currentQuestionIndex = 0;
+        score = 0;
+        selectedOption = null;
+        showFeedback = false;
+    }
+</script>
+
+<div class="safe-page" in:fade>
+    <GameContainer
+        bind:this={gameContainer}
+        gameId="sint-pieter-safe"
+        title="🔐 DE KLUIS VAN SINT PIETER"
+        onReset={handleReset}
+    >
+        <div class="game-content">
+            {#if gamePhase === "intro"}
+                <div class="card briefing" in:fly={{ y: 20 }}>
+                    <div class="vault-icon">🔒</div>
+                    <h2>Identiteitscontrole</h2>
+                    <p>
+                        De kluis is beveiligd met een bio-metrische
+                        Maastricht-check. Beantwoord 5 vragen over de stad.
+                        Minimaal <strong>3 goed</strong> om de kluis te openen en
+                        de viool te bevrijden.
+                    </p>
+                    <button class="primary-btn" onclick={startQuiz}>
+                        START DECODERING
+                    </button>
+                </div>
+            {:else}
+                <div class="quiz-container">
+                    <div class="quiz-header">
+                        <div class="progress-info">
+                            VRAAG {currentQuestionIndex + 1} VAN {questions.length}
+                        </div>
+                        <div class="score-tracking">
+                            GEVONDEN DATA: {score}
+                        </div>
+                    </div>
+
+                    <div class="question-card" in:scale={{ duration: 300 }}>
+                        <h3>{questions[currentQuestionIndex].q}</h3>
+
+                        <div class="options-grid">
+                            {#each questions[currentQuestionIndex].options as option, i}
+                                <button
+                                    class="option-btn"
+                                    class:selected={selectedOption === i}
+                                    class:correct={showFeedback &&
+                                        i ===
+                                            questions[currentQuestionIndex]
+                                                .correct}
+                                    class:wrong={showFeedback &&
+                                        selectedOption === i &&
+                                        i !==
+                                            questions[currentQuestionIndex]
+                                                .correct}
+                                    disabled={showFeedback}
+                                    onclick={() => handleOptionClick(i)}
+                                >
+                                    <span class="letter"
+                                        >{String.fromCharCode(65 + i)}</span
+                                    >
+                                    <span class="text">{option}</span>
+                                </button>
+                            {/each}
+                        </div>
+
+                        {#if showFeedback}
+                            <div
+                                class="feedback-msg"
+                                in:slide
+                                class:success={lastAnswerCorrect}
+                            >
+                                {lastAnswerCorrect
+                                    ? "CORRECT! TOEGANG VERLEEND"
+                                    : "FOUT! DATA CORRUPT"}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </GameContainer>
+</div>
+
+<style>
+    .safe-page {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .game-content {
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .card {
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        padding: 2.5rem;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+    }
+
+    .vault-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    h2 {
+        font-family: "Orbitron", sans-serif;
+        color: #fbbf24;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    p {
+        color: #cbd5e1;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .primary-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: #fbbf24;
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3);
+    }
+
+    .quiz-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        letter-spacing: 1px;
+    }
+
+    .score-tracking {
+        color: #fbbf24;
+    }
+
+    .question-card {
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        border-radius: 24px;
+        min-height: 400px;
+    }
+
+    h3 {
+        color: white;
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        line-height: 1.4;
+        text-align: center;
+    }
+
+    .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .option-btn {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        color: #cbd5e1;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(5px);
+    }
+
+    .option-btn.selected {
+        border-color: #fbbf24;
+    }
+
+    .option-btn.correct {
+        background: rgba(34, 197, 94, 0.2);
+        border-color: #22c55e;
+        color: #4ade80;
+    }
+
+    .option-btn.wrong {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: #ef4444;
+        color: #f87171;
+    }
+
+    .letter {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .feedback-msg {
+        margin-top: 2rem;
+        text-align: center;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #ef4444;
+        padding: 1rem;
+        border-radius: 8px;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .feedback-msg.success {
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    @media (max-width: 480px) {
+        .card,
+        .question-card {
+            padding: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.1rem;
+        }
+    }
+</style>
