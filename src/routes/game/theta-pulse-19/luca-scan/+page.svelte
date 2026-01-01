@@ -110,13 +110,13 @@
             <span>TARGET GELOKALISEERD</span>
         </div>
 
-        <h1>MISSIE: WYCKJ</h1>
+        <h1>MISSIE: WYCK</h1>
 
         {#if isScanning}
             <div class="scanner-container" transition:slide>
                 <div class="scanner-info">
                     <p>
-                        Scan de QR-code bij <strong>Wyckj</strong> om de ontsnapte
+                        Scan de QR-code bij <strong>Wyck</strong> om de ontsnapte
                         aliens in de val te lokken.
                     </p>
                 </div>
@@ -129,10 +129,10 @@
             <div class="briefing">
                 <p>
                     Het signaal is kristalhelder. De aliens blijken te vluchten
-                    naar Wyckj. <br />
+                    naar Wyck. <br />
                     Wees voorzichtig, ze zijn in het nauw gedreven!
                 </p>
-                <div class="location-hint">📍 LOCATIE: Wyckj</div>
+                <div class="location-hint">📍 LOCATIE: Wyck</div>
                 <button class="scan-btn" onclick={startScanner}>
                     📷 BEVESTIG ARRIVAL
                 </button>

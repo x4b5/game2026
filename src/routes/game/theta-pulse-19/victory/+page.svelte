@@ -54,7 +54,7 @@
                     <div class="objective-box warning">
                         <strong>WAARSCHUWING:</strong> Sensoren detecteren een
                         klein restant van de vloot. De aliens blijken te
-                        vluchten naar <strong>Wyckj</strong>!
+                        vluchten naar <strong>Wyck</strong>!
                     </div>
                     <p class="final-words">
                         We kunnen ze niet laten ontkomen. Maak je klaar voor de
