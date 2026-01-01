@@ -27,8 +27,8 @@
         // Add required letters
         result.push(...required);
 
-        // Fill rest with random letters until 25 (5x5)
-        while (result.length < 25) {
+        // Fill rest with random letters until 15 (3x5 grid)
+        while (result.length < 15) {
             result.push(letters[Math.floor(Math.random() * letters.length)]);
         }
 
