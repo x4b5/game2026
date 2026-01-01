@@ -42,7 +42,7 @@
 
     async function onScanSuccess(decodedText: string) {
         const code = decodedText.toLowerCase().trim();
-        const nextPath = "/game/sint-pieter/safe";
+        const nextPath = "/game/zeta-flux-33";
 
         if (scanner) {
             await scanner.clear();
@@ -102,20 +102,13 @@
             {#if intelScanned}
                 <div class="report-text" in:fade>
                     <p>
-                        <strong>SITUATIE:</strong> De decryptie heeft een
-                        bizarre zwakte blootgelegd. Het blijkt dat de aliens de
-                        viool van <strong>André Rieu</strong> hebben gestolen en
-                        verborgen.
-                    </p>
-                    <p>
-                        <strong>DECRYPTIE:</strong> Uit onderschepte bio-data
-                        blijkt dat de aliens fysiek onwel worden van zijn
-                        muziek. Het horen van de vioolklanken veroorzaakt acute
-                        <strong>diarree</strong> bij de aanvallers.
+                        <strong>SITUATIE:</strong> De wapens zijn vernietigd. De
+                        vijand trekt zich terug. We ontvangen edoch een vreemd signaal.
                     </p>
                     <p class="warning">
-                        🎻 <strong>NIEUWE MISSIE:</strong> Vind de viool en gebruik
-                        de muziek als biologisch wapen om de invasie te stoppen.
+                        📡 <strong>ORDER:</strong> Onderzoek de bron van dit
+                        signaal. Verplaats naar sector
+                        <strong>ZETA FLUX</strong> (Locatie: De Bovenkamer).
                     </p>
                 </div>
             {:else}
@@ -152,13 +145,8 @@
                 {#if showHint}
                     <div class="hint-box" transition:slide>
                         <p>
-                            📍 <strong>SINT PIETER:</strong> "Vind de viool in Sint
-                            Pieter. Maar eerst... los deze versleutelde som op:"
-                        </p>
-                        <div class="riddle-math">((14 × 3) + 6) ÷ 6 = ?</div>
-                        <p class="riddle-instruction">
-                            Het cijfer is het <strong>aantal letters</strong> van
-                            het woord van deze woonruimte.
+                            📍 <strong>ZETA FLUX:</strong> "Zoek de ingang bij 'De
+                            Bovenkamer'. Activeer de scanner."
                         </p>
                     </div>
                 {/if}
