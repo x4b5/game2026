@@ -66,9 +66,21 @@
     <main>
         {@render children()}
     </main>
+    <div class="version-tag">v2.1</div>
 </div>
 
 <style>
+    .version-tag {
+        position: fixed;
+        bottom: 5px;
+        right: 5px;
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 0.6rem;
+        pointer-events: none;
+        z-index: 9999;
+        font-family: monospace;
+    }
+
     .game-layout {
         min-height: 100vh;
         position: relative;
