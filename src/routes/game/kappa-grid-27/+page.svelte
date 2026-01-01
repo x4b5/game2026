@@ -202,7 +202,7 @@
         crossorigin="anonymous"
     />
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Tektur:wght@400;900&display=swap"
         rel="stylesheet"
     />
 </svelte:head>
@@ -216,6 +216,24 @@
         {#each Array(30) as _, i}
             <div class="particle" style:--i={i}></div>
         {/each}
+    </div>
+
+    <!-- HUD Decorations -->
+    <div class="hud-overlay">
+        <div class="hud-corner top-left"></div>
+        <div class="hud-corner top-right"></div>
+        <div class="hud-corner bottom-left"></div>
+        <div class="hud-corner bottom-right"></div>
+        <div class="data-stream-left">
+            <span>SIG: 100%</span>
+            <span>LAT: 50.8513</span>
+            <span>LON: 5.6910</span>
+        </div>
+        <div class="data-stream-right">
+            <span>AUTH: GRANTED</span>
+            <span>VER: 2.0.26</span>
+            <span>SEC: ALPHA</span>
+        </div>
     </div>
 
     <!-- Alert Banner -->
@@ -235,8 +253,9 @@
                 </div>
             </h1>
             <div class="subtitle">
-                De stad wordt aangevallen door buitenaardse krachten. Jij bent
-                een superheld en Maastricht's enige hoop!
+                De stad wordt aangevallen door buitenaardse krachten. Jullie
+                zijn lokale superhelden en worden nu als agenten ingezet om
+                Maaastricht te bevrijden.
             </div>
         </div>
 
@@ -256,7 +275,7 @@
 
     <!-- Avatar Selection -->
     <div class="selection-section">
-        <h2 class="section-title">Kies Je Superheld</h2>
+        <h2 class="section-title">KIES JE AGENT</h2>
 
         <div class="hero-grid">
             {#each heroes as hero}
@@ -316,17 +335,11 @@
             {/if}
         </button>
     </div>
-
-    <!-- Footer Info -->
-    <div class="footer-info">
-        <p>💡 Scan QR-codes om door het spel te navigeren</p>
-        <p>👥 Tot 6 spelers kunnen samen spelen op hun eigen telefoon</p>
-    </div>
 </div>
 
 <style>
     :global(body) {
-        font-family: "Inter", sans-serif;
+        font-family: "Rajdhani", sans-serif;
     }
 
     .welcome-page {
@@ -811,9 +824,10 @@
     .section-title {
         text-align: center;
         margin-bottom: 2rem;
-        font-size: 2.5rem;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
+        font-size: 3rem;
+        font-family: "Tektur", sans-serif;
+        font-weight: 900;
+        letter-spacing: -2px;
         background: linear-gradient(135deg, #a855f7, #ec4899, #f472b6);
         background-size: 200% 200%;
         -webkit-background-clip: text;
@@ -1199,9 +1213,74 @@
         }
     }
 
-    @media (max-width: 400px) {
-        .hero-grid {
-            grid-template-columns: 1fr;
+    /* HUD Elements */
+    .hud-overlay {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    .hud-corner {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .hud-corner.top-left {
+        top: 20px;
+        left: 20px;
+        border-right: none;
+        border-bottom: none;
+    }
+    .hud-corner.top-right {
+        top: 20px;
+        right: 20px;
+        border-left: none;
+        border-bottom: none;
+    }
+    .hud-corner.bottom-left {
+        bottom: 20px;
+        left: 20px;
+        border-right: none;
+        border-top: none;
+    }
+    .hud-corner.bottom-right {
+        bottom: 20px;
+        right: 20px;
+        border-left: none;
+        border-top: none;
+    }
+
+    .data-stream-left,
+    .data-stream-right {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-family: monospace;
+        font-size: 0.7rem;
+        color: rgba(59, 130, 246, 0.4);
+        letter-spacing: 2px;
+    }
+
+    .data-stream-left {
+        bottom: 150px;
+        left: 40px;
+        transform: rotate(-90deg);
+        transform-origin: left bottom;
+    }
+    .data-stream-right {
+        bottom: 150px;
+        right: 40px;
+        transform: rotate(90deg);
+        transform-origin: right bottom;
+    }
+
+    @media (max-width: 768px) {
+        .hud-overlay {
+            display: none;
         }
     }
 </style>
