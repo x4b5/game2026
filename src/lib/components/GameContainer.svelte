@@ -21,6 +21,24 @@
     let gameState = $state<"playing" | "won" | "lost">("playing");
     let score = $state(0);
     let showVictory = $state(false);
+    let adminPassword = $state("");
+    let showAdminBypass = $state(false);
+
+    function handleAdminBypass() {
+        if (adminPassword.toLowerCase() === "xavier") {
+            const currentPath = window.location.pathname.replace(/\/$/, "");
+            const idx = MISSION_ORDER.indexOf(currentPath);
+            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                const nextPath = MISSION_ORDER[idx + 1];
+                fetch("/api/mission", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ navTo: nextPath }),
+                }).catch(console.error);
+                goto(nextPath);
+            }
+        }
+    }
 
     onMount(() => {
         soundManager.init();
@@ -115,6 +133,27 @@
             </div>
         </div>
     {/if}
+
+    <!-- Admin Bypass Section -->
+    <div class="admin-section">
+        <button
+            class="admin-toggle"
+            onclick={() => (showAdminBypass = !showAdminBypass)}
+        >
+            🔑 Admin
+        </button>
+        {#if showAdminBypass}
+            <div class="admin-bypass">
+                <input
+                    type="password"
+                    bind:value={adminPassword}
+                    placeholder="Wachtwoord..."
+                    onkeydown={(e) => e.key === "Enter" && handleAdminBypass()}
+                />
+                <button onclick={handleAdminBypass}>Skip</button>
+            </div>
+        {/if}
+    </div>
 </div>
 
 <style>
