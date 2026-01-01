@@ -7,6 +7,19 @@
     let showHint = $state(false);
     let intelScanned = $state(false);
 
+    async function handleNext() {
+        try {
+            // Update global state so players aren't forced back by the layout poll
+            await fetch("/api/mission", {
+                method: "POST",
+                body: JSON.stringify({ step: "zeta-flux" }),
+            });
+        } catch (e) {
+            console.error(e);
+        }
+        goto("/game/zeta-flux-33");
+    }
+
     onMount(() => {
         visible = true;
         setTimeout(() => (intelScanned = true), 1500);
@@ -78,7 +91,7 @@
                 </div>
             {/if}
 
-            <button class="next-btn" onclick={() => goto("/game/zeta-flux-33")}>
+            <button class="next-btn" onclick={handleNext}>
                 GA NAAR LOCATIE
             </button>
         </div>
