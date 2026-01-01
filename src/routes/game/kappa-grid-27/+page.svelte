@@ -11,6 +11,7 @@
             id: "lord-mosa",
             name: "Lord Mosa",
             power: "🌊 De Heerser van de Maas",
+            origin: "Maastricht's waterwereld-beschermer uit de verborgen tunnels.",
             imgIdle: "/heroes/lord-mosa.png",
             imgAction: "/heroes/lord-mosa.png",
             color: "#3b82f6",
@@ -19,7 +20,8 @@
         {
             id: "stella",
             name: "Stella",
-            power: "🎭 De belichaming van de Mestreechter Geis",
+            power: "🎭 De Mestreechter Geis",
+            origin: "Is op mysterieuze wijze gemuteerd tijdens de Vastelaovend.",
             imgIdle: "/heroes/stella.png",
             imgAction: "/heroes/stella.png",
             color: "#ef4444",
@@ -28,7 +30,8 @@
         {
             id: "the-minck",
             name: "The Minck",
-            power: "🔥 De vlammende waker van Maastricht",
+            power: "🔥 De Vlammende Waker",
+            origin: "Ontstaan uit de eeuwige vlam van Jan Pieter Minckeleers.",
             imgIdle: "/heroes/the-minck.png",
             imgAction: "/heroes/the-minck.png",
             color: "#06b6d4",
@@ -270,6 +273,7 @@
                     <div class="hero-info">
                         <div class="hero-name">{hero.name}</div>
                         <div class="hero-power">{hero.power}</div>
+                        <div class="hero-origin">{hero.origin}</div>
                     </div>
                 </button>
             {/each}
@@ -814,10 +818,21 @@
     .hero-power {
         font-family: "Orbitron", sans-serif !important;
         font-size: 0.8rem !important;
-        color: rgba(255, 255, 255, 0.7) !important;
+        color: var(--hero-color) !important;
+        opacity: 0.9;
         margin-top: 0.2rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .hero-origin {
+        font-family: "Inter", sans-serif !important;
+        font-size: 0.7rem !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+        margin-top: 0.5rem;
+        line-height: 1.3;
+        font-style: italic;
     }
 
     .hero-card:disabled {
