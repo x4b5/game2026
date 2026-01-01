@@ -2,6 +2,7 @@
     import GameContainer from "$lib/components/GameContainer.svelte";
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
 
     interface DataFragment {
         id: number;
@@ -16,7 +17,8 @@
     let catcherX = $state(50); // Percentage position
     let goodCaught = $state(0);
     let badCaught = $state(0);
-    let gameActive = $state(true);
+    let gameActive = $state(false);
+    let briefingVisible = $state(true);
     let currentId = 0;
 
     const TARGET_GOOD = 30;
@@ -27,13 +29,18 @@
     let updateTimer: any;
 
     onMount(() => {
-        startGame();
-
+        // Game starts only after briefing
         return () => {
             clearInterval(spawnTimer);
             clearInterval(updateTimer);
         };
     });
+
+    function acceptBriefing() {
+        briefingVisible = false;
+        gameActive = true;
+        startGame();
+    }
 
     function startGame() {
         spawnTimer = setInterval(spawnFragment, 800);
@@ -134,25 +141,51 @@
     title="🌊 Iota Stream"
 >
     <div class="stream-game">
-        <div class="game-stats">
-            <div class="stat good">
-                <span class="stat-label">✓ Goede Data</span>
-                <span class="stat-value">{goodCaught}/{TARGET_GOOD}</span>
-            </div>
-            <div class="stat bad">
-                <span class="stat-label">✗ Corrupte Data</span>
-                <span class="stat-value">{badCaught}/{MAX_BAD}</span>
-            </div>
-        </div>
+        {#if briefingVisible}
+            <div class="intel-briefing" in:fade>
+                <div class="briefing-header">
+                    <span class="alert-tag">⚠️ DREIGINGSNIVEAU: CRITIEK</span>
+                    <h1>SITUATIE RAPPORT</h1>
+                </div>
 
-        <div
-            class="stream-field"
-            role="slider"
-            tabindex="0"
-            aria-label="Data catcher position"
+                <div class="briefing-content">
+                    <p class="intel-text">
+                        <strong>INTEL BEVESTIGD:</strong> Onze sensoren hebben grootschalige
+                        alien-mobilisatie gedetecteerd. De vijand bereidt zich voor
+                        op een frontale aanval op de binnenstad.
+                    </p>
+                    <p>
+                        <strong>MISSIE:</strong> Onderschep de gecodeerde datafragments
+                        uit de Iota Stream. We hebben deze intel nodig om hun aanvalsvector
+                        te bepalen.
+                    </p>
+                    <div class="warning-box">
+                        GEVECHTSKLAAR MAKEN. ELKE SECONDE TELT.
+                    </div>
+                </div>
+
+                <button class="accept-btn" onclick={acceptBriefing}>
+                    BEVESTIG & START SCAN
+                </button>
+            </div>
+        {:else}
+            <div class="game-stats" in:fade>
+                <div class="stat good">
+                    <span class="stat-label">✓ Goede Data</span>
+                    <span class="stat-value">{goodCaught}/{TARGET_GOOD}</span>
+                </div>
+                <div class="stat bad">
+                    <span class="stat-label">✗ Corrupte Data</span>
+                    <span class="stat-value">{badCaught}/{MAX_BAD}</span>
+                </div>
+            </div>
+        {/if}
+
+        <div class="stream-field">
+            role="slider" tabindex="0" aria-label="Data catcher position"
             onpointermove={handlePointerMove}
             ontouchmove={handleTouchMove}
-        >
+            >
             <!-- Data fragments -->
             {#each fragments as fragment (fragment.id)}
                 <div
@@ -397,6 +430,83 @@
         font-size: 0.875rem;
         color: var(--text-muted);
         font-style: italic;
+    }
+
+    /* Intel Briefing Styles */
+    .intel-briefing {
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid var(--primary);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        border-left-width: 8px;
+    }
+
+    .briefing-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-tag {
+        display: inline-block;
+        background: #ef4444;
+        color: white;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .briefing-header h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        color: white;
+        margin: 0;
+        letter-spacing: 2px;
+    }
+
+    .briefing-content {
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        color: #e2e8f0;
+    }
+
+    .intel-text {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .warning-box {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px dashed #ef4444;
+        padding: 1rem;
+        text-align: center;
+        color: #ef4444;
+        font-weight: 700;
+        font-family: "Orbitron", sans-serif;
+        margin-top: 1.5rem;
+    }
+
+    .accept-btn {
+        width: 100%;
+        padding: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+    }
+
+    .accept-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
     }
 
     @media (max-width: 640px) {
