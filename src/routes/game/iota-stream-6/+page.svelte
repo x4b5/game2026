@@ -38,7 +38,8 @@
     });
 
     function acceptBriefing() {
-        goto("/game/iota-stream-6/burner");
+        briefingVisible = false;
+        startGame();
     }
 
     function startGame() {
@@ -85,6 +86,10 @@
                                 clearInterval(updateTimer);
                                 gameContainer?.win(
                                     goodCaught * 100 - badCaught * 50,
+                                );
+                                setTimeout(
+                                    () => goto("/game/rho-system-88/finale"),
+                                    1500,
                                 );
                             }
                         } else {
@@ -147,32 +152,31 @@
         {#if briefingVisible}
             <div class="intel-briefing" in:fade>
                 <div class="briefing-header">
-                    <span class="alert-tag">⚠️ STATUS: UPDATE</span>
-                    <h1>MISSION UPDATE</h1>
+                    <span class="alert-tag">✅ SYSTEM ACCESS: GRANTED</span>
+                    <h1>THE MINCK: ONLINE</h1>
                 </div>
 
                 <div class="briefing-content">
                     <p class="intel-text">
-                        <strong>> PREVIOUS MISSION:</strong>
-                        <span class="highlight">SUCCESS</span>. Energieveld
-                        geneutraliseerd. Kappa Grid is offline. Uitstekend werk,
-                        agenten.
+                        <strong>> SYSTEM ALERT:</strong> U heeft volledige toegang
+                        tot het lokale netwerk.
                     </p>
                     <p>
-                        <strong>> NEW INTEL:</strong> Sensoren detecteren nu activiteit
-                        in Sector **KAZEMATTEN**. The Minck vertoont ongebruikelijke
-                        energie-pieken.
+                        <strong>> CRITICAL INTEL:</strong> Een enorme
+                        buitenaardse <span class="highlight">wapenopslag</span> is
+                        hier verborgen. Ze staan op het punt de binnenstad aan te
+                        vallen.
                     </p>
                     <p>
-                        <strong>> OBJECTIVE:</strong> Verplaats onmiddellijk naar
-                        de Kazematten. Observeer en rapporteer. Wees op uw hoede
-                        voor vijandelijke resten.
+                        <strong>> OBJECTIVE:</strong> De enige optie is om het
+                        arsenaal te <strong>verbranden</strong>. Gebruik de
+                        'Burner' utility om de aanval te stoppen.
                     </p>
-                    <div class="warning-box">MOVE OUT. STAY FROSTY.</div>
+                    <div class="warning-box">BURN SEQUENCE READY.</div>
                 </div>
 
                 <button class="accept-btn" onclick={acceptBriefing}>
-                    [ PROCEED TO TARGET ]
+                    [ INITIATE BURN SEQUENCE ]
                 </button>
             </div>
         {:else}
