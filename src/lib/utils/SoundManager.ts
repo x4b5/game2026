@@ -13,26 +13,33 @@ class SoundManager {
 
     private setupUnlockListeners() {
         const unlock = async () => {
-            if (!this.context) return;
+            console.log('User interaction detected, attempting to unlock audio...');
 
-            if (this.context.state === 'suspended') {
+            // Create context if it doesn't exist
+            if (!this.context) {
+                await this.init();
+            }
+
+            if (this.context && this.context.state === 'suspended') {
                 await this.context.resume();
             }
 
-            if (this.context.state === 'running') {
+            if (this.context && this.context.state === 'running') {
                 if (this.shouldBePlaying && this.ambientMusicNodes.length === 0) {
                     this.startAmbientMusic();
                 }
-                // Only remove if we actually successfully reached a running state
+                // Cleanup listeners
                 window.removeEventListener('click', unlock);
                 window.removeEventListener('touchstart', unlock);
                 window.removeEventListener('mousedown', unlock);
+                window.removeEventListener('keydown', unlock);
             }
         };
 
         window.addEventListener('click', unlock);
         window.addEventListener('touchstart', unlock);
         window.addEventListener('mousedown', unlock);
+        window.addEventListener('keydown', unlock);
     }
 
     async init() {
@@ -41,25 +48,35 @@ class SoundManager {
         if (!this.context) {
             try {
                 this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-                // Try to resume immediately
-                if (this.context.state === 'suspended') {
-                    await this.context.resume().catch(() => { });
-                }
+                console.log('AudioContext created in state:', this.context.state);
             } catch (e) {
                 console.warn('Web Audio API not supported', e);
             }
         }
+
+        if (this.context && this.context.state === 'suspended') {
+            await this.context.resume().catch(() => {
+                console.log('Automatic resume failed (expected on first load)');
+            });
+        }
+
         return this.context;
     }
 
     startAmbientMusic() {
         this.shouldBePlaying = true;
 
-        if (!this.enabled || !this.context) return;
+        if (!this.enabled || !this.context) {
+            this.init().then(() => {
+                if (this.context && this.context.state === 'running') {
+                    this.startAmbientMusic();
+                }
+            });
+            return;
+        }
 
-        // If still suspended, we rely on the unlock listeners
         if (this.context.state === 'suspended') {
+            console.log('AudioContext suspended, queued for first interaction.');
             return;
         }
 
@@ -230,7 +247,11 @@ class SoundManager {
     }
 
     playTone(frequency: number, duration: number = 0.2, volume: number = 0.3) {
-        if (!this.enabled || !this.context || this.context.state !== 'running') return;
+        if (!this.enabled || !this.context || this.context.state !== 'running') {
+            // Self-init if called while dead
+            if (this.enabled) this.init();
+            return;
+        }
         const oscillator = this.context.createOscillator();
         const gainNode = this.context.createGain();
         oscillator.connect(gainNode);
