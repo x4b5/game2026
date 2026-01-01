@@ -78,9 +78,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
         background: #020617;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         position: relative;
     }
 
@@ -98,16 +99,17 @@
     .content-panel {
         max-width: 600px;
         width: 100%;
-        padding: 3rem 2rem;
+        padding: 2.5rem 1.5rem;
         background: rgba(15, 23, 42, 0.9);
         border: 2px solid #3b82f6;
         box-shadow: 0 0 50px rgba(59, 130, 246, 0.2);
         text-align: center;
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
         z-index: 1;
         border-radius: 24px;
+        box-sizing: border-box;
     }
 
     .badge {
@@ -275,6 +277,33 @@
             width: 400px;
             height: 400px;
             opacity: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .stella-icon {
+            font-size: 3.5rem;
+        }
+
+        .violin-icon {
+            font-size: 1.8rem;
+        }
+
+        .visual-container {
+            height: 120px;
+        }
+
+        .report-box {
+            padding: 1.5rem;
+        }
+
+        .final-btn {
+            font-size: 1.1rem;
+            padding: 1.2rem;
         }
     }
 

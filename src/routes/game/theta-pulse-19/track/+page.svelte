@@ -141,7 +141,8 @@
         padding: 1.5rem;
         background: #020617;
         position: relative;
-        overflow: hidden;
+        overflow-y: auto; /* Allow scrolling */
+        overflow-x: hidden;
     }
 
     .background-scan {
@@ -351,6 +352,17 @@
         }
         h1 {
             font-size: 1.5rem;
+        }
+        .content-panel {
+            padding: 2rem 1rem;
+        }
+        .success-message {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+        .success-message .icon {
+            font-size: 2rem;
         }
     }
 </style>

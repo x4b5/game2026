@@ -175,11 +175,12 @@
 
 <style>
     .scan-page {
-        min-height: 90vh;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 1.5rem;
+        padding: 1.5rem 1rem;
+        overflow-y: auto;
     }
 
     .content-panel {
@@ -394,6 +395,27 @@
         50% {
             transform: scale(1.02);
             box-shadow: 0 0 35px rgba(59, 130, 246, 0.4);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .content-panel {
+            padding: 2rem 1.5rem;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .briefing p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .scan-btn {
+            padding: 1.1rem;
+            font-size: 1.1rem;
         }
     }
 

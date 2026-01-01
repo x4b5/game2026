@@ -204,8 +204,10 @@
     <div class="hero-section">
         <div class="title-container">
             <h1 class="title">
-                <span class="line1">ALIEN INVANSION</span>
-                <span class="line2">Maastricht</span>
+                <div class="title-wrapper">
+                    <span class="line1">ALIEN INVASION</span>
+                    <span class="line2">Maastricht</span>
+                </div>
             </h1>
             <div class="subtitle">
                 De stad wordt aangevallen door buitenaardse krachten. Jij bent
@@ -421,15 +423,33 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(3.5rem, 12vw, 6rem);
-        line-height: 0.9;
-        margin-bottom: 1.5rem;
+        font-size: clamp(2.5rem, 10vw, 6rem);
+        line-height: 1;
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .title-wrapper {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .line1,
+    .line2 {
+        display: block;
+        width: 100%;
+        text-align: center;
         font-weight: 900;
         letter-spacing: 0.05em;
         text-transform: uppercase;
+        word-break: break-all;
     }
 
     .line1 {
@@ -911,16 +931,65 @@
 
     /* Responsive */
     @media (max-width: 640px) {
+        .welcome-page {
+            padding-top: 4rem;
+        }
+
+        .title {
+            font-size: clamp(1.8rem, 8vw, 2.5rem);
+        }
+
+        .title-wrapper {
+            gap: 0.1rem;
+        }
+
+        .line1 {
+            font-size: 1.1em;
+        }
+
+        .line2 {
+            font-size: 0.9em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+        }
+
+        .mission-brief {
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .mission-brief h2 {
+            font-size: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
         .hero-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
         }
 
-        .player-section {
-            flex-direction: column;
+        .start-button {
+            padding: 1.5rem;
+            font-size: 1.2rem;
         }
 
-        .player-number {
-            min-width: auto;
+        .hero-name {
+            font-size: 0.9rem !important;
+        }
+
+        .hero-power {
+            font-size: 0.7rem !important;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .hero-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>

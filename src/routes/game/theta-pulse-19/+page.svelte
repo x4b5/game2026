@@ -151,7 +151,8 @@
         font-family: "Inter", sans-serif;
         display: flex;
         justify-content: center;
-        overflow: hidden;
+        overflow-y: auto; /* Allow scrolling */
+        overflow-x: hidden;
         position: relative;
     }
 
@@ -172,11 +173,12 @@
     .content-wrapper {
         max-width: 800px;
         width: 100%;
-        padding: 2rem;
+        padding: 2.5rem 1.5rem;
         display: flex;
         flex-direction: column;
         gap: 2rem;
         z-index: 1;
+        box-sizing: border-box;
     }
 
     /* Restricted Access Styles */
@@ -564,10 +566,48 @@
     @media (max-width: 768px) {
         main {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
 
         h1 {
             font-size: 2.2rem;
+        }
+
+        .content-wrapper {
+            padding: 1.5rem 1rem;
+        }
+
+        .restricted-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .hero-briefing,
+        .mission-objective {
+            padding: 1.5rem;
+        }
+
+        .vrijthof-map {
+            height: 150px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .start-btn {
+            font-size: 1rem;
+            padding: 1.2rem;
+        }
+
+        .hero-avatar {
+            width: 60px;
+            height: 60px;
+        }
+
+        .stella-icon {
+            font-size: 2rem;
         }
     }
 </style>
