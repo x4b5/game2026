@@ -3,22 +3,65 @@ class SoundManager {
     private enabled = true;
     private ambientMusicNodes: AudioNode[] = [];
     private pingInterval: any = null;
+    private isInitialized = false;
+
+    constructor() {
+        // Try to initialize as soon as possible
+        if (typeof window !== 'undefined') {
+            this.addUnlockListeners();
+        }
+    }
+
+    private addUnlockListeners() {
+        const unlock = () => {
+            if (this.context && this.context.state === 'suspended') {
+                this.context.resume().then(() => {
+                    console.log('AudioContext resumed via user interaction');
+                    // If music was supposed to be playing but couldn't, start it now
+                    if (this.ambientMusicNodes.length === 0 && this.isInitialized) {
+                        this.startAmbientMusic();
+                    }
+                });
+            }
+            window.removeEventListener('click', unlock);
+            window.removeEventListener('touchstart', unlock);
+            window.removeEventListener('keydown', unlock);
+        };
+        window.addEventListener('click', unlock);
+        window.addEventListener('touchstart', unlock);
+        window.addEventListener('keydown', unlock);
+    }
 
     async init() {
-        if (!this.context && typeof window !== 'undefined') {
+        if (typeof window === 'undefined') return;
+
+        if (!this.context) {
             try {
                 this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                this.isInitialized = true;
+
                 if (this.context.state === 'suspended') {
-                    await this.context.resume();
+                    await this.context.resume().catch(() => {
+                        console.warn('Initial resume failed, waiting for user interaction');
+                    });
                 }
             } catch (e) {
                 console.warn('Web Audio API not supported', e);
             }
         }
+        return this.context;
     }
 
     startAmbientMusic() {
         if (!this.enabled || !this.context) return;
+
+        // If context is suspended, we can't start nodes meaningfully yet
+        // but we flag isInitialized so the unlock listeners will start it
+        if (this.context.state === 'suspended') {
+            console.log('AudioContext suspended, will start music after interaction');
+            return;
+        }
+
         if (this.ambientMusicNodes.length > 0) return;
 
         const now = this.context.currentTime;
@@ -39,7 +82,6 @@ class SoundManager {
         textureGain.gain.setValueAtTime(0.04, now);
 
         // --- 3. Broken AM Radio Effect ---
-        // Noise source
         const bufferSize = 2 * this.context.sampleRate;
         const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
         const noiseData = noiseBuffer.getChannelData(0);
@@ -50,28 +92,24 @@ class SoundManager {
         radioNoise.buffer = noiseBuffer;
         radioNoise.loop = true;
 
-        // Bandpass filter for radio characteristic (300Hz - 3kHz range)
         const radioFilter = this.context.createBiquadFilter();
         radioFilter.type = 'bandpass';
         radioFilter.frequency.setValueAtTime(1200, now);
         radioFilter.Q.setValueAtTime(1, now);
 
-        // Amplitude Modulation (the 'broken' part)
         const radioGain = this.context.createGain();
         radioGain.gain.setValueAtTime(0.04, now);
 
-        // Random volume flicker LFO
         const flickerLfo = this.context.createOscillator();
         const flickerGain = this.context.createGain();
-        flickerLfo.type = 'square'; // Harsh cuts
-        flickerLfo.frequency.setValueAtTime(8, now); // 8Hz flicker
+        flickerLfo.type = 'square';
+        flickerLfo.frequency.setValueAtTime(8, now);
         flickerGain.gain.setValueAtTime(0.03, now);
 
-        // Secondary slow drift for radio signal
         const driftLfo = this.context.createOscillator();
         const driftGain = this.context.createGain();
         driftLfo.frequency.setValueAtTime(0.5, now);
-        driftGain.gain.setValueAtTime(400, now); // Drifts filter freq
+        driftGain.gain.setValueAtTime(400, now);
 
         // --- 4. Deep Filters ---
         const lpFilter = this.context.createBiquadFilter();
@@ -90,19 +128,16 @@ class SoundManager {
         masterGain.gain.setValueAtTime(0.15, now);
 
         // --- Connections ---
-        // Drone path
         subOsc.connect(subGain);
         textureOsc.connect(textureGain);
         subGain.connect(lpFilter);
         textureGain.connect(lpFilter);
         lpFilter.connect(masterGain);
 
-        // Radio path
         radioNoise.connect(radioFilter);
         radioFilter.connect(radioGain);
         radioGain.connect(masterGain);
 
-        // LFO Connections
         flickerLfo.connect(flickerGain);
         flickerGain.connect(radioGain.gain);
 
@@ -145,7 +180,7 @@ class SoundManager {
     }
 
     private playMysteriousPing() {
-        if (!this.enabled || !this.context) return;
+        if (!this.enabled || !this.context || this.context.state === 'suspended') return;
 
         const now = this.context.currentTime;
         const freq = [880, 1100, 1320, 1760][Math.floor(Math.random() * 4)];
@@ -193,7 +228,7 @@ class SoundManager {
     }
 
     playTone(frequency: number, duration: number = 0.2, volume: number = 0.3) {
-        if (!this.enabled || !this.context) return;
+        if (!this.enabled || !this.context || this.context.state === 'suspended') return;
         const oscillator = this.context.createOscillator();
         const gainNode = this.context.createGain();
         oscillator.connect(gainNode);
