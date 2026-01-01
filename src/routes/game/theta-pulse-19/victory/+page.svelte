@@ -14,7 +14,7 @@
     });
 
     async function handleContinue() {
-        goto("/game");
+        goto("/game/theta-pulse-19/track");
     }
 </script>
 
