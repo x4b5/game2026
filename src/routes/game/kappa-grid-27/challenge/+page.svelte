@@ -114,9 +114,24 @@
 </script>
 
 <div class="challenge-page" in:fade={{ duration: 800 }}>
-    <div class="glass-panel content-card">
+    <!-- Spectacular Background Elements -->
+    <div class="animated-bg"></div>
+    <div class="particles">
+        {#each { length: 20 } as _, i}
+            <div class="particle" style="--i:{i}"></div>
+        {/each}
+    </div>
+    <div class="cyber-grid"></div>
+
+    <div class="glass-panel content-card has-corners">
+        <!-- Cyber Corners -->
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
         <h1>KAPPA GRID 27</h1>
-        <h2>MISSIE BRIEFING</h2>
+        <h2 class="mission-title">MISSIE BRIEFING</h2>
 
         <!-- Scanner Container -->
         {#if isScanning}
@@ -166,8 +181,9 @@
                 </div>
             </div>
 
-            <button class="action-button" onclick={startScanner}>
-                📷 SCAN OMGEVING
+            <button class="action-button primary-action" onclick={startScanner}>
+                <span class="icon">📷</span>
+                <span class="text">SCAN OMGEVING</span>
             </button>
 
             <!-- Admin Password Field -->
