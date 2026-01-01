@@ -35,18 +35,21 @@
             {#if intelScanned}
                 <div class="report-text" in:fade>
                     <p>
-                        <strong>SITUATIE:</strong> De verbranding van het wapenarsenaal
-                        heeft een massale energie-feedback veroorzaakt in het alien-netwerk.
-                        Hierdoor hebben we hun stealth-protocol kunnen omzeilen.
+                        <strong>SITUATIE:</strong> De decryptie heeft een
+                        bizarre zwakte blootgelegd. Het blijkt dat de aliens de
+                        viool van <strong>André Rieu</strong> hebben gestolen en
+                        verborgen.
                     </p>
                     <p>
-                        <strong>DECRYPTIE:</strong> We hebben coördinaten gevonden
-                        die wijzen naar een ondergronds complex. Dit is de bron van
-                        het Iota Stream signaal.
+                        <strong>DECRYPTIE:</strong> Uit onderschepte bio-data
+                        blijkt dat de aliens fysiek onwel worden van zijn
+                        muziek. Het horen van de vioolklanken veroorzaakt acute
+                        <strong>diarree</strong> bij de aanvallers.
                     </p>
                     <p class="warning">
-                        ⚠️ <strong>WAARSCHUWING:</strong> De aliens zijn zich bewust
-                        van onze ontdekking. Ze hergroeperen zich bij de basis.
+                        🎻 <strong>NIEUWE MISSIE:</strong> Vind de viool en gebruik
+                        de muziek als biologisch wapen om de invasie definitief te
+                        stoppen.
                     </p>
                 </div>
             {:else}
@@ -59,15 +62,15 @@
 
         <div class="action-section">
             <button class="hint-toggle" onclick={() => (showHint = !showHint)}>
-                {showHint ? "❌ SLUIT EXTRA INFO" : "🔍 EXTRA INFORMATIE"}
+                {showHint ? "❌ SLUIT COÖRDINATEN" : "🔍 TOON LOCATIE DATA"}
             </button>
 
             {#if showHint}
                 <div class="hint-box" transition:slide>
                     <p>
-                        📍 <strong>COÖRDINATEN:</strong> "Zoek de plek waar de **stokoude
-                        boeken** rusten en de stilte heerst. Scan daar de verborgen
-                        code."
+                        📍 <strong>SINT PIETER:</strong> "De coördinaten leiden naar
+                        een plek in **Sint Pieter**. De viool ligt verborgen waar
+                        de kalkstenen muren de geheimen van de stad bewaren."
                     </p>
                 </div>
             {/if}
