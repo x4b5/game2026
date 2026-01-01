@@ -14,6 +14,9 @@
     let bursts = $state<any[]>([]);
     let isStella = $derived($gameProgress.player?.avatar === "stella");
 
+    let gamePhase = $state<"playing" | "result">("playing");
+    let isWinner = $state(false);
+
     let gameLoop: any;
 
     function initGame() {
@@ -22,6 +25,7 @@
         targets = [];
         bursts = [];
         gameActive = true;
+        gamePhase = "playing";
 
         gameLoop = setInterval(() => {
             if (timeLeft > 0 && gameActive) {
@@ -97,10 +101,11 @@
     function endGame() {
         gameActive = false;
         clearInterval(gameLoop);
-        if (score >= 1500) {
-            gameContainer?.win(score);
-        } else {
-            gameContainer?.lose();
+        gamePhase = "result";
+        isWinner = score >= 1500;
+
+        if (isWinner) {
+            gameProgress.completeGame("airborne-concerto", score);
         }
     }
 
@@ -147,6 +152,7 @@
 
             <div
                 class="game-area"
+                class:blur={gamePhase === "result"}
                 onmousemove={handleInput}
                 ontouchmove={handleInput}
                 onclick={playViolin}
@@ -188,7 +194,46 @@
                     <div class="wings"></div>
                 </div>
 
-                <div class="tap-hint">TAP OF KLIK OM DE VIOOL TE BESPELEN!</div>
+                {#if gamePhase === "playing"}
+                    <div class="tap-hint">
+                        TAP OF KLIK OM DE VIOOL TE BESPELEN!
+                    </div>
+                {/if}
+
+                {#if gamePhase === "result"}
+                    <div class="result-overlay" in:fade>
+                        <div class="result-box" in:fly={{ y: 20 }}>
+                            {#if isWinner}
+                                <div class="result-icon success">🎉</div>
+                                <h2>MISSIE GESLAAGD</h2>
+                                <p>
+                                    Je sonische impact van {score} heeft de aliens
+                                    tijdelijk verjaagd!
+                                </p>
+                                <button
+                                    class="result-btn success"
+                                    onclick={() =>
+                                        goto("/game/theta-pulse-19/victory")}
+                                >
+                                    GA VERDER
+                                </button>
+                            {:else}
+                                <div class="result-icon failure">💥</div>
+                                <h2>MISSIE MISLUKT</h2>
+                                <p>
+                                    Je had slechts {score} impact. De aliens hergroeperen
+                                    zich!
+                                </p>
+                                <button
+                                    class="result-btn failure"
+                                    onclick={handleReset}
+                                >
+                                    PROBEER OPNIEUW
+                                </button>
+                            {/if}
+                        </div>
+                    </div>
+                {/if}
             </div>
         </div>
     </GameContainer>
@@ -383,6 +428,77 @@
         font-size: 0.8rem;
         letter-spacing: 1px;
         pointer-events: none;
+    }
+
+    .game-area.blur {
+        filter: grayscale(0.5);
+    }
+
+    .result-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        backdrop-filter: blur(8px);
+    }
+
+    .result-box {
+        background: rgba(15, 23, 42, 0.95);
+        padding: 2.5rem;
+        border-radius: 24px;
+        border: 2px solid rgba(59, 130, 246, 0.3);
+        text-align: center;
+        max-width: 350px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .result-box h2 {
+        font-family: "Orbitron", sans-serif;
+        color: white;
+        margin-bottom: 1rem;
+        letter-spacing: 2px;
+    }
+
+    .result-box p {
+        color: #94a3b8;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .result-btn {
+        width: 100%;
+        padding: 1.2rem;
+        border-radius: 12px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        text-transform: uppercase;
+    }
+
+    .result-btn.success {
+        background: #22c55e;
+        color: white;
+    }
+
+    .result-btn.failure {
+        background: #ef4444;
+        color: white;
+    }
+
+    .result-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     }
 
     @media (max-width: 600px) {
