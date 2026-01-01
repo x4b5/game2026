@@ -27,11 +27,13 @@
     let countdownTimer: any;
 
     onMount(() => {
-        // Hero check
+        // Hero check removed to allow access for all
+        /*
         if ($gameProgress.player?.avatar !== "the-minck") {
             accessDenied = true;
             return;
         }
+        */
 
         gameActive = true;
         startGame();
