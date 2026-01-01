@@ -40,7 +40,7 @@
     ];
 
     // Player name inputs for each hero
-    let playerNames = $state({
+    let playerNames: Record<string, string> = $state({
         "lord-mosa": "",
         stella: "",
         "the-minck": "",
