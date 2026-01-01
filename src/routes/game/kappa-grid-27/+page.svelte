@@ -529,34 +529,24 @@
 
     .title {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(1.8rem, 7vw, 4.5rem);
-        line-height: 1.1;
-        margin-bottom: 2rem;
+        font-size: clamp(3.5rem, 16vw, 10rem);
+        font-weight: 900;
+        letter-spacing: -4px;
+        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
+        line-height: 1;
+        margin-bottom: 2.5rem;
         width: 100%;
         display: flex;
         justify-content: center;
-        perspective: 1200px;
     }
 
     .title-wrapper {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.1rem;
         width: 100%;
         max-width: 100%;
-        transform-style: preserve-3d;
-        transform: rotateX(15deg) rotateY(-5deg);
-        animation: titleFloat 6s ease-in-out infinite;
-    }
-
-    @keyframes titleFloat {
-        0%,
-        100% {
-            transform: rotateX(15deg) rotateY(-5deg) translateY(0);
-        }
-        50% {
-            transform: rotateX(20deg) rotateY(5deg) translateY(-10px);
-        }
+        position: relative;
     }
 
     .line1,
@@ -591,51 +581,69 @@
         mix-blend-mode: overlay;
     }
 
-    @keyframes holo-scan {
-        0% {
-            transform: translateY(-100%);
-        }
-        100% {
-            transform: translateY(100%);
-        }
-    }
-
     .line1 {
         position: relative;
-        background: linear-gradient(135deg, #60a5fa, #a78bfa, #3b82f6);
+        background: linear-gradient(135deg, #ffffff, #93c5fd, #3b82f6);
         background-size: 200% 200%;
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
         animation:
-            glow-blue 3s infinite,
-            gradientMove 4s ease infinite,
-            glitch 5s infinite;
+            glitch 0.3s infinite,
+            signal-flicker 2s infinite;
         text-shadow:
-            2px 2px 0px rgba(30, 58, 138, 0.8),
-            4px 4px 0px rgba(30, 58, 138, 0.5),
-            6px 6px 20px rgba(0, 0, 0, 1);
-        filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5));
-        transform: translateZ(80px);
+            0 0 20px rgba(255, 255, 255, 0.8),
+            -4px 0 rgba(255, 0, 255, 0.7),
+            4px 0 rgba(0, 255, 255, 0.7);
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
     }
 
     @keyframes glitch {
-        0%,
-        90%,
+        0% {
+            transform: translate(0) skew(0deg);
+            clip-path: inset(0% 0 0% 0);
+        }
+        10% {
+            transform: translate(-15px, 5px) skew(-10deg);
+            clip-path: inset(10% 0 80% 0);
+        }
+        20% {
+            transform: translate(15px, -5px) skew(10deg);
+            clip-path: inset(80% 0 10% 0);
+        }
+        30% {
+            transform: translate(-10px, 0) skew(0deg);
+            clip-path: inset(30% 0 30% 0);
+        }
+        40% {
+            transform: translate(10px, 0) skew(0deg);
+            clip-path: inset(0% 0 0% 0);
+        }
         100% {
-            transform: translateZ(80px) translate(0);
+            transform: translate(0) skew(0deg);
+            clip-path: inset(0% 0 0% 0);
         }
-        92% {
-            transform: translateZ(80px) translate(-5px, 2px) skewX(5deg);
+    }
+
+    @keyframes signal-flicker {
+        0%,
+        19%,
+        21%,
+        23%,
+        25%,
+        54%,
+        56%,
+        100% {
+            opacity: 1;
+            filter: brightness(1.2) contrast(1.2);
         }
-        94% {
-            transform: translateZ(80px) translate(5px, -2px) skewX(-5deg);
-        }
-        96% {
-            transform: translateZ(80px) translate(-2px, -2px);
-        }
-        98% {
-            transform: translateZ(80px) translate(2px, 2px);
+        20%,
+        22%,
+        24%,
+        55% {
+            opacity: 0.2;
+            filter: brightness(4) contrast(3) grayscale(1);
+            transform: scaleY(1.5) skewX(20deg);
         }
     }
 
@@ -706,40 +714,40 @@
 
     .line2 {
         position: relative;
-        background: linear-gradient(135deg, #f87171, #fbbf24, #ef4444);
+        background: linear-gradient(135deg, #ffffff, #fca5a5, #ef4444);
         background-size: 200% 200%;
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
         animation:
-            glow-red 3s infinite,
-            gradientMove 4s ease infinite reverse,
-            glitch-alt 5.2s infinite;
+            glitch-alt 0.4s infinite reverse,
+            signal-flicker 1.5s infinite;
         text-shadow:
-            2px 2px 0px rgba(153, 27, 27, 0.8),
-            4px 4px 0px rgba(153, 27, 27, 0.5),
-            6px 6px 20px rgba(0, 0, 0, 1);
-        filter: drop-shadow(0 0 10px rgba(248, 113, 113, 0.5));
-        transform: translateZ(60px);
+            0 0 20px rgba(255, 255, 255, 0.8),
+            -4px 0 rgba(0, 255, 255, 0.7),
+            4px 0 rgba(255, 0, 255, 0.7);
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.4));
     }
 
     @keyframes glitch-alt {
-        0%,
-        90%,
+        0% {
+            transform: translate(0);
+            clip-path: inset(0% 0 0% 0);
+        }
+        15% {
+            transform: translate(20px, -10px);
+            clip-path: inset(40% 0 40% 0);
+        }
+        30% {
+            transform: translate(-20px, 10px);
+            clip-path: inset(10% 0 85% 0);
+        }
+        45% {
+            transform: translate(10px, 10px);
+            clip-path: inset(85% 0 5% 0);
+        }
         100% {
-            transform: translateZ(60px) translate(0);
-        }
-        91% {
-            transform: translateZ(60px) translate(3px, -1px) skewX(-3deg);
-        }
-        93% {
-            transform: translateZ(60px) translate(-3px, 1px) skewX(3deg);
-        }
-        95% {
-            transform: translateZ(60px) translate(1px, 2px);
-        }
-        97% {
-            transform: translateZ(60px) translate(-1px, -2px);
+            transform: translate(0);
         }
     }
 
