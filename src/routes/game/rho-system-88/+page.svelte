@@ -5,6 +5,7 @@
     import { goto } from "$app/navigation";
 
     let gameContainer: any;
+    let adminPassword = $state("");
 
     async function acceptBriefing() {
         // Proceed to next stage (Kazematten Scan)
@@ -14,6 +15,13 @@
             body: JSON.stringify({ navTo: "/game/rho-system-88/scan" }),
         });
         goto("/game/rho-system-88/scan");
+    }
+
+    function handleAdminBypass() {
+        if (adminPassword.toLowerCase() === "xavier") {
+            // ADMIN OVERRIDE: Skip scan, go to finale
+            goto("/game/rho-system-88/finale");
+        }
     }
 </script>
 
@@ -57,6 +65,16 @@
             <button class="accept-btn" onclick={acceptBriefing}>
                 [ PROCEED TO TARGET ]
             </button>
+
+            <div class="admin-container">
+                <input
+                    type="password"
+                    class="admin-input"
+                    bind:value={adminPassword}
+                    placeholder="ADMIN OVERRIDE"
+                    onkeydown={(e) => e.key === "Enter" && handleAdminBypass()}
+                />
+            </div>
         </div>
     </div>
 </GameContainer>
@@ -220,5 +238,26 @@
         background: #34d399;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .admin-container {
+        margin-top: 2rem;
+        opacity: 0.1;
+        transition: opacity 0.3s;
+        text-align: center;
+    }
+
+    .admin-container:hover {
+        opacity: 1;
+    }
+
+    .admin-input {
+        background: transparent;
+        border: 1px solid #10b981;
+        color: #10b981;
+        padding: 0.5rem;
+        font-family: monospace;
+        text-align: center;
+        width: 150px;
     }
 </style>
