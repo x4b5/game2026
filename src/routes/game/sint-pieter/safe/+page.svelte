@@ -13,54 +13,49 @@
 
     const questions = [
         {
-            q: "Hoe noemen Maastrichtenaren hun stad in het eigen dialect?",
+            q: "Maastricht was eeuwenlang 'Tweeherig'. Welke twee machthebbers deelden de soevereiniteit over de stad?",
             options: [
-                "Mestreech",
-                "Maastricht-City",
-                "Mosae Trajectum",
-                "De Maasstad",
+                "De Koning van Spanje & de Paus",
+                "De Hertog van Brabant & de Prins-bisschop van Luik",
+                "De Graaf van Vlaanderen & de Keizer",
+                "De Stadhouder & de Staten-Generaal",
+            ],
+            correct: 1,
+        },
+        {
+            q: "In 1673 sneuvelde een wereldberoemde Franse kapitein-luitenant van de musketiers bij de Tongersepoort. Wie was dit?",
+            options: ["Athos", "Porthos", "D'Artagnan", "Cyrano de Bergerac"],
+            correct: 2,
+        },
+        {
+            q: "Wat is de naam van de oudste stadspoort van Nederland (bouwjaar ca. 1229), te vinden in Maastricht?",
+            options: [
+                "Onze Lieve Vrouwepoort",
+                "De Helpoort",
+                "Sint Pieterspoort",
+                "De Gevangenpoort",
+            ],
+            correct: 1,
+        },
+        {
+            q: "In welk iconisch gebouw aan de Maas werd in 1991-1992 het Verdrag van Maastricht onderhandeld en getekend?",
+            options: [
+                "Het Stadhuis op de Markt",
+                "Het Gouvernement (Provinciehuis)",
+                "Het Dinghuis",
+                "De Jezuïetenkerk",
+            ],
+            correct: 1,
+        },
+        {
+            q: "Wat wordt gesymboliseerd door het standbeeld van de 'Mestreechter Geis' op de Varkensmarkt?",
+            options: [
+                "De speelse en vrolijke volksaard van de Maastrichter",
+                "Een historische verzetsheld tegen de Spanjaarden",
+                "De beschermheilige van de lokale brouwers",
+                "Een legendarische stadsomroeper",
             ],
             correct: 0,
-        },
-        {
-            q: "Op welk beroemd plein geeft André Rieu elk jaar zijn zomerconcerten?",
-            options: [
-                "Markt",
-                "Onze Lieve Vrouweplein",
-                "Vrijthof",
-                "Mosae Forum",
-            ],
-            correct: 2,
-        },
-        {
-            q: "Welke 'berg' bij Maastricht herbergt de geheime gangen waar de viool mogelijk ligt?",
-            options: [
-                "Vaalserberg",
-                "Sint-Pietersberg",
-                "Cauberg",
-                "Gulperberg",
-            ],
-            correct: 1,
-        },
-        {
-            q: "Welk historisch verdrag werd in 1992 in Maastricht ondertekend?",
-            options: [
-                "Verdrag van de Maas",
-                "Verdrag van Maastricht",
-                "De Vrede van Mestreech",
-                "Het Rome-pact",
-            ],
-            correct: 1,
-        },
-        {
-            q: "Wat is de typische vlaai-variant die onlosmakelijk met Maastricht verbonden is?",
-            options: [
-                "Kersenvlaai",
-                "Appelvlaai",
-                "Linzenvlaai",
-                "Pruimenvlaai",
-            ],
-            correct: 2,
         },
     ];
 
