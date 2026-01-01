@@ -48,22 +48,23 @@
                     <h3>UITSTEKEND WERK, STELLA!</h3>
                     <p>
                         De sonische pulsen van je vioolspel hebben de
-                        alien-vloot volledig gedestabiliseerd. De dreiging boven
-                        het Vrijthof is geneutraliseerd.
+                        alien-vloot volledig gedestabiliseerd. Het Vrijthof is
+                        bevrijd!
                     </p>
-                    <div class="objective-box">
-                        <strong>STATUS:</strong> Alle moederschepen zijn op de vlucht
-                        geslagen. Maastricht ademt weer op.
+                    <div class="objective-box warning">
+                        <strong>WAARSCHUWING:</strong> Sensoren detecteren een
+                        klein restant van de vloot. Enkele elite-aliens zijn
+                        <strong>ontsnapt</strong> en trekken zich terug naar een
+                        geheime locatie!
                     </div>
                     <p class="final-words">
-                        De klanken van de 'Mestreechter Geis' zullen nog lang
-                        nagalmen op het plein. Je bent een ware held van de
-                        stad!
+                        We kunnen ze niet laten ontkomen. Maak je klaar voor de
+                        achtervolging!
                     </p>
                 </div>
 
                 <button class="final-btn" onclick={handleContinue}>
-                    MISSIE VOLTOOID 🎖️
+                    ACHTERVOLG DE ALIENS 🛸
                 </button>
             {:else}
                 <div class="decoding-text">SONISCHE ECHO'S ANALYSEREN...</div>
