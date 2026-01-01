@@ -53,8 +53,8 @@
             code === "geheim" ||
             code === "hidden"
         ) {
-            // Success! Mission point reached
-            goto("/game"); // Update this later if there's a specific final mission page
+            // Success! Head to the bridge for Mosa's part of the mission
+            goto("/game/mosa-bridge-44");
             return;
         }
 
@@ -117,30 +117,26 @@
         {#if isNewMission}
             <div class="new-mission-briefing" in:fly={{ y: 20 }}>
                 <div class="mission-header">
-                    <span class="pulse-tag"
-                        >NIEUWE OPDRACHT: DE SCHUILPLAATS</span
+                    <span class="pulse-tag">NIEUWE OPDRACHT: ACHTERVOLGING</span
                     >
                 </div>
                 <p>
-                    De elite-aliens hebben zich verschanst in de slaapkamer. We
-                    hebben informatie dat ze een <strong
-                        >interdimensionaal portaal</strong
-                    > proberen te openen.
+                    De elitaire aliens zijn geretecteerd in Wyck! Ze proberen op
+                    dit moment de <strong>Servaasbrug</strong> over te steken richting
+                    de binnenstad.
                 </p>
                 <div class="objective-list">
                     <div class="objective-item">
-                        <span class="icon">🔍</span>
-                        <span>Vind de verborgen QR-code in de kamer.</span>
+                        <span class="icon">🏃‍♂️</span>
+                        <span>Achtervolg de aliens naar de brug in Wyck.</span>
                     </div>
                     <div class="objective-item">
-                        <span class="icon">⚡</span>
-                        <span
-                            >Neutraliseer het portaal voor het te laat is.</span
-                        >
+                        <span class="icon">🌉</span>
+                        <span>Vind de verborgen QR-code bij de brug.</span>
                     </div>
                 </div>
                 <button class="scan-btn pulse" onclick={startScanner}>
-                    📷 START SCAN & NEUTRALISEER
+                    📷 START SCAN & ONDERSCHEP
                 </button>
             </div>
         {:else if isScanning}
@@ -159,9 +155,9 @@
         {:else}
             <div class="briefing">
                 <p>
-                    Het signaal is kristalhelder. De aliens blijken te vluchten
-                    naar Wyck. <br />
-                    Wees voorzichtig, ze zijn in het nauw gedreven!
+                    Het signaal is bevestigd! De aliens vluchten vanuit de
+                    slaapkamer richting Wyck. <br />
+                    De superhelden hebben de achtervolging ingezet via de Servaasbrug!
                 </p>
                 <div class="location-hint">📍 LOCATIE: Wyck</div>
                 <button class="scan-btn" onclick={() => (isNewMission = true)}>
