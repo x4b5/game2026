@@ -31,88 +31,103 @@ class SoundManager {
         subOsc.frequency.setValueAtTime(baseFreq, now);
         subGain.gain.setValueAtTime(0.12, now);
 
-        // --- 2. Dissonant Texture (Minor Second / Tritone) ---
+        // --- 2. Dissonant Texture ---
         const textureOsc = this.context.createOscillator();
         const textureGain = this.context.createGain();
         textureOsc.type = 'sawtooth';
-        // Playing a tritone above (root * 1.414)
         textureOsc.frequency.setValueAtTime(baseFreq * 1.414, now);
         textureGain.gain.setValueAtTime(0.04, now);
 
-        // --- 3. Noise Floor (Wind/Static) ---
+        // --- 3. Broken AM Radio Effect ---
+        // Noise source
         const bufferSize = 2 * this.context.sampleRate;
         const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
+        const noiseData = noiseBuffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
+            noiseData[i] = Math.random() * 2 - 1;
         }
-        const whiteNoise = this.context.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-        const noiseGain = this.context.createGain();
-        noiseGain.gain.setValueAtTime(0.02, now);
+        const radioNoise = this.context.createBufferSource();
+        radioNoise.buffer = noiseBuffer;
+        radioNoise.loop = true;
 
-        // --- 4. Filters ---
+        // Bandpass filter for radio characteristic (300Hz - 3kHz range)
+        const radioFilter = this.context.createBiquadFilter();
+        radioFilter.type = 'bandpass';
+        radioFilter.frequency.setValueAtTime(1200, now);
+        radioFilter.Q.setValueAtTime(1, now);
+
+        // Amplitude Modulation (the 'broken' part)
+        const radioGain = this.context.createGain();
+        radioGain.gain.setValueAtTime(0.04, now);
+
+        // Random volume flicker LFO
+        const flickerLfo = this.context.createOscillator();
+        const flickerGain = this.context.createGain();
+        flickerLfo.type = 'square'; // Harsh cuts
+        flickerLfo.frequency.setValueAtTime(8, now); // 8Hz flicker
+        flickerGain.gain.setValueAtTime(0.03, now);
+
+        // Secondary slow drift for radio signal
+        const driftLfo = this.context.createOscillator();
+        const driftGain = this.context.createGain();
+        driftLfo.frequency.setValueAtTime(0.5, now);
+        driftGain.gain.setValueAtTime(400, now); // Drifts filter freq
+
+        // --- 4. Deep Filters ---
         const lpFilter = this.context.createBiquadFilter();
         lpFilter.type = 'lowpass';
         lpFilter.frequency.setValueAtTime(150, now);
         lpFilter.Q.setValueAtTime(8, now);
 
-        const noiseFilter = this.context.createBiquadFilter();
-        noiseFilter.type = 'bandpass';
-        noiseFilter.frequency.setValueAtTime(400, now);
-        noiseFilter.Q.setValueAtTime(0.5, now);
-
-        // --- 5. Movement (LFOs) ---
-        const lfo1 = this.context.createOscillator();
-        const lfo1Gain = this.context.createGain();
-        lfo1.frequency.setValueAtTime(0.15, now); // Very slow breath
-        lfo1Gain.gain.setValueAtTime(0.06, now);
-
-        const lfo2 = this.context.createOscillator(); // For filter movement
-        const lfo2Gain = this.context.createGain();
-        lfo2.frequency.setValueAtTime(0.05, now);
-        lfo2Gain.gain.setValueAtTime(50, now);
+        // --- 5. Movement ---
+        const breatheLfo = this.context.createOscillator();
+        const breatheGain = this.context.createGain();
+        breatheLfo.frequency.setValueAtTime(0.15, now);
+        breatheGain.gain.setValueAtTime(0.06, now);
 
         // --- 6. Master Output ---
         const masterGain = this.context.createGain();
         masterGain.gain.setValueAtTime(0.15, now);
 
         // --- Connections ---
+        // Drone path
         subOsc.connect(subGain);
         textureOsc.connect(textureGain);
-
         subGain.connect(lpFilter);
         textureGain.connect(lpFilter);
-
-        whiteNoise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(masterGain);
-
         lpFilter.connect(masterGain);
+
+        // Radio path
+        radioNoise.connect(radioFilter);
+        radioFilter.connect(radioGain);
+        radioGain.connect(masterGain);
+
+        // LFO Connections
+        flickerLfo.connect(flickerGain);
+        flickerGain.connect(radioGain.gain);
+
+        driftLfo.connect(driftGain);
+        driftGain.connect(radioFilter.frequency);
+
+        breatheLfo.connect(breatheGain);
+        breatheGain.connect(masterGain.gain);
+
         masterGain.connect(this.context.destination);
-
-        // Modulation
-        lfo1.connect(lfo1Gain);
-        lfo1Gain.connect(masterGain.gain);
-
-        lfo2.connect(lfo2Gain);
-        lfo2Gain.connect(lpFilter.frequency);
 
         // Start everything
         subOsc.start();
         textureOsc.start();
-        whiteNoise.start();
-        lfo1.start();
-        lfo2.start();
+        radioNoise.start();
+        flickerLfo.start();
+        driftLfo.start();
+        breatheLfo.start();
 
         this.ambientMusicNodes = [
-            subOsc, textureOsc, whiteNoise,
-            subGain, textureGain, noiseGain, masterGain,
-            lpFilter, noiseFilter, lfo1, lfo1Gain, lfo2, lfo2Gain
+            subOsc, textureOsc, radioNoise, flickerLfo, driftLfo, breatheLfo,
+            subGain, textureGain, radioGain, flickerGain, driftGain, breatheGain,
+            lpFilter, radioFilter, masterGain
         ];
 
-        // --- 7. Random Mysterious Pings ---
         this.startRandomPings();
     }
 
@@ -120,7 +135,7 @@ class SoundManager {
         if (this.pingInterval) return;
 
         const schedulePing = () => {
-            const delay = Math.random() * 5000 + 3000; // Every 3-8 seconds
+            const delay = Math.random() * 5000 + 3000;
             this.pingInterval = setTimeout(() => {
                 this.playMysteriousPing();
                 schedulePing();
@@ -133,7 +148,7 @@ class SoundManager {
         if (!this.enabled || !this.context) return;
 
         const now = this.context.currentTime;
-        const freq = [880, 1100, 1320, 1760][Math.floor(Math.random() * 4)]; // High harmonic frequencies
+        const freq = [880, 1100, 1320, 1760][Math.floor(Math.random() * 4)];
 
         const osc = this.context.createOscillator();
         const gain = this.context.createGain();
@@ -144,17 +159,15 @@ class SoundManager {
         osc.frequency.setValueAtTime(freq, now);
 
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 4); // Long decay
+        gain.gain.linearRampToValueAtTime(0.04, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 4);
 
-        // Simple Delay/Reverb Effect
         delay.delayTime.setValueAtTime(0.4, now);
         feedback.gain.setValueAtTime(0.4, now);
 
         osc.connect(gain);
         gain.connect(this.context.destination);
 
-        // Echo loop
         gain.connect(delay);
         delay.connect(feedback);
         feedback.connect(delay);
@@ -181,19 +194,14 @@ class SoundManager {
 
     playTone(frequency: number, duration: number = 0.2, volume: number = 0.3) {
         if (!this.enabled || !this.context) return;
-
         const oscillator = this.context.createOscillator();
         const gainNode = this.context.createGain();
-
         oscillator.connect(gainNode);
         gainNode.connect(this.context.destination);
-
         oscillator.frequency.value = frequency;
         oscillator.type = 'sine';
-
         gainNode.gain.setValueAtTime(volume, this.context.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
-
         oscillator.start(this.context.currentTime);
         oscillator.stop(this.context.currentTime + duration);
     }
@@ -219,14 +227,10 @@ class SoundManager {
 
     setEnabled(enabled: boolean) {
         this.enabled = enabled;
-        if (!enabled) {
-            this.stopAmbientMusic();
-        }
+        if (!enabled) { this.stopAmbientMusic(); }
     }
 
-    isEnabled() {
-        return this.enabled;
-    }
+    isEnabled() { return this.enabled; }
 }
 
 export const soundManager = new SoundManager();
