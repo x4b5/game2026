@@ -106,7 +106,7 @@
         weapons = weapons
             .map((w) => ({
                 ...w,
-                y: w.y + 1.5,
+                y: w.y + 2.5, // Increased speed from 1.5 to 2.5
             }))
             .filter((w) => {
                 if (w.y > 100) {
@@ -141,6 +141,13 @@
                 if (weaponsDestroyed >= TARGET_WEAPONS) {
                     gameActive = false;
                     stopGame();
+
+                    // Update global mission state for all players
+                    fetch("/api/mission", {
+                        method: "POST",
+                        body: JSON.stringify({ step: "victory-omicron" }),
+                    }).catch(console.error);
+
                     gameContainer?.win(weaponsDestroyed * 200 + timeLeft * 50);
                 }
                 return false;

@@ -1,6 +1,10 @@
 <script lang="ts">
+    import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
     import { gameProgress } from "$lib/stores/gameStore";
     import "../../app.css";
+
     let { children } = $props();
 
     // Mapping for hero assets (must match the logic in +page.svelte)
@@ -15,6 +19,28 @@
             ? heroAssets[$gameProgress.player.avatar]
             : null,
     );
+
+    // Sync mission state across all players
+    onMount(() => {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch("/api/mission");
+                const data = await res.json();
+
+                // If mission is won and we aren't already on the victory page
+                if (
+                    data.step === "victory-omicron" &&
+                    !$page.url.pathname.includes("omicron-base-victory")
+                ) {
+                    goto("/game/omicron-base-victory");
+                }
+            } catch (e) {
+                console.error("Mission sync failed:", e);
+            }
+        }, 2000);
+
+        return () => clearInterval(interval);
+    });
 </script>
 
 <div class="game-layout">
