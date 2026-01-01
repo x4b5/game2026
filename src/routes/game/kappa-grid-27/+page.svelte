@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import { soundManager } from "$lib/utils/SoundManager";
 
-    // Available superhero avatars with idle and action poses (limited to 3)
+    // Available superhero avatars
     const heroes = [
         {
             id: "lord-mosa",
@@ -39,19 +39,20 @@
         },
     ];
 
-    let selectedHero = $state<string | null>(null);
-    let heroName = $state("");
-    let playerNumber = $state(1);
+    // Player name inputs for each hero
+    let playerNames = $state({
+        "lord-mosa": "",
+        stella: "",
+        "the-minck": "",
+    });
+
     let isStarting = $state(false);
     let mounted = $state(false);
+    let addedPlayers = $state<string[]>([]); // Track which heroes have players
 
     let briefingText =
         "Systeem geactiveerd... Verbinding maken met satellieten over Maastricht... Aliens hebben strategische punten bezet. Jouw missie: infiltreer hun netwerk, los de raadsels op en verdrijf de indringers uit onze stad!";
     let displayedBriefing = $state("");
-
-    // Multiplayer State
-    let takenHeroes = $state<Set<string>>(new Set());
-    let deviceId = $state("");
 
     onMount(() => {
         mounted = true;
@@ -69,129 +70,52 @@
                 setTimeout(type, speed);
             }
         };
-        setTimeout(type, 1000); // Start after 1s delay
+        setTimeout(type, 1000);
 
-        // 1. Get or Create Device ID
-        let storedId = localStorage.getItem("game2026_deviceId");
-        if (!storedId) {
-            storedId = crypto.randomUUID();
-            localStorage.setItem("game2026_deviceId", storedId);
-        }
-        deviceId = storedId;
-
-        // 2. Poll for hero status every 2 seconds
-        const pollInterval = setInterval(fetchHeroStatus, 2000);
-        fetchHeroStatus(); // Initial fetch
-
-        // Determine player number based on existing local data
-        const stored = localStorage.getItem("game2026_progress");
-        if (stored) {
-            const data = JSON.parse(stored);
-            if (data.player) {
-                // If we already have a hero, try to reclaim it (to sync server state)
-                if (data.player.avatar) {
-                    claimHero(data.player.avatar);
-                }
-
-                selectedHero = data.player.avatar;
-                heroName = data.player.name;
-                playerNumber = data.player.playerNumber;
-            }
+        // Check if players already exist
+        if ($gameProgress.players.length > 0) {
+            addedPlayers = $gameProgress.players.map((p) => p.avatar);
         }
 
         return () => {
-            clearInterval(pollInterval);
             soundManager.stopAmbientMusic();
         };
     });
 
-    async function fetchHeroStatus() {
-        try {
-            const res = await fetch("/api/heroes");
-            if (res.ok) {
-                const data = await res.json();
-                // takenHeroes contains all claimed IDs
-                // We typically want to show them as taken unless *we* took them
-                // But the UI logic is simpler if we just know what's taken globally.
-                // We'll trust our local 'selectedHero' state to know if we have one.
-                takenHeroes = new Set(data.taken);
-            }
-        } catch (e) {
-            console.error("Polling error:", e);
-        }
-    }
-
-    async function claimHero(heroId: string) {
-        if (!deviceId) return false;
-
-        try {
-            const res = await fetch("/api/heroes", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ heroId, deviceId }),
-            });
-
-            if (res.ok) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (e) {
-            console.error("Claim error:", e);
-            return false;
-        }
-    }
-
-    async function selectHero(heroId: string) {
-        // Prevent selecting if already taken by someone else (and not by us)
-        // Note: The UI should disable this, but safety check here
-        if (takenHeroes.has(heroId) && selectedHero !== heroId) {
+    function addPlayer(heroId: string) {
+        const name = playerNames[heroId].trim();
+        if (!name) {
             soundManager.playError();
-            alert("Deze held is al gekozen door iemand anders!");
+            alert("Voer eerst een naam in!");
             return;
         }
 
-        // Attempt to claim
-        const success = await claimHero(heroId);
+        const hero = heroes.find((h) => h.id === heroId);
+        if (!hero) return;
 
-        if (success) {
-            selectedHero = heroId;
-            soundManager.playClick();
-            // Auto-set the hero name from the selected hero
-            const hero = heroes.find((h) => h.id === heroId);
-            if (hero) {
-                heroName = hero.name;
-                playerNumber = hero.playerNumber;
-            }
-            // Refresh status immediately
-            fetchHeroStatus();
-        } else {
-            soundManager.playError();
-            alert("Helaas! Iemand anders was je net voor.");
-            // Refresh logic to show lock
-            fetchHeroStatus();
-        }
+        const playerData: PlayerData = {
+            name: name,
+            avatar: heroId,
+            playerNumber: hero.playerNumber,
+            joinedAt: Date.now(),
+            isAdmin: name.toLowerCase() === "xavier",
+        };
+
+        gameProgress.addPlayer(playerData);
+        addedPlayers = [...addedPlayers, heroId];
+        soundManager.playClick();
     }
 
     function startMission() {
-        if (!selectedHero) {
+        if (addedPlayers.length === 0) {
             soundManager.playError();
+            alert("Voeg minimaal 1 speler toe!");
             return;
         }
 
         isStarting = true;
         soundManager.playClick();
-        soundManager.stopAmbientMusic(); // Kill music immediately
-
-        const playerData: PlayerData = {
-            name: heroName.trim(),
-            avatar: selectedHero,
-            playerNumber: playerNumber,
-            joinedAt: Date.now(),
-            isAdmin: heroName.trim().toLowerCase() === "xavier",
-        };
-
-        gameProgress.setPlayer(playerData);
+        soundManager.stopAmbientMusic();
 
         // Navigate to next game after short delay
         setTimeout(() => {
@@ -282,49 +206,27 @@
 
     <!-- Avatar Selection -->
     <div class="selection-section">
-        <h2 class="section-title">STEL JE AGENT IN</h2>
-
-        <div class="name-input-container glass-panel">
-            <label for="agent-name">CODENAAM AGENT</label>
-            <input
-                id="agent-name"
-                type="text"
-                bind:value={heroName}
-                placeholder="Voer je naam in..."
-                maxlength="20"
-            />
-        </div>
+        <h2 class="section-title">VOEG SPELERS TOE</h2>
+        <p class="section-subtitle">
+            Elke speler kiest een agent en voert zijn/haar naam in
+        </p>
 
         <div class="hero-grid">
             {#each heroes as hero}
-                <button
+                <div
                     class="hero-card glass-panel"
-                    class:selected={selectedHero === hero.id}
-                    class:locked={takenHeroes.has(hero.id) &&
-                        selectedHero !== hero.id}
+                    class:added={addedPlayers.includes(hero.id)}
                     style:--hero-color={hero.color}
-                    onclick={() => selectHero(hero.id)}
-                    disabled={takenHeroes.has(hero.id) &&
-                        selectedHero !== hero.id}
                 >
                     <div class="hero-image-container">
                         <img
-                            src={selectedHero === hero.id
-                                ? hero.imgAction
-                                : hero.imgIdle}
+                            src={hero.imgIdle}
                             alt={hero.name}
                             class="hero-image"
-                            class:action-pose={selectedHero === hero.id}
                         />
                         <div class="player-id-badge">P{hero.playerNumber}</div>
-                        {#if selectedHero === hero.id}
-                            <div class="selected-badge">✓</div>
-                        {/if}
-                        {#if takenHeroes.has(hero.id) && selectedHero !== hero.id}
-                            <div class="locked-overlay">
-                                <span class="lock-icon">🔒</span>
-                                <span class="lock-text">BEZET</span>
-                            </div>
+                        {#if addedPlayers.includes(hero.id)}
+                            <div class="added-badge">✓ Toegevoegd</div>
                         {/if}
                     </div>
                     <div class="hero-info">
@@ -332,7 +234,32 @@
                         <div class="hero-power">{hero.power}</div>
                         <div class="hero-origin">{hero.origin}</div>
                     </div>
-                </button>
+
+                    {#if !addedPlayers.includes(hero.id)}
+                        <div class="player-input">
+                            <input
+                                type="text"
+                                bind:value={playerNames[hero.id]}
+                                placeholder="Voer je naam in..."
+                                maxlength="20"
+                            />
+                            <button
+                                class="add-player-btn"
+                                onclick={() => addPlayer(hero.id)}
+                            >
+                                Voeg Toe
+                            </button>
+                        </div>
+                    {:else}
+                        <div class="player-added">
+                            <span class="player-name">
+                                {$gameProgress.players.find(
+                                    (p) => p.avatar === hero.id,
+                                )?.name}
+                            </span>
+                        </div>
+                    {/if}
+                </div>
             {/each}
         </div>
     </div>
@@ -341,17 +268,18 @@
     <div class="start-section">
         <button
             class="start-button"
-            class:active={selectedHero !== null && heroName.trim().length > 0}
+            class:active={addedPlayers.length > 0}
             class:loading={isStarting}
             onclick={startMission}
-            disabled={!selectedHero ||
-                isStarting ||
-                heroName.trim().length === 0}
+            disabled={addedPlayers.length === 0 || isStarting}
         >
             {#if isStarting}
                 🚀 Missie Start...
             {:else}
-                START MISSIE
+                START MISSIE ({addedPlayers.length} speler{addedPlayers.length !==
+                1
+                    ? "s"
+                    : ""})
             {/if}
         </button>
     </div>

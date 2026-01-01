@@ -12,7 +12,8 @@ export interface GameProgress {
     completed: string[];  // Game IDs that are completed
     scores: Record<string, number>;  // High scores per game
     totalScore: number;
-    player?: PlayerData;  // Current player info
+    players: PlayerData[];  // Array of all players
+    currentPlayerIndex: number;  // Which player is currently playing
 }
 
 function createGameStore() {
@@ -22,7 +23,7 @@ function createGameStore() {
 
     const initial: GameProgress = stored
         ? JSON.parse(stored)
-        : { completed: [], scores: {}, totalScore: 0 };
+        : { completed: [], scores: {}, totalScore: 0, players: [], currentPlayerIndex: 0 };
 
     const { subscribe, set, update } = writable<GameProgress>(initial);
 
@@ -39,6 +40,7 @@ function createGameStore() {
                 const scoreDiff = newScore - previousScore;
 
                 const newState = {
+                    ...state,
                     completed: newCompleted,
                     scores: { ...state.scores, [gameId]: newScore },
                     totalScore: state.totalScore + scoreDiff
@@ -50,11 +52,24 @@ function createGameStore() {
 
                 return newState;
             }),
-        setPlayer: (playerData: PlayerData) =>
+        addPlayer: (playerData: PlayerData) =>
             update(state => {
                 const newState = {
                     ...state,
-                    player: playerData
+                    players: [...state.players, playerData]
+                };
+
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('game2026_progress', JSON.stringify(newState));
+                }
+
+                return newState;
+            }),
+        setCurrentPlayer: (index: number) =>
+            update(state => {
+                const newState = {
+                    ...state,
+                    currentPlayerIndex: index
                 };
 
                 if (typeof window !== 'undefined') {
@@ -64,7 +79,7 @@ function createGameStore() {
                 return newState;
             }),
         reset: () => {
-            const newState = { completed: [], scores: {}, totalScore: 0 };
+            const newState = { completed: [], scores: {}, totalScore: 0, players: [], currentPlayerIndex: 0 };
             set(newState);
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('game2026_progress');
