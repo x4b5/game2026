@@ -1,9 +1,17 @@
 import { writable } from 'svelte/store';
 
+export interface PlayerData {
+    name: string;
+    avatar: string;  // Avatar identifier
+    playerNumber: number;  // 1-6
+    joinedAt: number;  // Timestamp
+}
+
 export interface GameProgress {
     completed: string[];  // Game IDs that are completed
     scores: Record<string, number>;  // High scores per game
     totalScore: number;
+    player?: PlayerData;  // Current player info
 }
 
 function createGameStore() {
@@ -33,6 +41,19 @@ function createGameStore() {
                     completed: newCompleted,
                     scores: { ...state.scores, [gameId]: newScore },
                     totalScore: state.totalScore + scoreDiff
+                };
+
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('game2026_progress', JSON.stringify(newState));
+                }
+
+                return newState;
+            }),
+        setPlayer: (playerData: PlayerData) =>
+            update(state => {
+                const newState = {
+                    ...state,
+                    player: playerData
                 };
 
                 if (typeof window !== 'undefined') {
