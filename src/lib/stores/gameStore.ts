@@ -54,9 +54,12 @@ function createGameStore() {
             }),
         addPlayer: (playerData: PlayerData) =>
             update(state => {
+                // Ensure players array exists
+                const currentPlayers = Array.isArray(state.players) ? state.players : [];
+
                 const newState = {
                     ...state,
-                    players: [...state.players, playerData]
+                    players: [...currentPlayers, playerData]
                 };
 
                 if (typeof window !== 'undefined') {
