@@ -153,15 +153,15 @@
 
                 <div class="briefing-content">
                     <p class="intel-text">
-                        <strong>> INCOMING INTEL:</strong> High-frequency alien signals
-                        detected. Hostile mobilization imminent. Target sector: Inner
-                        City.
+                        <strong>> INCOMING INTEL:</strong> Hoogfrequente signalen
+                        gedetecteerd. Vijandelijke mobilisatie aanstaande. Doelwit:
+                        Binnenstad.
                     </p>
                     <p>
-                        <strong>> OBJECTIVE:</strong> Intercept data streams.
-                        Overload enemy weapon core using their own energy. Catch
-                        <span class="highlight">GREEN</span>
-                        signals. Avoid <span class="highlight">RED</span> corruption.
+                        <strong>> OBJECTIVE:</strong> Onderschep de
+                        data-stromen. Overbelast de wapenkern met hun eigen
+                        energie. Vang <span class="highlight">GROENE</span>
+                        signalen. Vermijd <span class="highlight">RODE</span> corruptie.
                     </p>
                     <div class="warning-box">
                         COMBAT READY. EXECUTE PROTOCOL.
