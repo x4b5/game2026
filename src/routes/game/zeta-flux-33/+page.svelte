@@ -25,6 +25,16 @@
                 .catch(console.error);
         }
 
+        const code = decodedText.toLowerCase();
+        if (
+            code === "zeta-flux-circuit" ||
+            code === "circuit" ||
+            code === "zeta-flux-33/circuit-overload"
+        ) {
+            goto("/game/zeta-flux-33/circuit-overload");
+            return;
+        }
+
         if (decodedText.startsWith("http")) {
             try {
                 const url = new URL(decodedText);
