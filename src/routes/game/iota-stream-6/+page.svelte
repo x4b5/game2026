@@ -147,29 +147,32 @@
         {#if briefingVisible}
             <div class="intel-briefing" in:fade>
                 <div class="briefing-header">
-                    <span class="alert-tag">⚠️ THREAT: CRITICAL</span>
-                    <h1>MISSION BRIEFING</h1>
+                    <span class="alert-tag">⚠️ STATUS: UPDATE</span>
+                    <h1>MISSION UPDATE</h1>
                 </div>
 
                 <div class="briefing-content">
                     <p class="intel-text">
-                        <strong>> INCOMING INTEL:</strong> Hoogfrequente signalen
-                        gedetecteerd. Vijandelijke mobilisatie aanstaande. Doelwit:
-                        Binnenstad.
+                        <strong>> PREVIOUS MISSION:</strong>
+                        <span class="highlight">SUCCESS</span>. Energieveld
+                        geneutraliseerd. Kappa Grid is offline. Uitstekend werk,
+                        agenten.
                     </p>
                     <p>
-                        <strong>> OBJECTIVE:</strong> Onderschep de
-                        data-stromen. Overbelast de wapenkern met hun eigen
-                        energie. Vang <span class="highlight">GROENE</span>
-                        signalen. Vermijd <span class="highlight">RODE</span> corruptie.
+                        <strong>> NEW INTEL:</strong> Sensoren detecteren nu activiteit
+                        in Sector **KAZEMATTEN**. The Minck vertoont ongebruikelijke
+                        energie-pieken.
                     </p>
-                    <div class="warning-box">
-                        COMBAT READY. EXECUTE PROTOCOL.
-                    </div>
+                    <p>
+                        <strong>> OBJECTIVE:</strong> Verplaats onmiddellijk naar
+                        de Kazematten. Observeer en rapporteer. Wees op uw hoede
+                        voor vijandelijke resten.
+                    </p>
+                    <div class="warning-box">MOVE OUT. STAY FROSTY.</div>
                 </div>
 
                 <button class="accept-btn" onclick={acceptBriefing}>
-                    [ INITIATE MISSION ]
+                    [ PROCEED TO TARGET ]
                 </button>
             </div>
         {:else}
