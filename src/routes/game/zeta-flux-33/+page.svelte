@@ -15,48 +15,68 @@
     });
 
     function onScanSuccess(decodedText: string) {
+        console.log("QR Scanned:", decodedText);
+
+        const rawCode = decodedText.trim();
+        const code = rawCode.toLowerCase();
+
+        // Stop scanning first
         if (scanner) {
             scanner
                 .clear()
                 .then(() => {
                     isScanning = false;
                     scanner = null;
+                    handleNavigation(rawCode, code);
                 })
-                .catch(console.error);
+                .catch((err: any) => {
+                    console.error("Scanner clear failed:", err);
+                    handleNavigation(rawCode, code);
+                });
+        } else {
+            handleNavigation(rawCode, code);
         }
+    }
 
-        const code = decodedText.toLowerCase();
+    function handleNavigation(rawCode: string, code: string) {
+        console.log("Handling navigation for:", code);
 
-        // If they scan Zeta Flux code, it leads to the safe quiz in Sint Pieter
+        // 1. Direct keywords for Sint Pieter Safe
         if (
             code === "zeta-flux" ||
             code === "zeta" ||
-            code === "zeta-flux-33" ||
             code === "safe" ||
-            code === "kluis"
+            code === "kluis" ||
+            code.includes("sint-pieter")
         ) {
             goto("/game/sint-pieter/safe");
             return;
         }
 
-        if (code === "circuit" || code === "zeta-flux-33/circuit-overload") {
+        // 2. Direct keywords for Circuit
+        if (code === "circuit" || code.includes("circuit-overload")) {
             goto("/game/zeta-flux-33/circuit-overload");
             return;
         }
 
-        if (decodedText.startsWith("http")) {
+        // 3. Full URLs or other game codes
+        if (rawCode.startsWith("http")) {
             try {
-                const url = new URL(decodedText);
-                goto(
-                    url.pathname.startsWith("/game")
-                        ? url.pathname
-                        : decodedText,
-                );
+                const url = new URL(rawCode);
+                if (url.pathname.startsWith("/game")) {
+                    goto(url.pathname);
+                } else {
+                    window.location.href = rawCode;
+                }
             } catch (e) {
-                window.location.href = decodedText;
+                window.location.href = rawCode;
             }
         } else {
-            goto(`/game/${decodedText}`);
+            // General fallback: strip leading slash if present
+            const cleanCode = rawCode.startsWith("/")
+                ? rawCode.slice(1)
+                : rawCode;
+            goto(`/game/${cleanCode}`);
         }
     }
 
