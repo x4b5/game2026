@@ -10,24 +10,25 @@
     let intelScanned = $state(false);
     let isScanning = $state(false);
     let scanner: any = null;
+    let adminPassword = $state("");
 
-    async function handleNext() {
-        // Admin Bypass
-        if ($gameProgress.player?.isAdmin) {
+    function handleAdminBypass() {
+        if (adminPassword.toLowerCase() === "xavier") {
             const currentPath = window.location.pathname.replace(/\/$/, "");
             const idx = MISSION_ORDER.indexOf(currentPath);
             if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
                 const nextPath = MISSION_ORDER[idx + 1];
-                await fetch("/api/mission", {
+                fetch("/api/mission", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ navTo: nextPath }),
                 }).catch(console.error);
                 goto(nextPath);
-                return;
             }
         }
+    }
 
+    async function handleNext() {
         isScanning = true;
         setTimeout(() => {
             scanner = new Html5QrcodeScanner(
@@ -165,6 +166,18 @@
                 <button class="next-btn" onclick={handleNext}>
                     📷 BEVESTIG LOCATIE
                 </button>
+
+                <!-- Admin Password Field -->
+                <div class="admin-bypass">
+                    <input
+                        type="password"
+                        bind:value={adminPassword}
+                        placeholder="Admin wachtwoord..."
+                        onkeydown={(e) =>
+                            e.key === "Enter" && handleAdminBypass()}
+                    />
+                    <button onclick={handleAdminBypass}>Doorgaan</button>
+                </div>
             {/if}
         </div>
     </div>
@@ -440,5 +453,48 @@
     .cancel-scan-btn:hover {
         background: #ef4444;
         color: white;
+    }
+
+    .admin-bypass {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .admin-bypass input {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.8rem;
+        border-radius: 6px;
+        color: white;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+    }
+
+    .admin-bypass input:focus {
+        outline: none;
+        border-color: #22c55e;
+    }
+
+    .admin-bypass button {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid #22c55e;
+        color: #4ade80;
+        padding: 0.8rem 1.2rem;
+        border-radius: 6px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .admin-bypass button:hover {
+        background: rgba(34, 197, 94, 0.3);
+        transform: translateY(-1px);
     }
 </style>
