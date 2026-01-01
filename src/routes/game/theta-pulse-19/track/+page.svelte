@@ -4,8 +4,8 @@
     import { goto } from "$app/navigation";
     import { gameProgress } from "$lib/stores/gameStore";
 
-    const TARGET_LOCATION = "SLAAPKAMER LUCA";
-    const CLEAN_TARGET = TARGET_LOCATION.replace(/\s/g, "");
+    const TARGET_LOCATION = "SLAAPKAMERLUCA";
+    const CLEAN_TARGET = TARGET_LOCATION;
 
     let currentGuess = $state("");
     let solved = $state(false);
@@ -78,12 +78,9 @@
                     {#each TARGET_LOCATION.split("") as char, i}
                         <span
                             class="char-slot"
-                            class:filled={i < currentGuess.length ||
-                                (char === " " && currentGuess.length > i)}
+                            class:filled={i < currentGuess.length}
                         >
-                            {#if char === " "}
-                                &nbsp;
-                            {:else if i < currentGuess.length}
+                            {#if i < currentGuess.length}
                                 {CLEAN_TARGET[i]}
                             {:else}
                                 _
