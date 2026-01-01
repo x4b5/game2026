@@ -2,12 +2,12 @@ class SoundManager {
     private context: AudioContext | null = null;
     private enabled = true;
     private ambientMusicNodes: AudioNode[] = [];
+    private pingInterval: any = null;
 
     async init() {
         if (!this.context && typeof window !== 'undefined') {
             try {
                 this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
-                // Resume context on user interaction
                 if (this.context.state === 'suspended') {
                     await this.context.resume();
                 }
@@ -19,62 +19,160 @@ class SoundManager {
 
     startAmbientMusic() {
         if (!this.enabled || !this.context) return;
-        if (this.ambientMusicNodes.length > 0) return; // Already playing
+        if (this.ambientMusicNodes.length > 0) return;
 
-        const baseFreq = 55; // Low A
+        const now = this.context.currentTime;
+        const baseFreq = 48.99; // Low G1
 
-        // Osc 1: Deep Drone
-        const osc1 = this.context.createOscillator();
-        const gain1 = this.context.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(baseFreq, this.context.currentTime);
-        gain1.gain.setValueAtTime(0.15, this.context.currentTime);
+        // --- 1. Deep Sub Drone ---
+        const subOsc = this.context.createOscillator();
+        const subGain = this.context.createGain();
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(baseFreq, now);
+        subGain.gain.setValueAtTime(0.12, now);
 
-        // Osc 2: Texture
-        const osc2 = this.context.createOscillator();
-        const gain2 = this.context.createGain();
-        osc2.type = 'sawtooth';
-        osc2.frequency.setValueAtTime(baseFreq * 2 + 0.5, this.context.currentTime);
-        gain2.gain.setValueAtTime(0.05, this.context.currentTime);
+        // --- 2. Dissonant Texture (Minor Second / Tritone) ---
+        const textureOsc = this.context.createOscillator();
+        const textureGain = this.context.createGain();
+        textureOsc.type = 'sawtooth';
+        // Playing a tritone above (root * 1.414)
+        textureOsc.frequency.setValueAtTime(baseFreq * 1.414, now);
+        textureGain.gain.setValueAtTime(0.04, now);
 
-        // Filter
-        const filter = this.context.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(200, this.context.currentTime);
-        filter.Q.setValueAtTime(5, this.context.currentTime);
+        // --- 3. Noise Floor (Wind/Static) ---
+        const bufferSize = 2 * this.context.sampleRate;
+        const noiseBuffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = this.context.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+        const noiseGain = this.context.createGain();
+        noiseGain.gain.setValueAtTime(0.02, now);
 
-        // Slow modulation (Breathing)
-        const lfo = this.context.createOscillator();
-        const lfoGain = this.context.createGain();
-        lfo.frequency.setValueAtTime(0.2, this.context.currentTime);
-        lfoGain.gain.setValueAtTime(0.05, this.context.currentTime);
+        // --- 4. Filters ---
+        const lpFilter = this.context.createBiquadFilter();
+        lpFilter.type = 'lowpass';
+        lpFilter.frequency.setValueAtTime(150, now);
+        lpFilter.Q.setValueAtTime(8, now);
 
+        const noiseFilter = this.context.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.setValueAtTime(400, now);
+        noiseFilter.Q.setValueAtTime(0.5, now);
+
+        // --- 5. Movement (LFOs) ---
+        const lfo1 = this.context.createOscillator();
+        const lfo1Gain = this.context.createGain();
+        lfo1.frequency.setValueAtTime(0.15, now); // Very slow breath
+        lfo1Gain.gain.setValueAtTime(0.06, now);
+
+        const lfo2 = this.context.createOscillator(); // For filter movement
+        const lfo2Gain = this.context.createGain();
+        lfo2.frequency.setValueAtTime(0.05, now);
+        lfo2Gain.gain.setValueAtTime(50, now);
+
+        // --- 6. Master Output ---
         const masterGain = this.context.createGain();
-        masterGain.gain.setValueAtTime(0.1, this.context.currentTime);
+        masterGain.gain.setValueAtTime(0.15, now);
 
-        // Connections
-        osc1.connect(gain1);
-        osc2.connect(gain2);
-        gain1.connect(filter);
-        gain2.connect(filter);
-        filter.connect(masterGain);
+        // --- Connections ---
+        subOsc.connect(subGain);
+        textureOsc.connect(textureGain);
+
+        subGain.connect(lpFilter);
+        textureGain.connect(lpFilter);
+
+        whiteNoise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+
+        lpFilter.connect(masterGain);
         masterGain.connect(this.context.destination);
 
-        // LFO connection to master gain (breathe effect)
-        lfo.connect(lfoGain);
-        lfoGain.connect(masterGain.gain);
+        // Modulation
+        lfo1.connect(lfo1Gain);
+        lfo1Gain.connect(masterGain.gain);
 
-        osc1.start();
-        osc2.start();
-        lfo.start();
+        lfo2.connect(lfo2Gain);
+        lfo2Gain.connect(lpFilter.frequency);
 
-        this.ambientMusicNodes = [osc1, osc2, lfo, gain1, gain2, lfoGain, filter, masterGain];
+        // Start everything
+        subOsc.start();
+        textureOsc.start();
+        whiteNoise.start();
+        lfo1.start();
+        lfo2.start();
+
+        this.ambientMusicNodes = [
+            subOsc, textureOsc, whiteNoise,
+            subGain, textureGain, noiseGain, masterGain,
+            lpFilter, noiseFilter, lfo1, lfo1Gain, lfo2, lfo2Gain
+        ];
+
+        // --- 7. Random Mysterious Pings ---
+        this.startRandomPings();
+    }
+
+    private startRandomPings() {
+        if (this.pingInterval) return;
+
+        const schedulePing = () => {
+            const delay = Math.random() * 5000 + 3000; // Every 3-8 seconds
+            this.pingInterval = setTimeout(() => {
+                this.playMysteriousPing();
+                schedulePing();
+            }, delay);
+        };
+        schedulePing();
+    }
+
+    private playMysteriousPing() {
+        if (!this.enabled || !this.context) return;
+
+        const now = this.context.currentTime;
+        const freq = [880, 1100, 1320, 1760][Math.floor(Math.random() * 4)]; // High harmonic frequencies
+
+        const osc = this.context.createOscillator();
+        const gain = this.context.createGain();
+        const delay = this.context.createDelay();
+        const feedback = this.context.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 4); // Long decay
+
+        // Simple Delay/Reverb Effect
+        delay.delayTime.setValueAtTime(0.4, now);
+        feedback.gain.setValueAtTime(0.4, now);
+
+        osc.connect(gain);
+        gain.connect(this.context.destination);
+
+        // Echo loop
+        gain.connect(delay);
+        delay.connect(feedback);
+        feedback.connect(delay);
+        delay.connect(this.context.destination);
+
+        osc.start(now);
+        osc.stop(now + 4.5);
     }
 
     stopAmbientMusic() {
+        if (this.pingInterval) {
+            clearTimeout(this.pingInterval);
+            this.pingInterval = null;
+        }
+
         this.ambientMusicNodes.forEach(node => {
-            if (node instanceof OscillatorNode) {
-                node.stop();
+            if (node instanceof OscillatorNode || node instanceof AudioBufferSourceNode) {
+                try { node.stop(); } catch (e) { }
             }
             node.disconnect();
         });
