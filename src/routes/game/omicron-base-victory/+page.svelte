@@ -79,7 +79,7 @@
             {/if}
 
             <button class="next-btn" onclick={() => goto("/game")}>
-                TERUG NAAR DASHBOARD
+                GA NAAR LOCATIE
             </button>
         </div>
     </div>
