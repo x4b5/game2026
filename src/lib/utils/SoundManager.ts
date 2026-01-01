@@ -3,33 +3,36 @@ class SoundManager {
     private enabled = true;
     private ambientMusicNodes: AudioNode[] = [];
     private pingInterval: any = null;
-    private isInitialized = false;
+    private shouldBePlaying = false;
 
     constructor() {
-        // Try to initialize as soon as possible
         if (typeof window !== 'undefined') {
-            this.addUnlockListeners();
+            this.setupUnlockListeners();
         }
     }
 
-    private addUnlockListeners() {
-        const unlock = () => {
-            if (this.context && this.context.state === 'suspended') {
-                this.context.resume().then(() => {
-                    console.log('AudioContext resumed via user interaction');
-                    // If music was supposed to be playing but couldn't, start it now
-                    if (this.ambientMusicNodes.length === 0 && this.isInitialized) {
-                        this.startAmbientMusic();
-                    }
-                });
+    private setupUnlockListeners() {
+        const unlock = async () => {
+            if (!this.context) return;
+
+            if (this.context.state === 'suspended') {
+                await this.context.resume();
             }
-            window.removeEventListener('click', unlock);
-            window.removeEventListener('touchstart', unlock);
-            window.removeEventListener('keydown', unlock);
+
+            if (this.context.state === 'running') {
+                if (this.shouldBePlaying && this.ambientMusicNodes.length === 0) {
+                    this.startAmbientMusic();
+                }
+                // Only remove if we actually successfully reached a running state
+                window.removeEventListener('click', unlock);
+                window.removeEventListener('touchstart', unlock);
+                window.removeEventListener('mousedown', unlock);
+            }
         };
+
         window.addEventListener('click', unlock);
         window.addEventListener('touchstart', unlock);
-        window.addEventListener('keydown', unlock);
+        window.addEventListener('mousedown', unlock);
     }
 
     async init() {
@@ -38,12 +41,10 @@ class SoundManager {
         if (!this.context) {
             try {
                 this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
-                this.isInitialized = true;
 
+                // Try to resume immediately
                 if (this.context.state === 'suspended') {
-                    await this.context.resume().catch(() => {
-                        console.warn('Initial resume failed, waiting for user interaction');
-                    });
+                    await this.context.resume().catch(() => { });
                 }
             } catch (e) {
                 console.warn('Web Audio API not supported', e);
@@ -53,12 +54,12 @@ class SoundManager {
     }
 
     startAmbientMusic() {
+        this.shouldBePlaying = true;
+
         if (!this.enabled || !this.context) return;
 
-        // If context is suspended, we can't start nodes meaningfully yet
-        // but we flag isInitialized so the unlock listeners will start it
+        // If still suspended, we rely on the unlock listeners
         if (this.context.state === 'suspended') {
-            console.log('AudioContext suspended, will start music after interaction');
             return;
         }
 
@@ -180,7 +181,7 @@ class SoundManager {
     }
 
     private playMysteriousPing() {
-        if (!this.enabled || !this.context || this.context.state === 'suspended') return;
+        if (!this.enabled || !this.context || this.context.state !== 'running') return;
 
         const now = this.context.currentTime;
         const freq = [880, 1100, 1320, 1760][Math.floor(Math.random() * 4)];
@@ -213,6 +214,7 @@ class SoundManager {
     }
 
     stopAmbientMusic() {
+        this.shouldBePlaying = false;
         if (this.pingInterval) {
             clearTimeout(this.pingInterval);
             this.pingInterval = null;
@@ -228,7 +230,7 @@ class SoundManager {
     }
 
     playTone(frequency: number, duration: number = 0.2, volume: number = 0.3) {
-        if (!this.enabled || !this.context || this.context.state === 'suspended') return;
+        if (!this.enabled || !this.context || this.context.state !== 'running') return;
         const oscillator = this.context.createOscillator();
         const gainNode = this.context.createGain();
         oscillator.connect(gainNode);
