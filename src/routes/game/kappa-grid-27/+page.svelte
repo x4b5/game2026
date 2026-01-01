@@ -1353,8 +1353,78 @@
 
     .hero-card.added {
         border-color: #22c55e;
-        box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
-        background: rgba(34, 197, 94, 0.05);
+        box-shadow:
+            0 0 30px rgba(34, 197, 94, 0.6),
+            0 0 60px rgba(34, 197, 94, 0.4),
+            inset 0 0 30px rgba(34, 197, 94, 0.2);
+        background: rgba(34, 197, 94, 0.1);
+        animation: hero-activation 1s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-card.added::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent,
+            rgba(34, 197, 94, 0.3),
+            transparent
+        );
+        animation: sweep 1.5s ease-out;
+    }
+
+    .hero-card.added .hero-image {
+        animation: power-up 0.8s ease-out;
+        filter: brightness(1.3) drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
+    }
+
+    @keyframes hero-activation {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow:
+                0 0 50px rgba(34, 197, 94, 0.8),
+                0 0 100px rgba(34, 197, 94, 0.6);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow:
+                0 0 30px rgba(34, 197, 94, 0.6),
+                0 0 60px rgba(34, 197, 94, 0.4);
+        }
+    }
+
+    @keyframes sweep {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    @keyframes power-up {
+        0% {
+            transform: scale(0.9);
+            filter: brightness(0.5) drop-shadow(0 0 0 rgba(34, 197, 94, 0));
+        }
+        50% {
+            transform: scale(1.1);
+            filter: brightness(1.5) drop-shadow(0 0 30px rgba(34, 197, 94, 1));
+        }
+        100% {
+            transform: scale(1);
+            filter: brightness(1.3) drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
+        }
     }
 
     .added-badge {
