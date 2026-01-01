@@ -180,19 +180,6 @@
                 Maaastricht te bevrijden.
             </div>
         </div>
-
-        <!-- Mission Brief -->
-        <div class="mission-brief glass-panel has-corners">
-            <div class="corner tl"></div>
-            <div class="corner tr"></div>
-            <div class="corner bl"></div>
-            <div class="corner br"></div>
-            <h2>🎯 DE BRIEFING</h2>
-            <div class="typewriter-content">
-                {displayedBriefing}
-                <span class="cursor">_</span>
-            </div>
-        </div>
     </div>
 
     <!-- Avatar Selection -->
@@ -252,6 +239,19 @@
                     {/if}
                 </div>
             {/each}
+        </div>
+    </div>
+
+    <!-- Mission Brief -->
+    <div class="mission-brief glass-panel has-corners">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <h2>🎯 DE BRIEFING</h2>
+        <div class="typewriter-content">
+            {displayedBriefing}
+            <span class="cursor">_</span>
         </div>
     </div>
 
