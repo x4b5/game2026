@@ -826,7 +826,7 @@
         margin-bottom: 2rem;
         font-size: 3rem;
         font-family: "Tektur", sans-serif;
-        font-weight: 900;
+        font-weight: 400;
         letter-spacing: -2px;
         background: linear-gradient(135deg, #a855f7, #ec4899, #f472b6);
         background-size: 200% 200%;
