@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 import fs from 'fs';
 import path from 'path';
 
-const DOMAIN = 'https://game2026-beta.vercel.app'; // Jouw Vercel URL
+const DOMAIN = 'https://marvelous-narwhal-8f48d1.netlify.app';
 const MISSIONS = [
     { name: 'nebula-post', slug: 'x7-alpha-92' },
     { name: 'vortex-hub', slug: 'delta-vortex-11' },
