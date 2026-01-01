@@ -2,6 +2,7 @@
     import GameContainer from "$lib/components/GameContainer.svelte";
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
 
     interface TimeShard {
         id: number;
@@ -105,6 +106,9 @@
         if (allAligned) {
             setTimeout(() => {
                 gameContainer?.win(2000);
+                setTimeout(() => {
+                    goto("/game/mosa-bridge-44");
+                }, 2000);
             }, 300);
         }
     }
@@ -117,12 +121,12 @@
 
 <GameContainer
     bind:this={gameContainer}
-    gameId="vortex-hub"
-    title="🌪️ Vortex Hub"
+    gameId="bathroom-lock"
+    title="🔒 Badkamer Vergrendeling"
 >
     <div class="vortex-game">
         <div class="instructions">
-            <p>Draai de vortex om alle tijdfragmenten op hun plek te krijgen</p>
+            <p>Draai de ringen om het slot van de badkamer te openen.</p>
         </div>
 
         <div
@@ -177,7 +181,7 @@
         </div>
 
         <div class="alignment-status">
-            {shards.filter((s) => isAligned(s)).length} / {shards.length} uitgelijnd
+            {shards.filter((s) => isAligned(s)).length} / {shards.length} ontgrendeld
         </div>
     </div>
 </GameContainer>

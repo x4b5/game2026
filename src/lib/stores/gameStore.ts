@@ -100,7 +100,6 @@ export const MISSION_ORDER = [
     '/game/rho-system-88/scan',
     '/game/iota-stream-6',
     '/game/iota-stream-6/burner',
-    '/game/rho-system-88/finale',
     '/game/omicron-base-victory',
     '/game/zeta-flux-33',
     '/game/sint-pieter/safe',
@@ -112,8 +111,9 @@ export const MISSION_ORDER = [
     '/game/theta-pulse-19/airborne-concerto',
     '/game/theta-pulse-19/victory',
     '/game/delta-vortex-11',
-    '/game/gamma-prime-8',
     '/game/mosa-bridge-44',
+    '/game/rho-system-88/finale',
+    '/game/gamma-prime-8',
     '/game/sigma-nexus-4',
     '/game/x7-alpha-92'
 ];

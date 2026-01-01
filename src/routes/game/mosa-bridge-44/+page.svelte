@@ -5,15 +5,16 @@
     import { gameProgress } from "$lib/stores/gameStore";
 
     let visible = $state(false);
-    let isMosa = $derived($gameProgress.player?.avatar === "mosa");
+    // let isMosa = $derived($gameProgress.player?.avatar === "mosa");
+    let isMosa = true; // Access restriction lifted by user request
 
     onMount(() => {
         visible = true;
     });
 
     async function handleNext() {
-        // This would lead to the next part of Mosa's mission
-        goto("/game");
+        // Go to the defense game
+        goto("/game/mosa-bridge-44/defense");
     }
 </script>
 

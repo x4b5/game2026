@@ -14,7 +14,14 @@
     });
 
     async function handleContinue() {
-        goto("/game/theta-pulse-19/track");
+        // Send everyone to the bridge
+        await fetch("/api/mission", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ navTo: "/game/mosa-bridge-44" }),
+        }).catch(console.error);
+
+        goto("/game/mosa-bridge-44");
     }
 </script>
 
