@@ -9,7 +9,7 @@
     let isScanning = $state(false);
     let scanner: any = null;
 
-    let isNewMission = $state(false);
+    let isNewMission = $state(true);
     let adminPassword = $state("");
 
     function handleAdminBypass() {
