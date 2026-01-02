@@ -7,21 +7,17 @@
     let visible = $state(false);
     let missionStarted = $state(false);
     let chargingStatus = $state(0);
-    let isStella = $derived($gameProgress.player?.avatar === "stella");
 
     onMount(() => {
         visible = true;
-        if (isStella) {
-            const interval = setInterval(() => {
-                if (chargingStatus < 100) chargingStatus += 1;
-                else clearInterval(interval);
-            }, 50);
-            return () => clearInterval(interval);
-        }
+        const interval = setInterval(() => {
+            if (chargingStatus < 100) chargingStatus += 1;
+            else clearInterval(interval);
+        }, 50);
+        return () => clearInterval(interval);
     });
 
     function startFinalAssault() {
-        if (!isStella) return;
         missionStarted = true;
         setTimeout(() => {
             goto("/game/theta-pulse-19/airborne-concerto");
@@ -33,102 +29,78 @@
     <div class="background-overlay"></div>
 
     <div class="content-wrapper">
-        {#if !isStella}
-            <div class="restricted-access" in:fly={{ y: 20 }}>
-                <div class="restricted-icon">🚫</div>
-                <h1>TOEGANG GEWEIGERD</h1>
-                <div class="restricted-card glass-panel">
+        <header in:fly={{ y: -50, delay: 200 }}>
+            <div class="mission-tag">OPERATIE: SONISCHE STORM</div>
+            <h1>THETA PULSE 19</h1>
+        </header>
+
+        <main>
+            <div class="hero-briefing" in:fly={{ x: -30, delay: 400 }}>
+                <div class="hero-avatar">
+                    <span class="stella-icon">✨</span>
+                    <div class="halo"></div>
+                </div>
+                <div class="briefing-text">
+                    <h2>AGENT: STELLA</h2>
                     <p>
-                        Deze missie vereist specifieke vliegvaardigheden en een
-                        diepe connectie met de 'Mestreechter Geis'.
+                        Stella, jij bent de enige die deze missie kan
+                        volbrengen. Jouw vermogen om te vliegen gecombineerd met
+                        je muzikale talent is de sleutel tot onze overwinning.
                     </p>
-                    <div class="hero-requirement">
-                        <span>VEREISTE HELD:</span>
-                        <div class="hero-badge">✨ STELLA</div>
+                    <div class="intel-box">
+                        <span class="icon">🎻</span>
+                        <div class="text">
+                            <strong>MICROFOON VERSTERKING:</strong> De viool van
+                            André Rieu is gekoppeld aan je sonische pak. De klanken
+                            worden met 500% versterkt.
+                        </div>
                     </div>
-                    <button class="back-btn" onclick={() => goto("/game")}>
-                        TERUG NAAR DASHBOARD
-                    </button>
                 </div>
             </div>
-        {:else}
-            <header in:fly={{ y: -50, delay: 200 }}>
-                <div class="mission-tag">OPERATIE: SONISCHE STORM</div>
-                <h1>THETA PULSE 19</h1>
-            </header>
 
-            <main>
-                <div class="hero-briefing" in:fly={{ x: -30, delay: 400 }}>
-                    <div class="hero-avatar">
-                        <span class="stella-icon">✨</span>
-                        <div class="halo"></div>
-                    </div>
-                    <div class="briefing-text">
-                        <h2>AGENT: STELLA</h2>
-                        <p>
-                            Stella, jij bent de enige die deze missie kan
-                            volbrengen. Jouw vermogen om te vliegen gecombineerd
-                            met je muzikale talent is de sleutel tot onze
-                            overwinning.
-                        </p>
-                        <div class="intel-box">
-                            <span class="icon">🎻</span>
-                            <div class="text">
-                                <strong>MICROFOON VERSTERKING:</strong> De viool
-                                van André Rieu is gekoppeld aan je sonische pak.
-                                De klanken worden met 500% versterkt.
-                            </div>
-                        </div>
+            <div class="mission-objective" in:fly={{ x: 30, delay: 600 }}>
+                <div class="vrijthof-map">
+                    <div class="scanner-line"></div>
+                    <div class="target-dots">
+                        <div class="dot" style="top: 20%; left: 30%"></div>
+                        <div class="dot" style="top: 50%; left: 70%"></div>
+                        <div class="dot" style="top: 80%; left: 40%"></div>
                     </div>
                 </div>
+                <h3>DOELWIT: VRIJTHOF</h3>
+                <p>
+                    Vlieg over het plein en slinger de vioolklanken in elke
+                    hoek. De aliens op de grond en in de schepen boven de Sint
+                    Servaasbasiliek moeten worden uitgeschakeld.
+                </p>
+            </div>
+        </main>
 
-                <div class="mission-objective" in:fly={{ x: 30, delay: 600 }}>
-                    <div class="vrijthof-map">
-                        <div class="scanner-line"></div>
-                        <div class="target-dots">
-                            <div class="dot" style="top: 20%; left: 30%"></div>
-                            <div class="dot" style="top: 50%; left: 70%"></div>
-                            <div class="dot" style="top: 80%; left: 40%"></div>
-                        </div>
-                    </div>
-                    <h3>DOELWIT: VRIJTHOF</h3>
-                    <p>
-                        Vlieg over het plein en slinger de vioolklanken in elke
-                        hoek. De aliens op de grond en in de schepen boven de
-                        Sint Servaasbasiliek moeten worden uitgeschakeld.
-                    </p>
+        <footer in:fly={{ y: 50, delay: 800 }}>
+            <div class="system-ready">
+                <div class="charge-bar">
+                    <div class="fill" style="width: {chargingStatus}%"></div>
                 </div>
-            </main>
-
-            <footer in:fly={{ y: 50, delay: 800 }}>
-                <div class="system-ready">
-                    <div class="charge-bar">
-                        <div
-                            class="fill"
-                            style="width: {chargingStatus}%"
-                        ></div>
-                    </div>
-                    <span class="status-msg"
-                        >SYSTEMS: {chargingStatus === 100
-                            ? "OPTIMAL"
-                            : "CHARGING..."}</span
-                    >
-                </div>
-
-                <button
-                    class="start-btn"
-                    class:ready={chargingStatus === 100}
-                    disabled={chargingStatus < 100 || missionStarted}
-                    onclick={startFinalAssault}
+                <span class="status-msg"
+                    >SYSTEMS: {chargingStatus === 100
+                        ? "OPTIMAL"
+                        : "CHARGING..."}</span
                 >
-                    {#if missionStarted}
-                        STARTING AIRBORNE CONCERTO...
-                    {:else}
-                        STIJG OP & SPEEL 🚀🎻
-                    {/if}
-                </button>
-            </footer>
-        {/if}
+            </div>
+
+            <button
+                class="start-btn"
+                class:ready={chargingStatus === 100}
+                disabled={chargingStatus < 100 || missionStarted}
+                onclick={startFinalAssault}
+            >
+                {#if missionStarted}
+                    STARTING AIRBORNE CONCERTO...
+                {:else}
+                    STIJG OP & SPEEL 🚀🎻
+                {/if}
+            </button>
+        </footer>
     </div>
 </div>
 
@@ -179,86 +151,6 @@
         gap: 2rem;
         z-index: 1;
         box-sizing: border-box;
-    }
-
-    /* Restricted Access Styles */
-    .restricted-access {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        height: 100%;
-        gap: 2rem;
-        margin-top: 4rem;
-    }
-
-    .restricted-icon {
-        font-size: 5rem;
-        filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));
-    }
-
-    .restricted-card {
-        background: rgba(0, 0, 0, 0.6);
-        padding: 3rem;
-        border-radius: 24px;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        max-width: 500px;
-    }
-
-    .restricted-access h1 {
-        font-family: "Orbitron", sans-serif;
-        color: #ef4444;
-        font-size: 2.5rem;
-        margin: 0;
-    }
-
-    .restricted-card p {
-        color: #94a3b8;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
-
-    .hero-requirement {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        margin-bottom: 2.5rem;
-    }
-
-    .hero-requirement span {
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.8rem;
-        color: #64748b;
-        letter-spacing: 2px;
-    }
-
-    .hero-badge {
-        background: #ef4444;
-        color: white;
-        padding: 0.8rem 2rem;
-        border-radius: 12px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 900;
-        letter-spacing: 2px;
-    }
-
-    .back-btn {
-        width: 100%;
-        padding: 1.2rem;
-        background: transparent;
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        font-family: "Orbitron", sans-serif;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .back-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: white;
     }
 
     header {
@@ -575,10 +467,6 @@
 
         .content-wrapper {
             padding: 1.5rem 1rem;
-        }
-
-        .restricted-card {
-            padding: 2rem 1.5rem;
         }
 
         .hero-briefing,
