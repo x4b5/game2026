@@ -2,7 +2,7 @@
     import GameContainer from "$lib/components/GameContainer.svelte";
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
-    import { fade } from "svelte/transition";
+    import { fade, scale, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
 
     let gameContainer: any;
@@ -24,7 +24,7 @@
             isAccessLocked = false;
             soundManager.playSuccess();
         } else {
-            accessError = "Onjuiste code!";
+            accessError = "⚠️ ACCESS DENIED: INVALID KEY";
             soundManager.playError();
         }
     }
@@ -126,478 +126,766 @@
     });
 </script>
 
-<GameContainer
-    bind:this={gameContainer}
-    gameId="gamma-prime"
-    title="🗼 Gamma Prime"
->
-    {#if isAccessLocked}
-        <div class="lock-screen">
-            <h3>🔒 VEILIGHEIDSPROTOCOL</h3>
-            <p>Voer de toegangscode in om het systeem te activeren.</p>
-            <div class="input-group">
-                <input
-                    type="text"
-                    bind:value={accessCode}
-                    placeholder="Wachtwoord..."
-                    class="access-input"
-                    onkeydown={(e) => e.key === "Enter" && checkAccessCode()}
-                />
-                <button class="unlock-btn" onclick={checkAccessCode}>→</button>
-            </div>
-            {#if accessError}
-                <p class="error-text">{accessError}</p>
-            {/if}
-        </div>
-    {:else}
-        <div class="frequency-game">
-            <div class="instructions">
-                <p>
-                    Stem af op de juiste frequentie om de <strong
-                        >bron van het signaal</strong
-                    > te onthullen.
-                </p>
-            </div>
+<svelte:head>
+    <title>Gamma Prime // SIGNAL ANALYSIS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin="anonymous"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet"
+    />
+</svelte:head>
 
-            <!-- Waveform Display -->
-            <div class="waveform-display">
-                <div
-                    class="signal-strength"
-                    style:width="{proximity}%"
-                    style:--signal-color={proximity > 90
-                        ? "#22c55e"
-                        : proximity > 50
-                          ? "#f59e0b"
-                          : "#6366f1"}
-                >
-                    <div class="signal-bar"></div>
+<div class="omicron-page">
+    <div class="env-bg"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <GameContainer
+        bind:this={gameContainer}
+        gameId="gamma-prime"
+        title="🗼 GAMMA PRIME: SIGNAL TRACKER"
+        nextUrl="/game/finale"
+    >
+        {#if isAccessLocked}
+            <div class="lock-screen-panel" in:fade>
+                <div class="panel-header">
+                    <span class="status-icon blink">🔒</span>
+                    VEILIGHEIDSPROTOCOL // ACCESS REQUIRED
+                </div>
+                <div class="panel-content glass-card">
+                    <div class="deco-box tl"></div>
+                    <div class="deco-box br"></div>
+
+                    <p class="instruction-text">
+                        Het systeem is vergrendeld. Voer de biomechanische
+                        encryptiesleutel in om de signaaltracer te activeren.
+                    </p>
+
+                    <div class="code-entry-group">
+                        <div class="input-container">
+                            <input
+                                type="text"
+                                bind:value={accessCode}
+                                placeholder="ACCESS KEY..."
+                                class="cyber-input"
+                                onkeydown={(e) =>
+                                    e.key === "Enter" && checkAccessCode()}
+                            />
+                            <div class="input-line"></div>
+                        </div>
+                        <button
+                            class="unlock-btn cyber-btn primary"
+                            onclick={checkAccessCode}
+                        >
+                            <span class="btn-text">UNLOCK</span>
+                        </button>
+                    </div>
+
+                    {#if accessError}
+                        <div class="error-banner" transition:slide>
+                            <span class="icon">⚠️</span>
+                            {accessError}
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        {:else}
+            <div class="frequency-game-container" in:fade>
+                <div class="mission-briefing glass-card">
+                    <p class="brief-text">
+                        <span class="label">>> OBJECTIVE:</span>
+                        Stem af op de exacte frequentie van de bron om de positie
+                        te onthullen. Zoek naar de sonische harmonie.
+                    </p>
                 </div>
 
-                <div class="frequency-reading">
-                    <span class="hz-value">{frequency}</span>
-                    <span class="hz-unit">Hz</span>
-                </div>
+                <!-- Waveform Display -->
+                <div class="analyzer-panel glass-card">
+                    <div class="panel-header">
+                        SIGNAL ANALYZER // {frequency}Hz
+                    </div>
 
-                <!-- Visual waveform -->
-                <div class="wave-container">
-                    {#each Array(20) as _, i}
+                    <div class="signal-gauge-container">
+                        <div class="gauge-background"></div>
                         <div
-                            class="wave-bar"
-                            style:height="{20 +
-                                Math.sin(
-                                    (i / 20) * Math.PI * 4 + frequency / 100,
-                                ) *
-                                    (proximity / 5)}%"
-                            style:opacity={proximity / 100}
+                            class="gauge-fill"
+                            style:width="{proximity}%"
+                            style:--gauge-color={proximity > 90
+                                ? "#10b981"
+                                : proximity > 50
+                                  ? "#f59e0b"
+                                  : "#3b82f6"}
+                        >
+                            <div class="gauge-scanner"></div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-area">
+                        <div class="wave-container">
+                            {#each Array(30) as _, i}
+                                <div
+                                    class="wave-bar"
+                                    style:height="{25 +
+                                        Math.sin(
+                                            (i / 30) * Math.PI * 6 +
+                                                frequency / 50,
+                                        ) *
+                                            (proximity / 4)}%"
+                                    style:opacity={0.2 +
+                                        (proximity / 100) * 0.8}
+                                    style:--bar-color={proximity > 80
+                                        ? "#10b981"
+                                        : "#3b82f6"}
+                                ></div>
+                            {/each}
+                        </div>
+                    </div>
+
+                    <div class="hz-display-box">
+                        <span class="hz-value">{frequency}</span>
+                        <span class="hz-unit">HZ</span>
+                    </div>
+                </div>
+
+                <!-- Tuner Controls -->
+                <div class="tuner-panel glass-card">
+                    <div class="panel-header">TUNER CONTROLS</div>
+
+                    <div class="audio-actions">
+                        <button
+                            class="cyber-btn secondary small"
+                            onclick={() => !isLocked && startTone()}
+                            disabled={isLocked}
+                        >
+                            ▶️ LISTEN
+                        </button>
+                        <button
+                            class="cyber-btn danger small"
+                            onclick={() => stopTone()}
+                        >
+                            ⏸️ MUTE
+                        </button>
+                    </div>
+
+                    <div class="slider-wrapper">
+                        <div
+                            class="slider-track-glow"
+                            style:width="{((frequency - MIN_FREQ) /
+                                (MAX_FREQ - MIN_FREQ)) *
+                                100}%"
                         ></div>
-                    {/each}
+                        <input
+                            type="range"
+                            min={MIN_FREQ}
+                            max={MAX_FREQ}
+                            bind:value={frequency}
+                            oninput={handleSliderInput}
+                            disabled={isLocked}
+                            class="cyber-slider"
+                        />
+                        <div class="freq-labels">
+                            <span>{MIN_FREQ}Hz</span>
+                            <span>{MAX_FREQ}Hz</span>
+                        </div>
+                    </div>
+
+                    <button
+                        class="cyber-btn big-action"
+                        class:ready={proximity > 90}
+                        onclick={lockFrequency}
+                        disabled={isLocked}
+                    >
+                        <span class="btn-text">
+                            {isLocked
+                                ? "🔒 FREQUENCY LOCKED"
+                                : "🔓 LOCK SIGNAL"}
+                        </span>
+                        <div class="btn-glitch"></div>
+                    </button>
+
+                    <div class="proximity-readout">
+                        <span class="label">SYNC STATUS:</span>
+                        <span class="value" class:synced={proximity > 90}
+                            >{proximity.toFixed(0)}%</span
+                        >
+                    </div>
                 </div>
             </div>
+        {/if}
 
-            <!-- Frequency Slider -->
-            <div class="tuner-controls">
-                <button
-                    class="control-btn"
-                    onclick={() => !isLocked && startTone()}
-                >
-                    ▶️ Speel Toon
-                </button>
-                <button class="control-btn" onclick={() => stopTone()}>
-                    ⏸️ Stop
-                </button>
-            </div>
+        {#if showRevelation}
+            <div class="revelation-overlay" transition:fade>
+                <div class="revelation-card glass-card success">
+                    <div class="deco-corner tl"></div>
+                    <div class="deco-corner br"></div>
 
-            <div class="slider-container">
-                <input
-                    type="range"
-                    min={MIN_FREQ}
-                    max={MAX_FREQ}
-                    bind:value={frequency}
-                    oninput={handleSliderInput}
-                    disabled={isLocked}
-                    class="frequency-slider"
-                />
-                <div class="slider-labels">
-                    <span>{MIN_FREQ} Hz</span>
-                    <span>{MAX_FREQ} Hz</span>
+                    <div class="revelation-header">
+                        <span class="icon">🤡</span>
+                        <h1 class="glitch-title" data-text="VALS ALARM">
+                            VALS ALARM!
+                        </h1>
+                    </div>
+
+                    <div class="intel-report">
+                        <p class="report-text">
+                            Het signaal is getraceerd naar een lokale kroeg...
+                        </p>
+                        <div class="revelation-details">
+                            <span class="prefix">>> DETECTIE:</span>
+                            Het blijkt een groep
+                            <strong>verdwaalde carnavalisten</strong> te zijn die
+                            na 3 dagen feesten vergeten zijn hun alienpakken uit
+                            te trekken!
+                        </div>
+                        <p class="comic-relief">"Alaaf? 👽🍺"</p>
+                    </div>
+
+                    <button
+                        class="cyber-btn success-action"
+                        onclick={() => {
+                            gameContainer?.win(Math.floor(proximity * 20));
+                        }}
+                    >
+                        <span class="btn-text">MISSIE AFRONDEN</span>
+                        <div class="glitch-effect"></div>
+                    </button>
                 </div>
             </div>
-
-            <button
-                class="lock-button"
-                class:ready={proximity > 90}
-                onclick={lockFrequency}
-                disabled={isLocked}
-            >
-                {isLocked ? "🔒 Vergrendeld!" : "🔓 Vergrendel Frequentie"}
-            </button>
-
-            <div class="proximity-indicator">
-                Nabijheid: <strong>{proximity.toFixed(0)}%</strong>
-            </div>
-        </div>
-    {/if}
-    {#if showRevelation}
-        <div class="revelation-overlay" transition:fade>
-            <div class="revelation-card">
-                <div class="icon">🤡</div>
-                <h1>VALS ALARM!</h1>
-                <p>Het signaal is getraceerd naar een lokale kroeg...</p>
-                <div class="story-box">
-                    Het blijkt een groep<strong> verdwaalde carnavalisten</strong> te zijn
-                    die na 3 dagen feesten vergeten  zijn hun alienpakken uit te trekken!
-                </div>
-                <p class="sub-text">"Alaaf? 👽🍺"</p>
-                <button
-                    class="finish-btn"
-                    onclick={() => {
-                        gameContainer?.win(Math.floor(proximity * 20));
-                        setTimeout(() => goto("/game/finale"), 1500);
-                    }}
-                >
-                    MISSIE AFRONDEN
-                </button>
-            </div>
-        </div>
-    {/if}
-</GameContainer>
+        {/if}
+    </GameContainer>
+</div>
 
 <style>
-    .frequency-game {
-        width: 100%;
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap");
+
+    :global(body) {
+        background-color: #020617;
+        margin: 0;
+        color: #e2e8f0;
+    }
+
+    .omicron-page {
+        position: relative;
+        min-height: 100vh;
+        font-family: "Rajdhani", sans-serif;
+    }
+
+    /* Background Effects */
+    .env-bg {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+            circle at 50% 50%,
+            #0f172a 0%,
+            #020617 100%
+        );
+        z-index: -1;
+    }
+
+    .scanlines {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.05) 50%
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 100;
+        opacity: 0.3;
+    }
+
+    .vignette {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(
+            circle,
+            transparent 40%,
+            rgba(0, 0, 0, 0.8) 100%
+        );
+        pointer-events: none;
+        z-index: 101;
+    }
+
+    /* Panel Styles */
+    .glass-card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        backdrop-filter: blur(12px);
+        padding: 2rem;
+        position: relative;
+    }
+
+    .panel-header {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.75rem;
+        color: #3b82f6;
+        opacity: 0.8;
+        letter-spacing: 2px;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        padding-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .deco-box {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #3b82f6;
+    }
+    .deco-box.tl {
+        top: -2px;
+        left: -2px;
+        border-right: none;
+        border-bottom: none;
+    }
+    .deco-box.br {
+        bottom: -2px;
+        right: -2px;
+        border-left: none;
+        border-top: none;
+    }
+
+    /* Lock Screen */
+    .lock-screen-panel {
         max-width: 500px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+
+    .instruction-text {
+        font-size: 1.1rem;
+        color: #94a3b8;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .code-entry-group {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .input-container {
+        width: 100%;
+        position: relative;
+    }
+
+    .cyber-input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: none;
+        padding: 1rem;
+        font-family: "Share Tech Mono", monospace;
+        color: #fff;
+        font-size: 1.5rem;
+        text-align: center;
+        letter-spacing: 4px;
+    }
+
+    .cyber-input:focus {
+        outline: none;
+    }
+
+    .input-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: #3b82f6;
+        box-shadow: 0 0 10px #3b82f6;
+    }
+
+    /* Frequency Game Container */
+    .frequency-game-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        max-width: 600px;
         margin: 0 auto;
     }
 
-    .instructions {
-        text-align: center;
-        margin-bottom: 2rem;
-        color: var(--text-muted);
+    .mission-briefing {
+        padding: 1rem 1.5rem !important;
+        border-left: 4px solid #3b82f6 !important;
     }
 
-    .waveform-display {
-        background: var(--glass);
-        border: 2px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
+    .brief-text {
+        margin: 0;
+        font-size: 1rem;
+        color: #cbd5e1;
+        line-height: 1.5;
+    }
+
+    .brief-text .label {
+        font-family: "Share Tech Mono", monospace;
+        color: #3b82f6;
+        margin-right: 0.5rem;
+    }
+
+    /* Analyzer Panel */
+    .analyzer-panel {
+        padding-top: 1rem !important;
+    }
+
+    .signal-gauge-container {
         position: relative;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
         overflow: hidden;
-    }
-
-    .signal-strength {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 4px;
-        background: var(--signal-color);
-        transition:
-            width 0.3s ease,
-            background 0.3s ease;
-        box-shadow: 0 0 10px var(--signal-color);
-    }
-
-    .signal-bar {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, var(--signal-color));
-        animation: pulse-signal 1s ease-in-out infinite;
-    }
-
-    @keyframes pulse-signal {
-        0%,
-        100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
-    }
-
-    .frequency-reading {
-        text-align: center;
         margin-bottom: 1.5rem;
     }
 
-    .hz-value {
-        font-size: 3rem;
-        font-weight: 700;
-        color: var(--primary);
-        font-family: monospace;
+    .gauge-fill {
+        height: 100%;
+        background: var(--gauge-color);
+        box-shadow: 0 0 15px var(--gauge-color);
+        transition:
+            width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+            background 0.5s;
+        position: relative;
     }
 
-    .hz-unit {
-        font-size: 1.5rem;
-        color: var(--text-muted);
-        margin-left: 0.5rem;
+    .gauge-scanner {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        );
+        animation: scanner-loop 1.5s infinite;
+    }
+
+    @keyframes scanner-loop {
+        from {
+            transform: translateX(100%);
+        }
+        to {
+            transform: translateX(-500%);
+        }
+    }
+
+    .visualization-area {
+        height: 120px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
     }
 
     .wave-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 2px;
-        height: 80px;
+        height: 100%;
+        width: 100%;
+        padding: 0 1rem;
     }
 
     .wave-bar {
         flex: 1;
-        background: linear-gradient(to top, var(--primary), var(--secondary));
-        border-radius: 2px;
+        background: var(--bar-color);
+        border-radius: 1px;
         transition:
-            height 0.1s ease,
-            opacity 0.3s ease;
+            height 0.1s linear,
+            background 0.3s;
+        box-shadow: 0 0 5px var(--bar-color);
     }
 
-    .tuner-controls {
+    .hz-display-box {
+        text-align: center;
+        font-family: "Orbitron", sans-serif;
+    }
+
+    .hz-value {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -2px;
+    }
+
+    .hz-unit {
+        font-size: 1.2rem;
+        color: #3b82f6;
+        margin-left: 0.5rem;
+    }
+
+    /* Tuner Panel */
+    .audio-actions {
         display: flex;
         gap: 1rem;
         margin-bottom: 2rem;
     }
 
-    .control-btn {
-        flex: 1;
-        padding: 0.75rem;
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        color: white;
-        font-weight: 600;
-        transition: all 0.2s ease;
+    .slider-wrapper {
+        position: relative;
+        margin-bottom: 2.5rem;
+        padding-top: 1rem;
     }
 
-    .control-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
+    .slider-track-glow {
+        position: absolute;
+        top: 14px;
+        left: 0;
+        height: 2px;
+        background: #3b82f6;
+        box-shadow: 0 0 15px #3b82f6;
+        opacity: 0.3;
+        pointer-events: none;
     }
 
-    .slider-container {
-        margin-bottom: 2rem;
-    }
-
-    .frequency-slider {
+    .cyber-slider {
+        -webkit-appearance: none;
         width: 100%;
-        height: 8px;
-        -webkit-appearance: none;
-        appearance: none;
-        background: var(--glass);
-        border-radius: 5px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
         outline: none;
-        border: 1px solid var(--glass-border);
+        cursor: pointer;
     }
 
-    .frequency-slider::-webkit-slider-thumb {
+    .cyber-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
-        appearance: none;
         width: 24px;
         height: 24px;
-        border-radius: 50%;
-        background: var(--primary);
-        cursor: pointer;
-        box-shadow: 0 0 10px var(--primary);
-        transition: transform 0.2s ease;
+        background: #fff;
+        border: 4px solid #3b82f6;
+        border-radius: 4px;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
     }
 
-    .frequency-slider::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-    }
-
-    .frequency-slider::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: var(--primary);
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 0 10px var(--primary);
-    }
-
-    .slider-labels {
+    .freq-labels {
         display: flex;
         justify-content: space-between;
-        margin-top: 0.5rem;
-        font-size: 0.875rem;
-        color: var(--text-muted);
+        margin-top: 0.75rem;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.8rem;
+        color: #64748b;
     }
 
-    .lock-button {
-        width: 100%;
-        padding: 1rem;
-        border-radius: 12px;
-        background: var(--glass);
-        border: 2px solid var(--glass-border);
-        color: white;
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
+    .big-action {
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #64748b !important;
+        padding: 1.25rem !important;
+        font-size: 1.2rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
-    .lock-button.ready {
-        background: var(--primary);
-        border-color: var(--primary);
-        animation: glow-pulse 1s ease-in-out infinite;
+    .big-action.ready {
+        background: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        color: #fff !important;
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        animation: cyber-glow 2s infinite;
     }
 
-    @keyframes glow-pulse {
+    @keyframes cyber-glow {
         0%,
         100% {
-            box-shadow: 0 0 20px var(--primary);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
         }
         50% {
-            box-shadow: 0 0 40px var(--primary);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
         }
     }
 
-    .lock-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .proximity-indicator {
-        text-align: center;
-        font-size: 1.125rem;
-        color: var(--text-muted);
-    }
-
-    .proximity-indicator strong {
-        color: var(--primary);
-        font-size: 1.5rem;
-    }
-    .lock-screen {
-        text-align: center;
-        padding: 2rem;
-        background: var(--glass);
-        border: 2px solid var(--glass-border);
-        border-radius: 20px;
-        color: white;
-    }
-
-    .input-group {
+    .proximity-readout {
         display: flex;
-        gap: 0.5rem;
         justify-content: center;
-        margin: 1.5rem 0;
+        align-items: center;
+        gap: 1rem;
+        font-family: "Orbitron", sans-serif;
     }
 
-    .access-input {
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid var(--primary);
-        padding: 0.8rem;
-        border-radius: 8px;
-        color: white;
-        font-family: inherit;
-        text-align: center;
-        font-size: 1.1rem;
+    .proximity-readout .label {
+        font-size: 0.8rem;
+        color: #64748b;
     }
-
-    .access-input:focus {
-        outline: none;
-        box-shadow: 0 0 10px var(--primary);
-    }
-
-    .unlock-btn {
-        background: var(--primary);
-        border: none;
-        padding: 0 1.5rem;
-        border-radius: 8px;
-        cursor: pointer;
+    .proximity-readout .value {
         font-size: 1.5rem;
-        font-weight: bold;
-        color: white;
-        transition: all 0.2s;
+        color: #3b82f6;
+    }
+    .proximity-readout .value.synced {
+        color: #10b981;
+        text-shadow: 0 0 10px #10b981;
     }
 
-    .unlock-btn:hover {
-        transform: scale(1.05);
-    }
-
-    .error-text {
-        color: #ef4444;
-        font-weight: bold;
-    }
-
+    /* Revelation Overlay */
     .revelation-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.85);
+        background: rgba(2, 6, 23, 0.9);
         backdrop-filter: blur(8px);
+        z-index: 1000;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 50;
-        padding: 2rem;
-        text-align: center;
+        padding: 1.5rem;
     }
 
     .revelation-card {
-        background: linear-gradient(135deg, #1e1b4b, #312e81);
-        padding: 2.5rem;
-        border-radius: 24px;
-        border: 2px solid #6366f1;
-        box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
-        max-width: 400px;
-        animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 450px;
+        width: 100%;
+        text-align: center;
+        border-color: #fbbf24 !important;
+        box-shadow: 0 0 50px rgba(251, 191, 36, 0.2);
     }
 
-    .revelation-card .icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        animation: bounce 2s infinite;
-    }
-
-    .story-box {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin: 1.5rem 0;
-        line-height: 1.6;
-        font-size: 1.1rem;
-        color: #e0e7ff;
-    }
-
-    .sub-text {
-        font-style: italic;
-        color: #818cf8;
+    .revelation-header {
         margin-bottom: 2rem;
     }
 
-    .finish-btn {
-        width: 100%;
+    .revelation-header .icon {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+        animation: emoji-bounce 2s infinite ease-in-out;
+    }
+
+    @keyframes emoji-bounce {
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+        50% {
+            transform: scale(1.2) rotate(10deg);
+        }
+    }
+
+    .glitch-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.5rem;
+        color: #fff;
+        position: relative;
+    }
+
+    .intel-report {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .report-text {
+        font-size: 1.1rem;
+        color: #94a3b8;
+    }
+
+    .revelation-details {
+        background: rgba(251, 191, 36, 0.1);
+        border-left: 2px solid #fbbf24;
         padding: 1rem;
-        background: #22c55e;
-        color: white;
+        color: #fbbf24;
+        font-family: "Rajdhani", sans-serif;
+        line-height: 1.5;
+    }
+
+    .revelation-details .prefix {
+        font-family: "Share Tech Mono", monospace;
+        font-weight: 700;
+        margin-right: 0.5rem;
+    }
+
+    .comic-relief {
+        text-align: center;
+        font-family: "Audiowide", cursive;
+        font-size: 1.5rem;
+        color: #fff;
+        margin: 0;
+    }
+
+    /* Cyber Buttons Base */
+    .cyber-btn {
+        position: relative;
+        padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 12px;
-        font-weight: 800;
-        font-size: 1.2rem;
         cursor: pointer;
-        transition: transform 0.2s;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        text-transform: uppercase;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
     }
 
-    .finish-btn:hover {
-        transform: scale(1.05);
-        background: #16a34a;
+    .cyber-btn.primary {
+        background: #3b82f6;
+        width: 100%;
+    }
+    .cyber-btn.secondary {
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid #3b82f6;
+        flex: 1;
+    }
+    .cyber-btn.danger {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        flex: 1;
+    }
+    .cyber-btn.success-action {
+        background: #10b981;
+        color: #000;
+        width: 100%;
+        font-size: 1.2rem;
+        padding: 1.25rem;
     }
 
-    @keyframes pop-in {
+    .cyber-btn:hover:not(:disabled) {
+        filter: brightness(1.2);
+        transform: translateY(-2px);
+    }
+
+    /* Additional helpers */
+    .blink {
+        animation: blink-anim 1s infinite alternate;
+    }
+    @keyframes blink-anim {
         from {
-            transform: scale(0.8);
-            opacity: 0;
+            opacity: 0.3;
         }
         to {
-            transform: scale(1);
             opacity: 1;
         }
     }
 
-    @keyframes bounce {
-        0%,
-        100% {
-            transform: translateY(0);
+    .error-banner {
+        color: #ef4444;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 480px) {
+        .hz-value {
+            font-size: 2.5rem;
         }
-        50% {
-            transform: translateY(-10px);
+        .glass-card {
+            padding: 1.5rem;
         }
     }
 </style>

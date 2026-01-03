@@ -23,23 +23,6 @@
         if (VALID_CODES.includes(code)) {
             showSuccess = true;
             errorMessage = "";
-
-            // Navigate to next mission after brief delay
-            setTimeout(() => {
-                const currentPath = window.location.pathname.replace(/\/$/, "");
-                const idx = MISSION_ORDER.indexOf(currentPath);
-                if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                    const nextPath = MISSION_ORDER[idx + 1];
-                    fetch("/api/mission", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ navTo: nextPath }),
-                    }).catch(console.error);
-                    goto(nextPath);
-                } else {
-                    goto("/game/rho-system-88");
-                }
-            }, 1000);
         } else {
             errorMessage = "Onjuiste code. Zoek goed rond in de ruimte!";
             showSuccess = false;
@@ -82,9 +65,30 @@
                 </div>
                 <h3>TOEGANG VERLEEND</h3>
                 <p>Locatie bevestigd. Rerouting...</p>
-                <div class="loading-bar">
-                    <div class="bar-fill"></div>
-                </div>
+
+                <button
+                    class="action-button success-btn"
+                    onclick={() => {
+                        const currentPath = window.location.pathname.replace(
+                            /\/$/,
+                            "",
+                        );
+                        const idx = MISSION_ORDER.indexOf(currentPath);
+                        if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                            const nextPath = MISSION_ORDER[idx + 1];
+                            fetch("/api/mission", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ navTo: nextPath }),
+                            }).catch(console.error);
+                            goto(nextPath);
+                        } else {
+                            goto("/game/rho-system-88");
+                        }
+                    }}
+                >
+                    DOORGAAN NAAR VOLGENDE MISSIE
+                </button>
             </div>
         {:else}
             <div class="briefing-panel">
@@ -556,6 +560,17 @@
     .action-button:hover {
         transform: scale(1.02);
         background: #2563eb;
+    }
+
+    .success-btn {
+        margin-top: 2rem;
+        background: #10b981 !important;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .success-btn:hover {
+        background: #059669 !important;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
     }
 
     .btn-content {

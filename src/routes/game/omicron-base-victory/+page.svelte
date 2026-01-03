@@ -20,17 +20,6 @@
         if (VALID_CODES.includes(code)) {
             showSuccess = true;
             errorMessage = "";
-
-            // Navigate to Zeta Flux after brief delay
-            setTimeout(() => {
-                const nextPath = "/game/zeta-flux-33";
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }, 1000);
         } else {
             errorMessage = "⚠️ ACCESS DENIED: INVALID DECRYPTION KEY";
             showSuccess = false;
@@ -126,7 +115,20 @@
                         <div class="success-ring"></div>
                     </div>
                     <p class="success-text">COÖRDINATEN BEVESTIGD</p>
-                    <p class="sub-text">Initialiseren Zeta Flux Protocol...</p>
+                    <button
+                        class="next-btn manual-next"
+                        onclick={() => {
+                            const nextPath = "/game/zeta-flux-33";
+                            fetch("/api/mission", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ navTo: nextPath }),
+                            }).catch(console.error);
+                            goto(nextPath);
+                        }}
+                    >
+                        DOORGAAN NAAR ZETA FLUX
+                    </button>
                 </div>
             {:else}
                 <button
@@ -623,6 +625,16 @@
 
     .next-btn:hover {
         background: #2563eb;
+    }
+
+    .manual-next {
+        margin-top: 1.5rem;
+        background: #22c55e !important;
+    }
+
+    .manual-next:hover {
+        background: #16a34a !important;
+        transform: scale(1.05);
     }
 
     .btn-glitch {

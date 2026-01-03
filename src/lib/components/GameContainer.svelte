@@ -8,12 +8,14 @@
         gameId,
         title,
         children,
+        nextUrl,
         onComplete = () => {},
         onReset = () => {},
     }: {
         gameId: string;
         title: string;
         children: any;
+        nextUrl?: string;
         onComplete?: (score: number) => void;
         onReset?: () => void;
     } = $props();
@@ -51,10 +53,6 @@
         soundManager.playWin();
         gameProgress.completeGame(gameId, finalScore);
         onComplete(finalScore);
-
-        setTimeout(() => {
-            showVictory = false;
-        }, 3000);
     }
 
     export function lose() {
@@ -85,12 +83,53 @@
     {#if showVictory}
         <div class="victory-overlay">
             <div class="victory-content animate-victory">
-                <div class="victory-icon">🎉</div>
-                <h1>Missie Geslaagd!</h1>
-                <p class="score-display">Score: {score}</p>
-                <button class="btn-play-again" onclick={reset}>
-                    Speel Opnieuw
-                </button>
+                <div class="victory-icon">🏆</div>
+                <h1>MISSIE GESLAAGD</h1>
+                <p class="score-display">PUNTEN: {score}</p>
+                <div class="victory-actions">
+                    <button class="btn-play-again" onclick={reset}>
+                        Speel Opnieuw
+                    </button>
+                    <button
+                        class="btn-continue"
+                        onclick={() => {
+                            if (nextUrl) {
+                                goto(nextUrl);
+                                return;
+                            }
+                            const currentPath =
+                                window.location.pathname.replace(/\/$/, "");
+                            const idx = MISSION_ORDER.indexOf(currentPath);
+                            // Also try to match the parent mission path if it's a sub-game
+                            const parentPath = currentPath
+                                .split("/")
+                                .slice(0, 3)
+                                .join("/");
+                            const pIdx = MISSION_ORDER.indexOf(parentPath);
+
+                            const targetIdx = idx !== -1 ? idx : pIdx;
+
+                            if (
+                                targetIdx !== -1 &&
+                                targetIdx < MISSION_ORDER.length - 1
+                            ) {
+                                const nextPath = MISSION_ORDER[targetIdx + 1];
+                                fetch("/api/mission", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({ navTo: nextPath }),
+                                }).catch(console.error);
+                                goto(nextPath);
+                            } else {
+                                goto("/game");
+                            }
+                        }}
+                    >
+                        Volgende Missie
+                    </button>
+                </div>
             </div>
         </div>
     {/if}
@@ -271,20 +310,43 @@
 
     .btn-play-again,
     .btn-try-again,
-    .btn-continue-anyway {
+    .btn-continue-anyway,
+    .btn-continue {
         padding: 1rem 2.5rem;
-        border-radius: 12px;
+        border-radius: 4px;
         font-weight: 700;
         font-size: 1.1rem;
         transition: all 0.3s ease;
         border: none;
         cursor: pointer;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .victory-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
     }
 
     .btn-play-again,
     .btn-try-again {
-        background: var(--primary);
+        background: rgba(255, 255, 255, 0.1);
         color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-continue {
+        background: #0ef3ff;
+        color: #020617;
+        box-shadow: 0 0 20px rgba(14, 243, 255, 0.3);
+    }
+
+    .btn-continue:hover {
+        background: #fff;
+        box-shadow: 0 0 30px rgba(14, 243, 255, 0.5);
     }
 
     .btn-continue-anyway {
