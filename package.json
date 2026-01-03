@@ -16,7 +16,6 @@
 		"generate-qr": "node scripts/generate-qr.js"
 	},
 	"devDependencies": {
-
 		"@sveltejs/adapter-netlify": "^5.2.4",
 		"@sveltejs/kit": "^2.49.1",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
@@ -26,6 +25,8 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
+		"@mediapipe/drawing_utils": "^0.3.1675466124",
+		"@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
 		"@types/qrcode": "^1.5.6",
 		"html5-qrcode": "^2.3.8",
 		"jimp": "^1.6.0",

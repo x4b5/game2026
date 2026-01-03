@@ -10,30 +10,30 @@
         {
             id: "lord-mosa",
             name: "Lord Mosa",
-            power: "🌊 De Heerser van de Maas",
+            power: "De Heerser van de Maas",
             origin: "Geboren met de gave om de Maas te beheersen.",
             imgIdle: "/heroes/lord-mosa.png",
-            imgAction: "/heroes/lord-mosa.png",
+            imgAction: "/heroes/lord-mosa-2.png",
             color: "#3b82f6",
             playerNumber: 1,
         },
         {
             id: "stella",
             name: "Stella",
-            power: "🎭 De Mestreechter Geis",
-            origin: "Is op mysterieuze wijze gemuteerd tijdens de Vastelaovend.",
+            power: "De belichaming van de Mestreechter Geis",
+            origin: "Op mysterieuze wijze betoverd tijdens de Vastelaovend.",
             imgIdle: "/heroes/stella.png",
-            imgAction: "/heroes/stella.png",
+            imgAction: "/heroes/stella-2.png",
             color: "#ef4444",
             playerNumber: 2,
         },
         {
             id: "the-minck",
             name: "The Minck",
-            power: "🔥 De Vlammende Waker",
+            power: "De Vlammende Waker",
             origin: "Ontstaan uit de eeuwige vlam van Jan Pieter Minckeleers.",
             imgIdle: "/heroes/the-minck.png",
-            imgAction: "/heroes/the-minck.png",
+            imgAction: "/heroes/the-minck-2.png",
             color: "#06b6d4",
             playerNumber: 3,
         },
@@ -52,17 +52,20 @@
     let videoElement: HTMLVideoElement;
 
     let briefingText =
-        "Systeem geactiveerd... (v2.1) Verbinding maken met satellieten... Aliens hebben strategische punten bezet. Jouw missie: kraak het slot van de badkamer, en spoel ze weg bij de Servaasbrug!";
+        'krrzt... #%&... SIGNAL UNSTABLE... /// REROUTING... SYSTEM ONLINE... ENCRYPTED FEED ESTABLISHED. Agent X: "Vijandige entiteiten hebben strategische sectoren in de stad overgenomen. Maastricht heeft in de geschiedenis vele belegeringen doorstaan. JULLIE MISSIE: Verdrijf de aliens en breng rust terug in Maastricht. Stel me niet teleur."';
     let displayedBriefing = $state("");
+    let isStabilizing = $state(false); // Start false, trigger on briefing view
 
     onMount(() => {
         mounted = true;
+        // Interference triggered by IntersectionObserver now
+
         soundManager.init().then(() => {
             soundManager.startAmbientMusic();
         });
 
         // Show briefing text immediately
-        displayedBriefing = briefingText;
+        // displayedBriefing handled by typeWriter action now
 
         // Reset players when this page opens - it's the start of a new game
         gameProgress.reset();
@@ -128,6 +131,45 @@
             goto("/game/kappa-grid-27/challenge");
         }, 800);
     }
+
+    function typeWriter(
+        node: HTMLElement,
+        { speed = 30, delay = 0, onStart = () => {} } = {},
+    ) {
+        const text = node.textContent?.trim() || "";
+        node.textContent = "";
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        observer.disconnect();
+                        setTimeout(() => {
+                            onStart(); // Trigger interference/start callback
+                            let i = 0;
+                            const timer = setInterval(() => {
+                                if (i < text.length) {
+                                    node.textContent += text.charAt(i);
+                                    i++;
+                                } else {
+                                    clearInterval(timer);
+                                }
+                            }, speed);
+                        }, delay);
+                    }
+                });
+            },
+            { threshold: 0.1 },
+        );
+
+        observer.observe(node);
+
+        return {
+            destroy() {
+                observer.disconnect();
+            },
+        };
+    }
 </script>
 
 <svelte:head>
@@ -139,7 +181,7 @@
         crossorigin="anonymous"
     />
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Tektur:wght@400;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Tektur:wght@400;900&display=swap"
         rel="stylesheet"
     />
 </svelte:head>
@@ -149,11 +191,7 @@
     <div class="animated-bg"></div>
     <div class="cyber-grid"></div>
     <div class="scanline-overlay"></div>
-    <div class="particles">
-        {#each Array(30) as _, i}
-            <div class="particle" style:--i={i}></div>
-        {/each}
-    </div>
+    <div class="noise-overlay"></div>
 
     <!-- HUD Decorations -->
     <div class="hud-overlay">
@@ -189,42 +227,55 @@
                     <span class="line2">Maastricht</span>
                 </div>
             </h1>
-            <div class="subtitle">
+            <div class="subtitle" use:typeWriter={{ speed: 20, delay: 300 }}>
                 De stad wordt aangevallen door buitenaardse krachten. Jullie
                 zijn lokale superhelden en worden nu als agenten ingezet om
-                Maaastricht te bevrijden.
+                Maastricht te bevrijden.
             </div>
+        </div>
+        <div class="video-surveillance-container">
+            <div class="rec-indicator">● REC</div>
+            <div class="cam-info">CAM-2B // LIVE FEED</div>
             <video
                 bind:this={videoElement}
                 src="/alien-attack.mp4"
-                class="hero-video-banner"
+                class="hero-video-banner surveillance-mode"
                 autoplay
                 muted
                 playsinline
+                loop
             ></video>
+            <img src="/wat-is-loos.png" alt="Intel" class="pip-overlay" />
+            <div class="scanlines-video"></div>
         </div>
     </div>
 
     <!-- Avatar Selection -->
     <div class="selection-section">
-        <h2 class="section-title">VOEG SPELERS TOE</h2>
-        <p class="section-subtitle">
-            Elke speler kiest een agent en voert zijn/haar naam in
-        </p>
+        <h2 class="section-title">ASSEMBLE STRIKE TEAM</h2>
+        <p class="section-subtitle">SELECT OPERATIVE // AUTHORIZE IDENTITY</p>
 
         <div class="hero-grid">
             {#each heroes as hero}
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
                 <div
                     class="hero-card glass-panel"
                     class:added={addedPlayers.includes(hero.id)}
+                    class:ready={addedPlayers.includes(hero.id)}
                     style:--hero-color={hero.color}
+                    onmouseenter={() => soundManager.playHover()}
                 >
                     <div class="hero-image-container">
                         <img
-                            src={hero.imgIdle}
+                            src={addedPlayers.includes(hero.id)
+                                ? hero.imgAction
+                                : hero.imgIdle}
                             alt={hero.name}
                             class="hero-image"
                         />
+                        {#if addedPlayers.includes(hero.id)}
+                            <div class="ready-badge">READY</div>
+                        {/if}
                     </div>
                     <div class="hero-info">
                         <div class="hero-name">{hero.name}</div>
@@ -237,18 +288,21 @@
                             <input
                                 type="text"
                                 bind:value={playerNames[hero.id]}
-                                placeholder="Voer je naam in..."
+                                placeholder="ENTER CODENAME..."
                                 maxlength="20"
+                                onkeydown={(e) =>
+                                    e.key === "Enter" && addPlayer(hero.id)}
                             />
                             <button
                                 class="add-player-btn"
                                 onclick={() => addPlayer(hero.id)}
                             >
-                                Voeg Toe
+                                CONFIRM DEPLOYMENT
                             </button>
                         </div>
                     {:else}
                         <div class="player-added">
+                            <div class="player-label">AGENT:</div>
                             <span class="player-name">
                                 {$gameProgress.players.find(
                                     (p) => p.avatar === hero.id,
@@ -267,10 +321,27 @@
         <div class="corner tr"></div>
         <div class="corner bl"></div>
         <div class="corner br"></div>
-        <h2>🎯 DE BRIEFING</h2>
-        <div class="typewriter-content">
-            {displayedBriefing}
-            <span class="cursor">_</span>
+        <h2>BRIEFING AGENT X</h2>
+        <div class="briefing-content" class:signal-interference={isStabilizing}>
+            <div class="agent-portrait">
+                <img src="/heroes/agent-x.png" alt="Agent X" />
+                <div class="scan-line"></div>
+            </div>
+            <div class="typewriter-content">
+                <span
+                    use:typeWriter={{
+                        speed: 15,
+                        delay: 500,
+                        onStart: () => {
+                            isStabilizing = true;
+                            setTimeout(() => {
+                                isStabilizing = false;
+                            }, 2500);
+                        },
+                    }}>{briefingText}</span
+                >
+                <span class="cursor">_</span>
+            </div>
         </div>
     </div>
 
@@ -298,6 +369,20 @@
 <style>
     :global(body) {
         font-family: "Rajdhani", sans-serif;
+        font-weight: 600;
+        background-color: #0f172a;
+    }
+
+    .noise-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 900;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
 
     .welcome-page {
@@ -327,17 +412,19 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(
-            -45deg,
-            #0f172a,
-            #1e1b4b,
-            #312e81,
-            #1e293b,
-            #0c4a6e
-        );
-        background-size: 400% 400%;
-        animation: gradientShift 12s ease infinite;
+        background: radial-gradient(circle at center, #1e1b4b 0%, #000000 100%);
+        box-shadow: inset 0 0 100px #000;
         z-index: -2;
+        animation: bg-alarm-pulse 4s infinite alternate;
+    }
+
+    @keyframes bg-alarm-pulse {
+        0% {
+            box-shadow: inset 0 0 100px #000;
+        }
+        100% {
+            box-shadow: inset 0 0 150px rgba(220, 38, 38, 0.3);
+        } /* Red alarm glow */
     }
 
     @keyframes gradientShift {
@@ -430,15 +517,33 @@
         height: 100%;
         background: linear-gradient(
             to bottom,
-            transparent 0%,
-            rgba(59, 130, 246, 0.1) 50%,
-            transparent 100%
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0) 50%,
+            rgba(0, 0, 0, 0.2) 50%,
+            rgba(0, 0, 0, 0.2)
         );
-        background-size: 100% 10px;
-        animation: scanlineScroll 10s linear infinite;
-        pointer-events: none;
+        background-size: 100% 4px;
         z-index: 1000;
-        opacity: 0.2;
+        pointer-events: none;
+        animation: scanlines 0.2s linear infinite;
+        opacity: 0.15;
+    }
+
+    /* Vignette & CRT Curve */
+    .scanline-overlay::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: radial-gradient(
+            rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.45) 100%
+        );
+        background-size: 100% 100%;
+        pointer-events: none;
     }
 
     @keyframes scanlineScroll {
@@ -496,22 +601,22 @@
 
     /* Hero Section */
     .hero-section {
-        margin-bottom: 3rem;
+        margin-bottom: 12rem;
     }
 
     .title-container {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 4rem;
     }
 
     .title {
-        font-family: "Orbitron", sans-serif;
+        font-family: "Audiowide", cursive;
         font-size: clamp(2rem, 9vw, 5rem);
         font-weight: 950;
         letter-spacing: -1px;
         filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
         line-height: 0.8;
-        margin-bottom: 1rem;
+        margin-bottom: 8rem;
         width: 100%;
         display: flex;
         justify-content: center;
@@ -577,8 +682,21 @@
 
     @keyframes glitch {
         0% {
-            transform: translate(0) skew(0deg);
-            clip-path: inset(0% 0 0% 0);
+            transform: translate(0);
+            text-shadow:
+                -2px 0 #ff00c1,
+                2px 0 #01ffff;
+        }
+        2%,
+        64% {
+            transform: translate(2px, 0) skew(0deg);
+        }
+        4%,
+        60% {
+            transform: translate(-2px, 0) skew(0deg);
+        }
+        62% {
+            transform: translate(0, 0) skew(5deg);
         }
         10% {
             transform: translate(-15px, 5px) skew(-10deg);
@@ -772,7 +890,7 @@
         color: rgba(255, 255, 255, 0.8);
         font-weight: 500;
         max-width: 600px;
-        margin: 0 auto;
+        margin: 0 auto 5rem auto;
         line-height: 1.5;
         padding: 0 1rem;
     }
@@ -801,27 +919,291 @@
         }
     }
 
-    .hero-video-banner {
+    .video-surveillance-container {
+        position: relative;
+        max-width: 600px;
+        margin: 8rem auto 8rem auto;
+        border: 2px solid #334155;
+        background: #000;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-video-banner.surveillance-mode {
         display: block;
         width: 100%;
-        max-width: 500px;
         height: auto;
-        border-radius: 20px;
-        margin: 2rem auto 0 auto;
-        border: 3px solid rgba(59, 130, 246, 0.4);
-        box-shadow:
-            0 0 40px rgba(59, 130, 246, 0.3),
-            0 10px 30px rgba(0, 0, 0, 0.5);
+        opacity: 0.8;
+        filter: sepia(0.2) grayscale(0.4) contrast(1.2);
+        box-shadow: none;
+        border: none;
+        margin: 0;
+    }
+
+    .rec-indicator {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        color: #ef4444;
+        font-family: "Share Tech Mono", monospace;
+        font-weight: bold;
+        animation: blink 1s steps(1) infinite;
+        z-index: 10;
+        text-shadow: 0 0 5px #ef4444;
+    }
+
+    @keyframes blink {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
+    }
+
+    .cam-info {
+        position: absolute;
+        bottom: 15px;
+        right: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.8rem;
+        z-index: 10;
+    }
+
+    .scanlines-video {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0) 50%,
+            rgba(0, 0, 0, 0.2) 50%,
+            rgba(0, 0, 0, 0.2)
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .pip-overlay {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        width: 120px;
+        height: auto;
+        border: 1px solid #ef4444;
+        z-index: 20;
+        opacity: 0.9;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     }
 
     .mission-brief {
-        padding: 2.5rem;
-        margin-top: 2rem;
+        padding: 4rem;
+        margin-top: 12rem; /* Increased from 5rem */
         backdrop-filter: blur(20px);
+        background: linear-gradient(
+                180deg,
+                rgba(6, 182, 212, 0.05) 0%,
+                rgba(6, 182, 212, 0) 100%
+            ),
+            #0f172a;
+        border: 4px solid #3b82f6;
+        box-shadow:
+            0 0 40px rgba(59, 130, 246, 0.3),
+            inset 0 0 100px rgba(0, 0, 0, 0.9);
+        border-radius: 4px;
         position: relative;
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        clip-path: polygon(
+            0 0,
+            100% 0,
+            100% calc(100% - 30px),
+            calc(100% - 30px) 100%,
+            0 100%
+        );
+    }
+
+    /* Scanning Laser Effect */
+    /* Scanning Laser Effect */
+    .mission-brief::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            rgba(59, 130, 246, 0.1) 50%,
+            transparent
+        );
+        background-size: 100% 200%;
+        animation: scan-briefing 4s linear infinite;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    @keyframes scan-briefing {
+        0% {
+            background-position: 0% 0%;
+        }
+        100% {
+            background-position: 0% 200%;
+        }
+    }
+
+    .briefing-content {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+        margin-top: 1rem;
+        position: relative;
+    }
+
+    .signal-interference {
+        animation: heavy-glitch 0.2s infinite;
+        filter: blur(2px) grayscale(100%) contrast(200%);
+        opacity: 0.7;
+    }
+
+    @keyframes heavy-glitch {
+        0% {
+            transform: translate(0, 0);
+            clip-path: inset(0 0 0 0);
+        }
+        20% {
+            transform: translate(-5px, 2px);
+            clip-path: inset(10% 0 40% 0);
+        }
+        40% {
+            transform: translate(5px, -2px);
+            clip-path: inset(40% 0 10% 0);
+        }
+        60% {
+            transform: translate(-2px, 5px);
+            clip-path: inset(80% 0 5% 0);
+        }
+        80% {
+            transform: translate(2px, -5px);
+            clip-path: inset(5% 0 60% 0);
+        }
+        100% {
+            transform: translate(0, 0);
+            clip-path: inset(0 0 0 0);
+        }
+    }
+
+    .agent-portrait {
+        flex-shrink: 0;
+        width: 180px;
+        height: 180px;
+        border: 2px solid #3b82f6;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .agent-portrait img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(100%) sepia(20%) hue-rotate(180deg) brightness(0.9);
+        animation: image-glitch 4s infinite;
+    }
+
+    @keyframes image-glitch {
+        0% {
+            transform: translate(0);
+            filter: grayscale(100%) sepia(20%) hue-rotate(180deg)
+                brightness(0.9);
+        }
+        2% {
+            transform: translate(-2px, 2px);
+            filter: grayscale(100%) sepia(20%) hue-rotate(220deg)
+                brightness(1.2);
+        }
+        4% {
+            transform: translate(2px, -2px);
+            filter: grayscale(0%) invert(100%);
+        }
+        5% {
+            transform: translate(0);
+            filter: grayscale(100%) sepia(20%) hue-rotate(180deg)
+                brightness(0.9);
+        }
+        15% {
+            transform: scale(1.02);
+            opacity: 0.8;
+        }
+        16% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            filter: grayscale(100%) sepia(40%) hue-rotate(180deg) blur(2px);
+        }
+        52% {
+            filter: grayscale(100%) sepia(20%) hue-rotate(180deg)
+                brightness(0.9);
+        }
+        80% {
+            transform: translate(1px, 0);
+        }
+        81% {
+            transform: translate(-1px, 0);
+        }
+        82% {
+            transform: translate(0);
+        }
+    }
+
+    .agent-portrait .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(59, 130, 246, 0.8);
+        box-shadow: 0 0 10px #3b82f6;
+        animation: scan-portrait 2s linear infinite;
+    }
+
+    @keyframes scan-portrait {
+        0% {
+            top: 0;
+        }
+        100% {
+            top: 100%;
+        }
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+        .briefing-content {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+
+    .mission-brief::before {
+        content: "TOP SECRET // CLASSIFIED EYES ONLY";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #3b82f6;
+        color: #000;
+        font-family: "Chakra Petch", sans-serif;
+        font-weight: 800;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.5);
+        z-index: 10;
+        letter-spacing: 2px;
     }
 
     .has-corners .corner {
@@ -877,30 +1259,154 @@
     }
 
     .mission-brief h2 {
-        margin-bottom: 1.5rem;
-        color: #3b82f6;
-        font-size: 1.5rem;
-        font-family: "Orbitron", sans-serif;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        color: #fff;
+        font-size: 2.5rem;
+        font-family: "Audiowide", cursive;
         font-weight: 900;
-        letter-spacing: 3px;
-        text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #3b82f6;
+        display: inline-block;
+        padding-bottom: 0.5rem;
+        text-shadow: 0 0 10px #3b82f6;
+    }
+
+    @keyframes briefing-glitch {
+        0% {
+            transform: translate(0) skew(0deg);
+            text-shadow: none;
+            opacity: 1;
+        }
+        2% {
+            transform: translate(-5px, 2px) skew(10deg);
+            text-shadow:
+                3px 0 #ff00c1,
+                -3px 0 #01ffff;
+            opacity: 0.8;
+        }
+        4% {
+            transform: translate(5px, -2px) skew(-10deg);
+            text-shadow:
+                -3px 0 #ff00c1,
+                3px 0 #01ffff;
+            opacity: 0.8;
+        }
+        5% {
+            opacity: 0;
+        }
+        6% {
+            transform: translate(0) skew(0deg);
+            text-shadow: none;
+            opacity: 1;
+        }
+        10% {
+            transform: translate(-2px, 0);
+            opacity: 0.5;
+        }
+        11% {
+            transform: translate(2px, 0);
+            opacity: 1;
+        }
+        15% {
+            transform: scale(1.1) skew(20deg);
+            text-shadow:
+                4px 0 #ff00c1,
+                -4px 0 #01ffff;
+            opacity: 0.6;
+        }
+        16% {
+            transform: scale(1) skew(0deg);
+            text-shadow: none;
+            opacity: 1;
+        }
+        40% {
+            opacity: 1;
+        }
+        41% {
+            transform: translate(-10px, 0) skew(-20deg);
+            opacity: 0;
+        }
+        42% {
+            transform: translate(10px, 0) skew(20deg);
+            opacity: 1;
+        }
+        43% {
+            transform: translate(0) skew(0deg);
+            opacity: 1;
+        }
+        50% {
+            text-shadow:
+                2px 2px #ff00c1,
+                -2px -2px #01ffff;
+        }
+        52% {
+            text-shadow: none;
+        }
+        65% {
+            transform: translate(0);
+            opacity: 1;
+        }
+        66% {
+            transform: translate(5px, 5px) skew(30deg);
+            opacity: 0.4;
+        }
+        67% {
+            transform: translate(-5px, -5px) skew(-30deg);
+            opacity: 1;
+        }
+        68% {
+            transform: translate(0);
+            opacity: 1;
+        }
+        80% {
+            opacity: 0;
+        }
+        82% {
+            opacity: 1;
+        }
+        95% {
+            transform: skew(5deg);
+        }
+        96% {
+            transform: skew(-5deg);
+        }
+        97% {
+            transform: skew(0);
+        }
+        100% {
+            transform: translate(0);
+            text-shadow: none;
+            opacity: 1;
+        }
     }
 
     .typewriter-content {
-        font-family: "Courier New", monospace;
-        font-size: 1rem;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 1.25rem;
         line-height: 1.6;
-        color: rgba(255, 255, 255, 0.9);
+        color: #22c55e;
+        text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
         min-height: 3rem;
+        text-align: left;
+        animation: briefing-glitch 5s infinite;
+        position: relative;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1.5rem;
+        border: 1px solid #22c55e;
+        border-left: 4px solid #22c55e;
     }
 
     .cursor {
         display: inline-block;
         width: 8px;
         height: 1.2em;
-        background: #3b82f6;
+        background: #33ff00;
+        box-shadow: 0 0 5px #33ff00;
         margin-left: 2px;
-        animation: blink-cursor 1s step-end infinite;
+        vertical-align: text-bottom;
+        animation: blink-caret 1s step-end infinite;
     }
 
     @keyframes blink-cursor {
@@ -915,12 +1421,12 @@
 
     /* Selection Section */
     .selection-section {
-        margin-bottom: 2.5rem;
+        margin-bottom: 12rem; /* Increased from 5rem */
     }
 
     .section-title {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 5rem;
         font-size: 3rem;
         font-family: "Tektur", sans-serif;
         font-weight: 400;
@@ -937,26 +1443,53 @@
     .hero-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 3rem;
+        margin-bottom: 5rem;
     }
 
     .hero-card {
-        padding: 1.25rem;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 2px solid transparent;
+        padding: 0;
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
         position: relative;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.03);
+        transition: all 0.3s ease;
+    }
+
+    .hero-card::before {
+        /* Tech corner accent top-right */
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        border-top: 2px solid var(--hero-color);
+        border-right: 2px solid var(--hero-color);
+        z-index: 2;
     }
 
     .hero-card:hover {
-        transform: translateY(-12px) scale(1.05);
-        box-shadow:
-            0 20px 50px rgba(0, 0, 0, 0.6),
-            0 0 20px var(--hero-color);
-        background: rgba(255, 255, 255, 0.05);
+        transform: translateY(-5px);
+        border-color: var(--hero-color);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-image-container {
+        margin: 0;
+        border-radius: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.2),
+            rgba(0, 0, 0, 0.8)
+        );
+    }
+
+    .hero-info {
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.4);
     }
 
     .hero-card.selected {
@@ -1091,7 +1624,7 @@
     }
 
     .hero-name {
-        font-family: "Orbitron", sans-serif !important;
+        font-family: "Audiowide", cursive !important;
         font-weight: 700 !important;
         font-size: 1.1rem !important;
         margin-top: 0.5rem;
@@ -1159,28 +1692,37 @@
 
     /* Start Button */
     .start-section {
-        margin-bottom: 2rem;
+        margin-top: 10rem; /* Added space */
+        margin-bottom: 6rem;
     }
 
     .start-button {
         width: 100%;
-        padding: 1.75rem 2.5rem;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
-        background-size: 200% 200%;
-        border: none;
-        border-radius: 20px;
-        color: white;
+        max-width: 600px;
+        margin: 0 auto;
+        display: block;
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        color: #fff;
         font-size: 1.5rem;
-        font-weight: 700;
-        font-family: "Orbitron", sans-serif;
-        letter-spacing: 0.05em;
+        letter-spacing: 2px;
         text-transform: uppercase;
+        font-family: "Audiowide", cursive;
         cursor: pointer;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
         opacity: 0.5;
         position: relative;
         overflow: hidden;
+        clip-path: polygon(
+            10% 0,
+            100% 0,
+            100% 70%,
+            90% 100%,
+            0 100%,
+            0 30%
+        ); /* Sci-fi shape */
     }
 
     .start-button::before {
@@ -1204,8 +1746,10 @@
     }
 
     .start-button.active {
+        background: #2563eb;
+        border-color: #60a5fa;
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
         opacity: 1;
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
         animation: pulse-glow 2s infinite ease-in-out;
     }
 
@@ -1348,7 +1892,7 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        font-family: monospace;
+        font-family: "Share Tech Mono", monospace;
         font-size: 0.7rem;
         color: rgba(59, 130, 246, 0.4);
         letter-spacing: 2px;
@@ -1591,6 +2135,7 @@
         }
         50% {
             transform: scale(1.05);
+            opacity: 1;
         }
         100% {
             transform: scale(1);
@@ -1598,14 +2143,49 @@
         }
     }
 
-    .player-name {
+    .ready-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: #22c55e; /* Neon Green */
+        color: #000;
         font-family: "Orbitron", sans-serif;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #22c55e;
+        font-weight: 900;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 4px;
+        box-shadow: 0 0 15px #22c55e;
+        transform: rotate(-5deg);
+        animation: badge-pulse 1s infinite alternate;
+        z-index: 20;
+    }
+
+    @keyframes badge-pulse {
+        from {
+            transform: rotate(-5deg) scale(1);
+            box-shadow: 0 0 10px #22c55e;
+        }
+        to {
+            transform: rotate(-5deg) scale(1.1);
+            box-shadow: 0 0 25px #22c55e;
+        }
+    }
+
+    .player-label {
+        font-family: "Rajdhani", sans-serif;
+        font-size: 0.8rem;
+        color: #86efac;
         text-transform: uppercase;
         letter-spacing: 1px;
-        text-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+        margin-bottom: 0.2rem;
+    }
+
+    .player-name {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
         display: block;
         animation: glow-text 2s ease-in-out infinite;
     }

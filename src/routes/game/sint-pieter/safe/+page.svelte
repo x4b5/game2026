@@ -151,7 +151,25 @@
     }
 </script>
 
-<div class="safe-page" in:fade>
+<svelte:head>
+    <title>Sint Pieter // SECURITY CLEARANCE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin="anonymous"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Audiowide&family=Chakra+Petch:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet"
+    />
+</svelte:head>
+
+<div class="safe-page">
+    <div class="animated-bg"></div>
+    <div class="scanline-overlay"></div>
+    <div class="vignette"></div>
+
     <GameContainer
         bind:this={gameContainer}
         gameId="sint-pieter-safe"
@@ -160,31 +178,62 @@
     >
         <div class="game-content">
             {#if gamePhase === "intro"}
-                <div class="card briefing" in:fly={{ y: 20 }}>
-                    <div class="vault-icon">🔒</div>
-                    <h2>Identiteitscontrole</h2>
-                    <p>
+                <div class="cyber-card briefing" in:fly={{ y: 20 }}>
+                    <!-- Decoration -->
+                    <div class="deco-bar top"></div>
+
+                    <div class="icon-header">
+                        <div class="vault-icon">🔒</div>
+                        <div class="scan-ring"></div>
+                    </div>
+
+                    <h2 class="glitch-text">IDENTITEITSCONTROLE</h2>
+                    <p class="mission-text">
                         De kluis is beveiligd met een bio-metrische
                         Maastricht-check. Beantwoord 10 vragen over de stad.
-                        Minimaal <strong>5 goed</strong> om de kluis te openen en
-                        de viool te bevrijden.
+                        <br /><br />
+                        <span class="highlight">VEREISTE:</span> Minimaal
+                        <strong>5 correcte antwoorden</strong> om het beveiligingsprotocol
+                        te doorbreken.
                     </p>
                     <button class="primary-btn" onclick={startQuiz}>
-                        START DECODERING
+                        <div class="btn-content">START DECODERING</div>
+                        <div class="btn-glitch"></div>
                     </button>
                 </div>
             {:else if gamePhase === "quiz"}
                 <div class="quiz-container">
-                    <div class="quiz-header">
+                    <div class="quiz-header glass-panel">
                         <div class="progress-info">
-                            VRAAG {currentQuestionIndex + 1} VAN {questions.length}
+                            <span class="label">PROGRESSIE</span>
+                            <span class="value"
+                                >{currentQuestionIndex + 1} / {questions.length}</span
+                            >
                         </div>
                         <div class="score-tracking">
-                            GEVONDEN DATA: {score}
+                            <span class="label">DATA</span>
+                            <span class="value">{score}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div
+                                class="fill"
+                                style:width="{(currentQuestionIndex /
+                                    questions.length) *
+                                    100}%"
+                            ></div>
                         </div>
                     </div>
 
-                    <div class="question-card" in:scale={{ duration: 300 }}>
+                    <div
+                        class="question-card cyber-box"
+                        in:scale={{ duration: 300 }}
+                    >
+                        <!-- Corners -->
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+
                         <h3>{questions[currentQuestionIndex].q}</h3>
 
                         <div class="options-grid">
@@ -204,7 +253,7 @@
                                     disabled={showFeedback}
                                     onclick={() => handleOptionClick(i)}
                                 >
-                                    <span class="letter"
+                                    <span class="letter-box"
                                         >{String.fromCharCode(65 + i)}</span
                                     >
                                     <span class="text">{option}</span>
@@ -218,6 +267,9 @@
                                 in:slide
                                 class:success={lastAnswerCorrect}
                             >
+                                <span class="feedback-icon"
+                                    >{lastAnswerCorrect ? "✅" : "❌"}</span
+                                >
                                 {lastAnswerCorrect
                                     ? "CORRECT! TOEGANG VERLEEND"
                                     : "FOUT! DATA CORRUPT"}
@@ -226,20 +278,44 @@
                     </div>
                 </div>
             {:else if gamePhase === "result"}
-                <div class="card result-card" in:fly={{ y: 20 }}>
-                    {#if score >= 3}
-                        <div class="result-icon success">🔓</div>
-                        <h2>TOEGANG VERLEEND</h2>
-                        <p>
-                            Je hebt {score} van de {questions.length} vragen goed
-                            beantwoord. De kluis springt open... de viool is van
-                            jou!
+                <div class="cyber-card result-card" in:fly={{ y: 20 }}>
+                    <div class="deco-bar top"></div>
+                    <div class="deco-bar bottom"></div>
+
+                    {#if score >= 5}
+                        <div class="result-header success">
+                            <div class="result-icon">🔓</div>
+                            <div class="result-glow"></div>
+                        </div>
+                        <h2 class="glitch-text">TOEGANG VERLEEND</h2>
+                        <div class="score-display">
+                            <span class="big-score">{score}</span>
+                            <span class="total">/ {questions.length}</span>
+                        </div>
+                        <p class="mission-text">
+                            Biometrische scan succesvol. De kluis is geopend.
+                            <strong class="highlight"
+                                >De viool is veiliggesteld.</strong
+                            >
                         </p>
                         <button
                             class="primary-btn success"
                             onclick={() => goto("/game/sint-pieter/victory")}
                         >
-                            GA VERDER
+                            <div class="btn-content">GA VERDER</div>
+                            <div class="btn-glitch"></div>
+                        </button>
+                    {:else}
+                        <div class="result-header fail">
+                            <div class="result-icon">🚫</div>
+                        </div>
+                        <h2 class="glitch-text fail">TOEGANG GEWEIGERD</h2>
+                        <p class="mission-text">
+                            Onvoldoende kennis gedetecteerd. Score: {score}/{questions.length}.
+                            Probeer het opnieuw.
+                        </p>
+                        <button class="primary-btn retry" onclick={handleReset}>
+                            <div class="btn-content">OPNIEUW PROBEREN</div>
                         </button>
                     {/if}
                 </div>
@@ -249,57 +325,142 @@
 </div>
 
 <style>
+    /* Global Overrides */
+    :global(body) {
+        background-color: #030712;
+        color: #e2e8f0;
+        font-family: "Rajdhani", sans-serif;
+    }
+
     .safe-page {
-        min-height: 90vh;
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Background Effects */
+    .animated-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+                circle at 50% 100%,
+                rgba(251, 191, 36, 0.1) 0%,
+                transparent 70%
+            ),
+            linear-gradient(rgba(20, 20, 20, 0.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(20, 20, 20, 0.8) 1px, transparent 1px);
+        background-size:
+            100% 100%,
+            40px 40px,
+            40px 40px;
+        z-index: -2;
+        animation: bg-pulse 8s ease-in-out infinite;
+    }
+
+    .vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            circle at center,
+            transparent 40%,
+            #000 100%
+        );
+        z-index: 5;
+        pointer-events: none;
     }
 
     .game-content {
-        max-width: 600px;
+        max-width: 700px;
         width: 100%;
         margin: 0 auto;
+        position: relative;
+        z-index: 20;
     }
 
-    .card {
-        background: rgba(0, 0, 0, 0.7);
-        border: 1px solid rgba(251, 191, 36, 0.3);
-        padding: 2.5rem;
-        border-radius: 20px;
+    .cyber-card {
+        background: rgba(10, 10, 15, 0.95);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        padding: 3rem;
+        position: relative;
         text-align: center;
-        box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+        box-shadow: 0 0 50px rgba(251, 191, 36, 0.1);
+        clip-path: polygon(
+            20px 0,
+            100% 0,
+            100% calc(100% - 20px),
+            calc(100% - 20px) 100%,
+            0 100%,
+            0 20px
+        );
+    }
+
+    .deco-bar {
+        position: absolute;
+        height: 4px;
+        background: #fbbf24;
+        width: 100px;
+    }
+    .deco-bar.top {
+        top: 0;
+        left: 0;
+    }
+    .deco-bar.bottom {
+        bottom: 0;
+        right: 0;
+    }
+
+    .icon-header {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
     }
 
     .vault-icon {
         font-size: 4rem;
-        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
     }
 
-    .intro-image {
-        width: 100%;
-        max-width: 400px;
-        height: auto;
-        border-radius: 16px;
-        margin-bottom: 1.5rem;
-        border: 2px solid rgba(251, 191, 36, 0.3);
-        box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+    .scan-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        border: 2px dashed #fbbf24;
+        border-radius: 50%;
+        animation: spin 10s linear infinite;
+        opacity: 0.5;
     }
 
     h2 {
         font-family: "Orbitron", sans-serif;
-        color: #fbbf24;
+        color: #fff;
         margin-bottom: 1.5rem;
         text-transform: uppercase;
         letter-spacing: 2px;
+        font-size: 1.8rem;
     }
 
-    p {
-        color: #cbd5e1;
+    .glitch-text.fail {
+        color: #ef4444;
+    }
+
+    .mission-text {
+        color: #94a3b8;
         line-height: 1.6;
         margin-bottom: 2rem;
         font-size: 1.1rem;
+        font-family: "Share Tech Mono", monospace;
+    }
+
+    .highlight {
+        color: #fbbf24;
     }
 
     .primary-btn {
@@ -308,83 +469,174 @@
         background: #fbbf24;
         color: #000;
         border: none;
-        border-radius: 12px;
         font-family: "Orbitron", sans-serif;
         font-weight: 900;
         font-size: 1.1rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        clip-path: polygon(
+            10px 0,
+            100% 0,
+            100% calc(100% - 10px),
+            calc(100% - 10px) 100%,
+            0 100%,
+            0 10px
+        );
+    }
+
+    .btn-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-glitch {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            45deg,
+            transparent 5%,
+            rgba(255, 255, 255, 0.3) 5%,
+            rgba(255, 255, 255, 0.3) 10%,
+            transparent 10%
+        );
+        animation: glitch-anim 2s infinite linear;
     }
 
     .primary-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(251, 191, 36, 0.3);
+        background: #f59e0b;
+        box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
     }
 
     .quiz-container {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .quiz-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.8rem;
-        color: #94a3b8;
-        letter-spacing: 1px;
-    }
-
-    .score-tracking {
-        color: #fbbf24;
-    }
-
-    .question-card {
-        background: rgba(0, 0, 0, 0.8);
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.6);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-        border-radius: 24px;
+        position: relative;
+        clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        width: 100%;
+        background: #333;
+    }
+
+    .progress-bar .fill {
+        height: 100%;
+        background: #fbbf24;
+        transition: width 0.3s;
+    }
+
+    .label {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 0.7rem;
+        color: #64748b;
+        display: block;
+    }
+
+    .value {
+        font-family: "Orbitron", sans-serif;
+        color: #fbbf24;
+        font-size: 1.1rem;
+    }
+
+    .question-card.cyber-box {
+        background: rgba(15, 20, 30, 0.9);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        padding: 2.5rem;
         min-height: 400px;
+        position: relative;
+    }
+
+    .corner {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border: 2px solid #3b82f6;
+    }
+    .corner.tl {
+        top: 0;
+        left: 0;
+        border-right: none;
+        border-bottom: none;
+    }
+    .corner.tr {
+        top: 0;
+        right: 0;
+        border-left: none;
+        border-bottom: none;
+    }
+    .corner.bl {
+        bottom: 0;
+        left: 0;
+        border-right: none;
+        border-top: none;
+    }
+    .corner.br {
+        bottom: 0;
+        right: 0;
+        border-left: none;
+        border-top: none;
     }
 
     h3 {
         color: white;
-        font-size: 1.25rem;
+        font-size: 1.3rem;
         margin-bottom: 2rem;
         line-height: 1.4;
         text-align: center;
+        font-family: "Rajdhani", sans-serif;
+        font-weight: 600;
     }
 
     .options-grid {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
     .option-btn {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
-        padding: 1rem 1.5rem;
-        background: rgba(255, 255, 255, 0.05);
+        gap: 1rem;
+        padding: 1rem 1.2rem;
+        background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 14px;
         color: #cbd5e1;
         text-align: left;
         cursor: pointer;
         transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
     }
 
     .option-btn:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translateX(5px);
+        background: rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+        padding-left: 1.5rem;
     }
 
     .option-btn.selected {
+        background: rgba(251, 191, 36, 0.1);
         border-color: #fbbf24;
+        color: #fbbf24;
     }
 
     .option-btn.correct {
@@ -399,40 +651,86 @@
         color: #f87171;
     }
 
-    .letter {
-        width: 32px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+    .letter-box {
+        width: 30px;
+        height: 30px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        color: white;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .option-btn.selected .letter-box {
+        border-color: #fbbf24;
+        color: #fbbf24;
+    }
+    .option-btn.correct .letter-box {
+        border-color: #22c55e;
+        color: #22c55e;
     }
 
     .feedback-msg {
         margin-top: 2rem;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: #ef4444;
         padding: 1rem;
-        border-radius: 8px;
-        background: rgba(239, 68, 68, 0.1);
+        background: rgba(239, 68, 68, 0.05);
+        border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     .feedback-msg.success {
-        color: #22c55e;
-        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+        background: rgba(34, 197, 94, 0.05);
+        border-color: #22c55e;
+    }
+
+    .result-header {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
     }
 
     .result-icon {
         font-size: 5rem;
-        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .result-glow {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            circle,
+            rgba(74, 222, 128, 0.4),
+            transparent 70%
+        );
+        z-index: 1;
+        animation: pulse 2s infinite;
+    }
+
+    .score-display {
+        margin: 1rem 0;
+        font-family: "Orbitron", sans-serif;
+    }
+
+    .big-score {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #4ade80;
+    }
+    .total {
+        font-size: 1.5rem;
+        color: #94a3b8;
     }
 
     .primary-btn.success {
@@ -441,21 +739,71 @@
     }
 
     .primary-btn.retry {
-        background: #ef4444;
-        color: white;
+        background: transparent;
+        border: 1px solid #ef4444;
+        color: #ef4444;
+    }
+    .primary-btn.retry:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    @keyframes spin {
+        from {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
+    }
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+    }
+    @keyframes glitch-anim {
+        0% {
+            transform: translate(0);
+        }
+        20% {
+            transform: translate(-2px, 2px);
+        }
+        40% {
+            transform: translate(-2px, -2px);
+        }
+        60% {
+            transform: translate(2px, 2px);
+        }
+        80% {
+            transform: translate(2px, -2px);
+        }
+        100% {
+            transform: translate(0);
+        }
+    }
+
+    @keyframes bg-pulse {
+        0%,
+        100% {
+            opacity: 0.8;
+        }
+        50% {
+            opacity: 1;
+        }
     }
 
     @media (max-width: 480px) {
-        .card,
+        .cyber-card,
         .question-card {
             padding: 1.5rem;
         }
-
-        h1 {
+        h2 {
             font-size: 1.5rem;
-        }
-        h3 {
-            font-size: 1.1rem;
         }
     }
 </style>

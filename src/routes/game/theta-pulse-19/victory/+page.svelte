@@ -41,13 +41,11 @@
                 class="stella-victory"
                 in:scale={{ duration: 1000, delay: 400 }}
             >
-                <span class="stella-icon">✨</span>
-                <span class="violin-icon">🎻</span>
-            </div>
-            <div class="sonic-waves">
-                <div class="wave"></div>
-                <div class="wave"></div>
-                <div class="wave"></div>
+                <img
+                    src="/heroes/stella-violin.png"
+                    alt="Stella Violin"
+                    class="hero-image"
+                />
             </div>
         </div>
 
@@ -188,30 +186,28 @@
 
     .visual-container {
         position: relative;
-        height: 180px;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 2rem;
     }
 
     .stella-victory {
         position: relative;
         z-index: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
 
-    .stella-icon {
-        font-size: 5rem;
-        display: block;
+    .hero-image {
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        filter: drop-shadow(0 0 20px #3b82f6);
         animation: float 3s ease-in-out infinite;
-    }
-
-    .violin-icon {
-        font-size: 2.5rem;
-        position: absolute;
-        bottom: -10px;
-        right: -10px;
-        filter: drop-shadow(0 0 10px #3b82f6);
-        animation: float 3s ease-in-out infinite reverse;
+        display: block;
     }
 
     .sonic-waves {

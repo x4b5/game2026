@@ -4,6 +4,8 @@
     import { goto } from "$app/navigation";
     import { gameProgress } from "$lib/stores/gameStore";
     import { soundManager } from "$lib/utils/SoundManager";
+    import HandTracker from "$lib/components/HandTracker.svelte";
+    import type { HandLandmarkerResult } from "@mediapipe/tasks-vision";
 
     let score = $state(0);
     let timeLeft = $state(30);
@@ -21,6 +23,12 @@
             shootY: number;
         }[]
     >([]);
+
+    // Hand tracking
+    let tracker: any;
+    let handX = $state(50);
+    let handY = $state(50);
+    let isHandActive = $state(false);
 
     // Game loop variables
     let noteInterval: any;
@@ -43,16 +51,18 @@
         timeLeft = 30;
         notes = [];
 
-        // Spawn notes faster (every 400ms instead of 800ms)
-        noteInterval = setInterval(spawnNote, 400);
+        // Spawn notes slower (every 800ms)
+        noteInterval = setInterval(spawnNote, 800);
 
-        // Game loop - notes fall faster (every 200ms instead of 1000ms)
+        // Game loop - collisions & physics
         gameLoop = setInterval(() => {
-            // Move notes down faster
+            // Move notes down slower
             notes = notes
-                .map((n) => ({ ...n, y: n.y + 5 }))
+                .map((n) => ({ ...n, y: n.y + 2 })) // Slower descent for better playability
                 .filter((n) => n.y < 100);
-        }, 200);
+
+            checkHandCollisions();
+        }, 50);
 
         // Flicker effect - randomly hide/show notes
         flickerInterval = setInterval(() => {
@@ -73,7 +83,8 @@
     }
 
     function spawnNote() {
-        const types = ["🎵", "🎶", "🎼", "🎻"];
+        if (!gameActive) return;
+        const types = ["🛸"];
         const note = {
             id: nextNoteId++,
             x: Math.random() * 80 + 10, // 10-90% width
@@ -87,29 +98,62 @@
         notes = [...notes, note];
     }
 
+    function checkHandCollisions() {
+        if (!isHandActive) return;
+
+        notes.forEach((note) => {
+            if (note.caught || !note.visible) return;
+
+            // Simple distance interaction
+            const dx = note.x - handX;
+            const dy = note.y - handY;
+            // Note: coordinates are % based. Aspect ratio matters but simplified:
+            // Assuming simplified euclidean distance in % space.
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 8) {
+                // Catch radius ~8%
+                catchNote(note.id);
+            }
+        });
+    }
+
+    function handleHandResults(results: HandLandmarkerResult) {
+        if (results.landmarks && results.landmarks.length > 0) {
+            isHandActive = true;
+            const hand = results.landmarks[0];
+            const indexTip = hand[8];
+
+            // Mirror X (1 - x) because webcam is mirrored visually usually
+            handX = (1 - indexTip.x) * 100;
+            handY = indexTip.y * 100;
+        } else {
+            isHandActive = false;
+        }
+    }
+
     function catchNote(id: number) {
-        // Find the note and mark it as caught with a random direction
+        let caughtOne = false;
         notes = notes.map((n) => {
             if (n.id === id && !n.caught) {
+                caughtOne = true;
                 score += 100;
                 soundManager.playClick();
                 return {
                     ...n,
                     caught: true,
-                    shootX: (Math.random() - 0.5) * 200, // Random X direction
-                    shootY: -150 - Math.random() * 100, // Shoot upward
+                    shootX: (Math.random() - 0.5) * 200,
+                    shootY: -150 - Math.random() * 100,
                 };
             }
             return n;
         });
 
         // Remove caught notes after animation
-        setTimeout(() => {
-            notes = notes.filter((n) => n.id !== id);
-        }, 500);
-
-        if (score >= 1000 && !gameWon) {
-            // Early win condition or just milestone
+        if (caughtOne) {
+            setTimeout(() => {
+                notes = notes.filter((n) => n.id !== id);
+            }, 500);
         }
     }
 
@@ -117,7 +161,6 @@
         stopGame();
         if (score >= 500) {
             gameWon = true;
-            // soundManager.playSuccess();
             setTimeout(() => {
                 goto("/game/theta-pulse-19/victory");
             }, 3000);
@@ -138,14 +181,30 @@
 <div class="concerto-page" in:fade>
     <div class="sky-background"></div>
 
+    <!-- Hand Tracker Preview -->
+    <div class="tracker-layer">
+        <HandTracker
+            bind:this={tracker}
+            onResults={handleHandResults}
+            showDebug={true}
+        />
+    </div>
+
     {#if !gameActive && !gameWon}
         <div class="intro-card glass-panel" in:scale>
             <h1>AIRBORNE CONCERTO</h1>
             <p>
-                Vlieg door de lucht en verzamel de muzieknoten om de harmonie te
-                herstellen!
+                Gebruik je hand om de muzieknoten te vangen!
+                <br />
+                <em>Beweeg je hand voor de camera.</em>
             </p>
             <div class="controls">
+                <button
+                    class="btn-secondary"
+                    onclick={() => tracker?.enableCam()}
+                >
+                    📸 Camera AAN
+                </button>
                 <button class="btn-primary" onclick={startGame}
                     >START VLUCHT 🚀</button
                 >
@@ -158,8 +217,18 @@
         </div>
 
         <div class="game-area">
-            <!-- Stella / Player Avatar -->
-            <div class="player-avatar">✈️🎻</div>
+            <!-- Hand Cursor / Sparkle -->
+            {#if isHandActive}
+                <div class="hand-cursor" style="left: {handX}%; top: {handY}%">
+                    🎻
+                </div>
+            {/if}
+
+            <!-- Stella / Player Avatar - follows hand or centers -->
+            <div
+                class="player-avatar"
+                style:left={isHandActive ? `${handX}%` : "50%"}
+            ></div>
 
             <!-- Falling Notes -->
             {#each notes as note (note.id)}
@@ -204,6 +273,19 @@
         z-index: -1;
     }
 
+    .tracker-layer {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 160px;
+        z-index: 50;
+        opacity: 0.8;
+        border-radius: 8px;
+        overflow: hidden;
+        pointer-events: none; /* Let clicks pass through if needed, but video needs none */
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
     .glass-panel {
         background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(10px);
@@ -221,6 +303,13 @@
         margin-bottom: 1rem;
     }
 
+    .controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
     .btn-primary {
         background: #3b82f6;
         color: white;
@@ -233,8 +322,23 @@
         transition: transform 0.2s;
     }
 
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
     .btn-primary:hover {
         transform: scale(1.05);
+    }
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
 
     .game-hud {
@@ -254,6 +358,15 @@
         position: relative;
         width: 100%;
         height: 100vh;
+    }
+
+    .hand-cursor {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        pointer-events: none;
+        z-index: 100;
+        filter: drop-shadow(0 0 10px white);
     }
 
     .note {
@@ -300,9 +413,10 @@
     .player-avatar {
         position: absolute;
         bottom: 50px;
-        left: 50%;
+        /* left is dynamic now */
         transform: translateX(-50%);
         font-size: 4rem;
+        transition: left 0.1s linear;
     }
 
     @keyframes float {

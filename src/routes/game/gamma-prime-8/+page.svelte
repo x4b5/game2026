@@ -244,8 +244,8 @@
                 <h1>VALS ALARM!</h1>
                 <p>Het signaal is getraceerd naar een lokale kroeg...</p>
                 <div class="story-box">
-                    Het blijkt een <strong>verdwaalde carnavalist</strong> te zijn
-                    die na 3 dagen feesten vergeten was zijn alienpak uit te trekken!
+                    Het blijkt een groep<strong> verdwaalde carnavalisten</strong> te zijn
+                    die na 3 dagen feesten vergeten  zijn hun alienpakken uit te trekken!
                 </div>
                 <p class="sub-text">"Alaaf? 👽🍺"</p>
                 <button
