@@ -1,118 +1,35 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { fade, fly, slide } from "svelte/transition";
+    import { onMount } from "svelte";
+    import { fade, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
     import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
 
     let visible = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
-    let adminPassword = $state("");
+    let locationCode = $state("");
+    let errorMessage = $state("");
+    let showSuccess = $state(false);
 
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }
-        }
-    }
+    // Valid passwords for this location (Vrijthof)
+    const VALID_CODES = ["mooswief"];
 
     onMount(() => {
         visible = true;
     });
 
-    onDestroy(() => {
-        if (scanner) {
-            scanner.clear().catch(console.error);
-        }
-    });
+    function handleCodeSubmit() {
+        const code = locationCode.toLowerCase().trim();
 
-    function onScanSuccess(decodedText: string) {
-        console.log("QR Scanned:", decodedText);
+        if (VALID_CODES.includes(code)) {
+            showSuccess = true;
+            errorMessage = "";
 
-        const rawCode = decodedText.trim();
-        const code = rawCode.toLowerCase();
-
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                    handleNavigation(rawCode, code);
-                })
-                .catch((err: any) => {
-                    console.error("Scanner clear failed:", err);
-                    handleNavigation(rawCode, code);
-                });
+            // Navigate to Theta Pulse after brief delay
+            setTimeout(() => {
+                goto("/game/theta-pulse-19");
+            }, 1000);
         } else {
-            handleNavigation(rawCode, code);
-        }
-    }
-
-    function handleNavigation(rawCode: string, code: string) {
-        // Redirigé naar Theta Pulse na de scan op het Vrijthof
-        if (
-            code === "vrijthof" ||
-            code === "finale" ||
-            code === "theta-pulse" ||
-            code.includes("theta")
-        ) {
-            goto("/game/theta-pulse-19");
-            return;
-        }
-
-        if (rawCode.startsWith("http")) {
-            try {
-                const url = new URL(rawCode);
-                if (url.pathname.startsWith("/game")) {
-                    goto(url.pathname);
-                } else {
-                    window.location.href = rawCode;
-                }
-            } catch (e) {
-                window.location.href = rawCode;
-            }
-        } else {
-            const cleanCode = rawCode.startsWith("/")
-                ? rawCode.slice(1)
-                : rawCode;
-            goto(`/game/${cleanCode}`);
-        }
-    }
-
-    function startScanner() {
-        isScanning = true;
-        setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                false,
-            );
-            scanner.render(onScanSuccess, () => {});
-        }, 100);
-    }
-
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        } else {
-            isScanning = false;
+            errorMessage = "Onjuiste code. Kijk goed rond op het Vrijthof!";
+            showSuccess = false;
         }
     }
 </script>
@@ -126,18 +43,10 @@
 
         <h1>ONDERWEG NAAR HET VRIJTHOF</h1>
 
-        {#if isScanning}
-            <div class="scanner-container" transition:slide>
-                <div class="scanner-info">
-                    <p>
-                        Zoek de QR-code bij het <strong>Vrijthof</strong> (brievenbus)
-                        om je aankomst te bevestigen.
-                    </p>
-                </div>
-                <div id="reader"></div>
-                <button class="cancel-btn" onclick={stopScanner}>
-                    ❌ ANNULEER SCAN
-                </button>
+        {#if showSuccess}
+            <div class="success-message" transition:slide>
+                <span class="success-icon">✅</span>
+                <p>Locatie bevestigd! Voorbereiden op confrontatie...</p>
             </div>
         {:else}
             <div class="briefing">
@@ -145,20 +54,31 @@
                     Viool beveiligd? Check. <br />
                     Nu is het tijd om de aliens te confronteren bij hun verzamelpunt.
                 </p>
-                <button class="scan-btn" onclick={startScanner}>
-                    📷 BEVESTIG LOCATIE
-                </button>
 
-                <!-- Admin Password Field -->
-                <div class="admin-bypass">
+                <div class="location-hint">
+                    📍 Zoek de locatiecode op het <strong>Vrijthof</strong>
+                </div>
+
+                <div class="code-entry">
+                    <label for="location-code">🔐 VOER LOCATIECODE IN:</label>
                     <input
-                        type="password"
-                        bind:value={adminPassword}
-                        placeholder="Admin wachtwoord..."
+                        id="location-code"
+                        type="text"
+                        bind:value={locationCode}
+                        placeholder="Type de code..."
                         onkeydown={(e) =>
-                            e.key === "Enter" && handleAdminBypass()}
+                            e.key === "Enter" && handleCodeSubmit()}
+                        autocomplete="off"
+                        autocapitalize="none"
                     />
-                    <button onclick={handleAdminBypass}>Doorgaan</button>
+                    {#if errorMessage}
+                        <p class="error-text" transition:slide>
+                            {errorMessage}
+                        </p>
+                    {/if}
+                    <button class="scan-btn" onclick={handleCodeSubmit}>
+                        🔓 BEVESTIG LOCATIE
+                    </button>
                 </div>
             </div>
         {/if}
@@ -190,6 +110,7 @@
         display: flex;
         flex-direction: column;
         gap: 2.5rem;
+        border-radius: 16px;
     }
 
     .status-header {
@@ -224,7 +145,64 @@
         color: #cbd5e1;
         font-size: 1.1rem;
         line-height: 1.6;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .location-hint {
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        border: 1px dashed rgba(59, 130, 246, 0.4);
+    }
+
+    .code-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .code-entry label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+    }
+
+    .code-entry input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #3b82f6;
+        color: white;
+        font-size: 1.3rem;
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        border-radius: 8px;
+    }
+
+    .code-entry input:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .code-entry input::placeholder {
+        color: #64748b;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
     }
 
     .scan-btn {
@@ -248,48 +226,26 @@
         box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
     }
 
-    .scanner-container {
+    .success-message {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        width: 100%;
-    }
-
-    .scanner-info {
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
         background: rgba(59, 130, 246, 0.1);
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .scanner-info p {
-        color: #dbeafe;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-
-    #reader {
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
         border: 2px solid #3b82f6;
+        border-radius: 16px;
     }
 
-    .cancel-btn {
-        background: rgba(239, 68, 68, 0.1);
-        color: #f87171;
-        border: 1px solid #ef4444;
-        padding: 0.8rem;
-        border-radius: 8px;
+    .success-icon {
+        font-size: 4rem;
+    }
+
+    .success-message p {
         font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .cancel-btn:hover {
-        background: #ef4444;
-        color: white;
+        font-size: 1.2rem;
+        color: #60a5fa;
+        text-align: center;
     }
 
     .footer-meta {
@@ -320,48 +276,5 @@
             transform: scale(1.2);
             opacity: 0.6;
         }
-    }
-
-    .admin-bypass {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .admin-bypass input {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.8rem;
-        border-radius: 6px;
-        color: white;
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.9rem;
-    }
-
-    .admin-bypass input:focus {
-        outline: none;
-        border-color: #3b82f6;
-    }
-
-    .admin-bypass button {
-        background: rgba(59, 130, 246, 0.2);
-        border: 1px solid #3b82f6;
-        color: #60a5fa;
-        padding: 0.8rem 1.2rem;
-        border-radius: 6px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .admin-bypass button:hover {
-        background: rgba(59, 130, 246, 0.3);
-        transform: translateY(-1px);
     }
 </style>

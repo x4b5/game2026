@@ -58,6 +58,51 @@
             ],
             correct: 1,
         },
+        {
+            q: "Welke beroemde violist, geboren in Maastricht, is bekend van zijn concerten op het Vrijthof?",
+            options: [
+                "Janine Jansen",
+                "André Rieu",
+                "Wibi Soerjadi",
+                "Herman van Veen",
+            ],
+            correct: 1,
+        },
+        {
+            q: "Hoe heet de bekende grot met mergelgangen onder de Sint-Pietersberg?",
+            options: [
+                "De Grotten van Han",
+                "De Zonneberg grotten",
+                "De Valkenburg grotten",
+                "De Cannerberg grotten",
+            ],
+            correct: 1,
+        },
+        {
+            q: "Welke rivier stroomt door Maastricht?",
+            options: ["De Rijn", "De Maas", "De Schelde", "De Geul"],
+            correct: 1,
+        },
+        {
+            q: "De Onze-Lieve-Vrouwebasiliek in Maastricht heeft een bijzondere status. Welke unieke eigenschap heeft deze kerk?",
+            options: [
+                "Het is de enige Romaanse kerk in Nederland",
+                "Het bezit een fragment van het Heilig Kruis",
+                "Het heeft de oudste werkende kerkklok van Europa",
+                "Het is gebouwd op de resten van een Romeinse tempel",
+            ],
+            correct: 3,
+        },
+        {
+            q: "In 1764 werd in Maastricht een belangrijk fossiel ontdekt. Welk prehistorisch dier werd gevonden in de Sint-Pietersberg?",
+            options: [
+                "Een mammoet",
+                "Een Mosasaurus",
+                "Een pteranodon",
+                "Een wolharige neushoorn",
+            ],
+            correct: 1,
+        },
     ];
 
     function startQuiz() {
@@ -90,7 +135,7 @@
 
     function finishQuiz() {
         gamePhase = "result";
-        if (score >= 3) {
+        if (score >= 5) {
             gameContainer?.win(score * 1000);
         } else {
             gameContainer?.lose();
@@ -120,8 +165,8 @@
                     <h2>Identiteitscontrole</h2>
                     <p>
                         De kluis is beveiligd met een bio-metrische
-                        Maastricht-check. Beantwoord 5 vragen over de stad.
-                        Minimaal <strong>3 goed</strong> om de kluis te openen en
+                        Maastricht-check. Beantwoord 10 vragen over de stad.
+                        Minimaal <strong>5 goed</strong> om de kluis te openen en
                         de viool te bevrijden.
                     </p>
                     <button class="primary-btn" onclick={startQuiz}>
@@ -230,6 +275,16 @@
     .vault-icon {
         font-size: 4rem;
         margin-bottom: 1rem;
+    }
+
+    .intro-image {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        border: 2px solid rgba(251, 191, 36, 0.3);
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
     }
 
     h2 {

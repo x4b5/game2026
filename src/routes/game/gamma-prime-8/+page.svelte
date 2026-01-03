@@ -2,6 +2,8 @@
     import GameContainer from "$lib/components/GameContainer.svelte";
     import { soundManager } from "$lib/utils/SoundManager";
     import { onMount } from "svelte";
+    import { fade } from "svelte/transition";
+    import { goto } from "$app/navigation";
 
     let gameContainer: any;
     let frequency = $state(440); // Starting at A4
@@ -12,9 +14,24 @@
     let oscillator: OscillatorNode | null = null;
     let gainNode: GainNode | null = null;
 
+    let isAccessLocked = $state(true);
+    let accessCode = $state("");
+    let accessError = $state("");
+    let showRevelation = $state(false);
+
+    function checkAccessCode() {
+        if (accessCode.toLowerCase().trim() === "neus") {
+            isAccessLocked = false;
+            soundManager.playSuccess();
+        } else {
+            accessError = "Onjuiste code!";
+            soundManager.playError();
+        }
+    }
+
     const MIN_FREQ = 200;
     const MAX_FREQ = 800;
-    const TOLERANCE = 5;
+    const TOLERANCE = 25;
 
     onMount(() => {
         // Random target frequency
@@ -91,7 +108,7 @@
             isLocked = true;
             stopTone();
             soundManager.playWin();
-            gameContainer?.win(Math.floor(proximity * 20));
+            showRevelation = true;
         } else {
             soundManager.playError();
         }
@@ -114,88 +131,135 @@
     gameId="gamma-prime"
     title="🗼 Gamma Prime"
 >
-    <div class="frequency-game">
-        <div class="instructions">
-            <p>
-                Stem af op de juiste frequentie om het signaal te ontgrendelen
-            </p>
+    {#if isAccessLocked}
+        <div class="lock-screen">
+            <h3>🔒 VEILIGHEIDSPROTOCOL</h3>
+            <p>Voer de toegangscode in om het systeem te activeren.</p>
+            <div class="input-group">
+                <input
+                    type="text"
+                    bind:value={accessCode}
+                    placeholder="Wachtwoord..."
+                    class="access-input"
+                    onkeydown={(e) => e.key === "Enter" && checkAccessCode()}
+                />
+                <button class="unlock-btn" onclick={checkAccessCode}>→</button>
+            </div>
+            {#if accessError}
+                <p class="error-text">{accessError}</p>
+            {/if}
         </div>
-
-        <!-- Waveform Display -->
-        <div class="waveform-display">
-            <div
-                class="signal-strength"
-                style:width="{proximity}%"
-                style:--signal-color={proximity > 90
-                    ? "#22c55e"
-                    : proximity > 50
-                      ? "#f59e0b"
-                      : "#6366f1"}
-            >
-                <div class="signal-bar"></div>
+    {:else}
+        <div class="frequency-game">
+            <div class="instructions">
+                <p>
+                    Stem af op de juiste frequentie om de <strong
+                        >bron van het signaal</strong
+                    > te onthullen.
+                </p>
             </div>
 
-            <div class="frequency-reading">
-                <span class="hz-value">{frequency}</span>
-                <span class="hz-unit">Hz</span>
+            <!-- Waveform Display -->
+            <div class="waveform-display">
+                <div
+                    class="signal-strength"
+                    style:width="{proximity}%"
+                    style:--signal-color={proximity > 90
+                        ? "#22c55e"
+                        : proximity > 50
+                          ? "#f59e0b"
+                          : "#6366f1"}
+                >
+                    <div class="signal-bar"></div>
+                </div>
+
+                <div class="frequency-reading">
+                    <span class="hz-value">{frequency}</span>
+                    <span class="hz-unit">Hz</span>
+                </div>
+
+                <!-- Visual waveform -->
+                <div class="wave-container">
+                    {#each Array(20) as _, i}
+                        <div
+                            class="wave-bar"
+                            style:height="{20 +
+                                Math.sin(
+                                    (i / 20) * Math.PI * 4 + frequency / 100,
+                                ) *
+                                    (proximity / 5)}%"
+                            style:opacity={proximity / 100}
+                        ></div>
+                    {/each}
+                </div>
             </div>
 
-            <!-- Visual waveform -->
-            <div class="wave-container">
-                {#each Array(20) as _, i}
-                    <div
-                        class="wave-bar"
-                        style:height="{20 +
-                            Math.sin((i / 20) * Math.PI * 4 + frequency / 100) *
-                                (proximity / 5)}%"
-                        style:opacity={proximity / 100}
-                    ></div>
-                {/each}
+            <!-- Frequency Slider -->
+            <div class="tuner-controls">
+                <button
+                    class="control-btn"
+                    onclick={() => !isLocked && startTone()}
+                >
+                    ▶️ Speel Toon
+                </button>
+                <button class="control-btn" onclick={() => stopTone()}>
+                    ⏸️ Stop
+                </button>
             </div>
-        </div>
 
-        <!-- Frequency Slider -->
-        <div class="tuner-controls">
+            <div class="slider-container">
+                <input
+                    type="range"
+                    min={MIN_FREQ}
+                    max={MAX_FREQ}
+                    bind:value={frequency}
+                    oninput={handleSliderInput}
+                    disabled={isLocked}
+                    class="frequency-slider"
+                />
+                <div class="slider-labels">
+                    <span>{MIN_FREQ} Hz</span>
+                    <span>{MAX_FREQ} Hz</span>
+                </div>
+            </div>
+
             <button
-                class="control-btn"
-                onclick={() => !isLocked && startTone()}
-            >
-                ▶️ Speel Toon
-            </button>
-            <button class="control-btn" onclick={() => stopTone()}>
-                ⏸️ Stop
-            </button>
-        </div>
-
-        <div class="slider-container">
-            <input
-                type="range"
-                min={MIN_FREQ}
-                max={MAX_FREQ}
-                bind:value={frequency}
-                oninput={handleSliderInput}
+                class="lock-button"
+                class:ready={proximity > 90}
+                onclick={lockFrequency}
                 disabled={isLocked}
-                class="frequency-slider"
-            />
-            <div class="slider-labels">
-                <span>{MIN_FREQ} Hz</span>
-                <span>{MAX_FREQ} Hz</span>
+            >
+                {isLocked ? "🔒 Vergrendeld!" : "🔓 Vergrendel Frequentie"}
+            </button>
+
+            <div class="proximity-indicator">
+                Nabijheid: <strong>{proximity.toFixed(0)}%</strong>
             </div>
         </div>
-
-        <button
-            class="lock-button"
-            class:ready={proximity > 90}
-            onclick={lockFrequency}
-            disabled={isLocked}
-        >
-            {isLocked ? "🔒 Vergrendeld!" : "🔓 Vergrendel Frequentie"}
-        </button>
-
-        <div class="proximity-indicator">
-            Nabijheid: <strong>{proximity.toFixed(0)}%</strong>
+    {/if}
+    {#if showRevelation}
+        <div class="revelation-overlay" transition:fade>
+            <div class="revelation-card">
+                <div class="icon">🤡</div>
+                <h1>VALS ALARM!</h1>
+                <p>Het signaal is getraceerd naar een lokale kroeg...</p>
+                <div class="story-box">
+                    Het blijkt een <strong>verdwaalde carnavalist</strong> te zijn
+                    die na 3 dagen feesten vergeten was zijn alienpak uit te trekken!
+                </div>
+                <p class="sub-text">"Alaaf? 👽🍺"</p>
+                <button
+                    class="finish-btn"
+                    onclick={() => {
+                        gameContainer?.win(Math.floor(proximity * 20));
+                        setTimeout(() => goto("/game/finale"), 1500);
+                    }}
+                >
+                    MISSIE AFRONDEN
+                </button>
+            </div>
         </div>
-    </div>
+    {/if}
 </GameContainer>
 
 <style>
@@ -399,5 +463,141 @@
     .proximity-indicator strong {
         color: var(--primary);
         font-size: 1.5rem;
+    }
+    .lock-screen {
+        text-align: center;
+        padding: 2rem;
+        background: var(--glass);
+        border: 2px solid var(--glass-border);
+        border-radius: 20px;
+        color: white;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin: 1.5rem 0;
+    }
+
+    .access-input {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--primary);
+        padding: 0.8rem;
+        border-radius: 8px;
+        color: white;
+        font-family: inherit;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    .access-input:focus {
+        outline: none;
+        box-shadow: 0 0 10px var(--primary);
+    }
+
+    .unlock-btn {
+        background: var(--primary);
+        border: none;
+        padding: 0 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .unlock-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .revelation-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .revelation-card {
+        background: linear-gradient(135deg, #1e1b4b, #312e81);
+        padding: 2.5rem;
+        border-radius: 24px;
+        border: 2px solid #6366f1;
+        box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
+        max-width: 400px;
+        animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .revelation-card .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    .story-box {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+        line-height: 1.6;
+        font-size: 1.1rem;
+        color: #e0e7ff;
+    }
+
+    .sub-text {
+        font-style: italic;
+        color: #818cf8;
+        margin-bottom: 2rem;
+    }
+
+    .finish-btn {
+        width: 100%;
+        padding: 1rem;
+        background: #22c55e;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .finish-btn:hover {
+        transform: scale(1.05);
+        background: #16a34a;
+    }
+
+    @keyframes pop-in {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes bounce {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
     }
 </style>

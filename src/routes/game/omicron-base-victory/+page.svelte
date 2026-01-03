@@ -2,75 +2,38 @@
     import { onMount } from "svelte";
     import { fade, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
     import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
 
     let visible = $state(false);
     let showHint = $state(false);
     let intelScanned = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
-    let adminPassword = $state("");
+    let locationCode = $state("");
+    let errorMessage = $state("");
+    let showSuccess = $state(false);
 
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
+    // Valid passwords for this location
+    const VALID_CODES = ["badkamer"];
+
+    function handleCodeSubmit() {
+        const code = locationCode.toLowerCase().trim();
+
+        if (VALID_CODES.includes(code)) {
+            showSuccess = true;
+            errorMessage = "";
+
+            // Navigate to Zeta Flux after brief delay
+            setTimeout(() => {
+                const nextPath = "/game/zeta-flux-33";
                 fetch("/api/mission", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ navTo: nextPath }),
                 }).catch(console.error);
                 goto(nextPath);
-            }
-        }
-    }
-
-    async function handleNext() {
-        isScanning = true;
-        setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                false,
-            );
-            scanner.render(onScanSuccess, () => {});
-        }, 100);
-    }
-
-    async function onScanSuccess(decodedText: string) {
-        const code = decodedText.toLowerCase().trim();
-        const nextPath = "/game/zeta-flux-33";
-
-        if (scanner) {
-            await scanner.clear();
-            isScanning = false;
-            scanner = null;
-        }
-
-        // Tell everyone else to follow
-        await fetch("/api/mission", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ navTo: nextPath }),
-        }).catch(console.error);
-
-        goto(nextPath);
-    }
-
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
+            }, 1000);
         } else {
-            isScanning = false;
+            errorMessage = "Onjuiste code. Los de puzzel op!";
+            showSuccess = false;
         }
     }
 
@@ -108,7 +71,7 @@
                     <p class="warning">
                         📡 <strong>ORDER:</strong> Onderzoek de bron van dit
                         signaal. Verplaats naar sector
-                        <strong>ZETA FLUX</strong> (Locatie: De Bovenkamer).
+                        <strong>ZETA FLUX</strong>.
                     </p>
                 </div>
             {:else}
@@ -120,19 +83,10 @@
         </div>
 
         <div class="action-section">
-            {#if isScanning}
-                <div class="scanner-wrapper" transition:slide>
-                    <div class="scanner-briefing">
-                        <h3>BEVESTIG LOCATIE</h3>
-                        <p>
-                            Scan de QR-code op de bestemming om de
-                            kluis-interface te activeren.
-                        </p>
-                    </div>
-                    <div id="reader"></div>
-                    <button class="cancel-scan-btn" onclick={stopScanner}>
-                        ❌ ANNULEER SCAN
-                    </button>
+            {#if showSuccess}
+                <div class="success-message" transition:slide>
+                    <span class="success-icon">✅</span>
+                    <p>Locatie bevestigd! Naar Zeta Flux...</p>
                 </div>
             {:else}
                 <button
@@ -156,20 +110,26 @@
                     </div>
                 {/if}
 
-                <button class="next-btn" onclick={handleNext}>
-                    📷 BEVESTIG LOCATIE
-                </button>
-
-                <!-- Admin Password Field -->
-                <div class="admin-bypass">
+                <div class="code-entry">
+                    <label for="location-code">🔐 VOER LOCATIECODE IN:</label>
                     <input
-                        type="password"
-                        bind:value={adminPassword}
-                        placeholder="Admin wachtwoord..."
+                        id="location-code"
+                        type="text"
+                        bind:value={locationCode}
+                        placeholder="Type de code..."
                         onkeydown={(e) =>
-                            e.key === "Enter" && handleAdminBypass()}
+                            e.key === "Enter" && handleCodeSubmit()}
+                        autocomplete="off"
+                        autocapitalize="none"
                     />
-                    <button onclick={handleAdminBypass}>Doorgaan</button>
+                    {#if errorMessage}
+                        <p class="error-text" transition:slide>
+                            {errorMessage}
+                        </p>
+                    {/if}
+                    <button class="next-btn" onclick={handleCodeSubmit}>
+                        🔓 BEVESTIG LOCATIE
+                    </button>
                 </div>
             {/if}
         </div>
@@ -195,6 +155,7 @@
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
+        border-radius: 16px;
     }
 
     .header-section {
@@ -262,7 +223,7 @@
         background: rgba(0, 0, 0, 0.3);
         padding: 1.5rem;
         border-radius: 12px;
-        min-height: 180px;
+        min-height: 150px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -374,6 +335,54 @@
         color: #94a3b8;
     }
 
+    .code-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .code-entry label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        color: #22c55e;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .code-entry input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #22c55e;
+        color: white;
+        font-size: 1.3rem;
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        border-radius: 8px;
+    }
+
+    .code-entry input:focus {
+        outline: none;
+        border-color: #4ade80;
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    .code-entry input::placeholder {
+        color: #64748b;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
+    }
+
     .next-btn {
         width: 100%;
         padding: 1rem;
@@ -383,7 +392,7 @@
         border-radius: 8px;
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 1rem;
         cursor: pointer;
         transition: all 0.3s ease;
         text-transform: uppercase;
@@ -396,98 +405,25 @@
         box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
     }
 
-    /* Scanner Styles */
-    .scanner-wrapper {
+    .success-message {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.5rem;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    #reader {
-        width: 100%;
-        border-radius: 8px;
-        overflow: hidden;
+        gap: 1rem;
+        padding: 2rem;
+        background: rgba(34, 197, 94, 0.1);
         border: 2px solid #22c55e;
-        background: black;
+        border-radius: 16px;
     }
 
-    .scanner-briefing h3 {
+    .success-icon {
+        font-size: 3rem;
+    }
+
+    .success-message p {
         font-family: "Orbitron", sans-serif;
-        color: #4ade80;
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .scanner-briefing p {
-        color: #94a3b8;
-        font-size: 0.85rem;
-        line-height: 1.4;
-    }
-
-    .cancel-scan-btn {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-        border: 1px solid #ef4444;
-        padding: 0.8rem 1.5rem;
-        border-radius: 8px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-    }
-
-    .cancel-scan-btn:hover {
-        background: #ef4444;
-        color: white;
-    }
-
-    .admin-bypass {
-        margin-top: 1.5rem;
-        padding: 1rem;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px dashed rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .admin-bypass input {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.8rem;
-        border-radius: 6px;
-        color: white;
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.9rem;
-    }
-
-    .admin-bypass input:focus {
-        outline: none;
-        border-color: #22c55e;
-    }
-
-    .admin-bypass button {
-        background: rgba(34, 197, 94, 0.2);
-        border: 1px solid #22c55e;
-        color: #4ade80;
-        padding: 0.8rem 1.2rem;
-        border-radius: 6px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .admin-bypass button:hover {
-        background: rgba(34, 197, 94, 0.3);
-        transform: translateY(-1px);
+        font-size: 1.1rem;
+        color: #22c55e;
+        text-align: center;
     }
 </style>

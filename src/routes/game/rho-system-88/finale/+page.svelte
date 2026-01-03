@@ -1,375 +1,522 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { fade, fly, slide } from "svelte/transition";
+    import { onMount } from "svelte";
+    import { fade, scale, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
-    import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
+    import { soundManager } from "$lib/utils/SoundManager";
+    import GameContainer from "$lib/components/GameContainer.svelte";
 
-    let visible = $state(false);
-    let showExtraInfo = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
-    let adminPassword = $state("");
+    let gameContainer: any;
+    let gamePhase = $state<"intro" | "playing" | "success">("intro");
 
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }
-        }
-    }
+    // The target word (with space)
+    const TARGET_WORD = "KAMER LUCA";
+
+    // Available tiles (scrambled letters + space + some decoys)
+    const ALL_LETTERS = [
+        "K",
+        "A",
+        "M",
+        "E",
+        "R",
+        " ",
+        "L",
+        "U",
+        "C",
+        "A",
+        "X",
+        "Z",
+        "P",
+        "N",
+        "O",
+        "I",
+    ];
+
+    let tiles = $state<{ id: number; letter: string; selected: boolean }[]>([]);
+    let selectedLetters = $state<string[]>([]);
+    let errorMessage = $state("");
+    let showHint = $state(false);
 
     onMount(() => {
-        visible = true;
+        shuffleTiles();
     });
 
-    onDestroy(() => {
-        if (scanner) {
-            scanner.clear().catch(console.error);
-        }
-    });
+    // Pre-filled letters (positions in TARGET_WORD: "KAMER LUCA")
+    // Position: K=0, A=1, M=2, E=3, R=4, space=5, L=6, U=7, C=8, A=9
+    // We pre-fill M (pos 2) and C (pos 8)
+    const PREFILLED = [
+        { pos: 2, letter: "M" },
+        { pos: 8, letter: "C" },
+    ];
 
-    function onScanSuccess(decodedText: string, decodedResult: any) {
-        console.log(`Code scanned = ${decodedText}`, decodedResult);
+    function shuffleTiles() {
+        // Shuffle the letters, but mark M and C as already selected
+        const shuffled = [...ALL_LETTERS].sort(() => Math.random() - 0.5);
+        tiles = shuffled.map((letter, index) => ({
+            id: index,
+            letter,
+            selected: letter === "M" || letter === "C", // Pre-select M and C
+        }));
+        // Initialize selectedLetters with placeholders for the prefilled positions
+        initializeSelectedLetters();
+    }
 
-        // Stop scanning
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        }
+    function initializeSelectedLetters() {
+        // Create array with nulls, then fill in prefilled letters
+        const arr: (string | null)[] = new Array(TARGET_WORD.length).fill(null);
+        PREFILLED.forEach((p) => {
+            arr[p.pos] = p.letter;
+        });
+        selectedLetters = arr.filter((l) => l !== null) as string[];
+        // Actually we need a different approach - track which positions are filled
+    }
 
-        // Handle navigation
-        if (decodedText.startsWith("http")) {
-            try {
-                const url = new URL(decodedText);
-                if (url.pathname.startsWith("/game")) {
-                    goto(url.pathname);
-                } else {
-                    window.location.href = decodedText;
-                }
-            } catch (e) {
-                window.location.href = decodedText;
+    // We'll use a different state: an array representing each slot
+    let slots = $state<(string | null)[]>([]);
+
+    function initSlots() {
+        slots = TARGET_WORD.split("").map((letter, idx) => {
+            const prefilled = PREFILLED.find((p) => p.pos === idx);
+            return prefilled ? prefilled.letter : null;
+        });
+    }
+
+    function selectTile(id: number) {
+        const tile = tiles.find((t) => t.id === id);
+        if (!tile || tile.selected) return;
+
+        // Find next empty slot (that's not prefilled)
+        const nextEmptyIdx = slots.findIndex(
+            (s, idx) => s === null && !PREFILLED.some((p) => p.pos === idx),
+        );
+
+        if (nextEmptyIdx === -1) return; // All filled
+
+        const expectedLetter = TARGET_WORD[nextEmptyIdx];
+
+        if (tile.letter === expectedLetter) {
+            // Correct!
+            soundManager.playClick();
+            tiles = tiles.map((t) =>
+                t.id === id ? { ...t, selected: true } : t,
+            );
+            slots = slots.map((s, idx) =>
+                idx === nextEmptyIdx ? tile.letter : s,
+            );
+
+            // Check if complete
+            if (slots.every((s) => s !== null)) {
+                soundManager.playWin();
+                gamePhase = "success";
+                setTimeout(() => {
+                    goto("/game/gamma-prime-8");
+                }, 3000);
             }
         } else {
-            goto(`/game/${decodedText}`);
+            // Wrong!
+            soundManager.playError();
+            errorMessage = "Verkeerde letter! Begin opnieuw.";
+            resetSelection();
         }
     }
 
-    function onScanFailure(error: any) {
-        // handle scan failure
-    }
-
-    function startScanner() {
-        isScanning = true;
+    function resetSelection() {
         setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                /* verbose= */ false,
-            );
-            scanner.render(onScanSuccess, onScanFailure);
-        }, 100);
+            // Reset tiles except M and C
+            tiles = tiles.map((t) => ({
+                ...t,
+                selected: t.letter === "M" || t.letter === "C",
+            }));
+            // Reset slots to only prefilled
+            initSlots();
+            errorMessage = "";
+        }, 500);
     }
 
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        } else {
-            isScanning = false;
-        }
+    function startGame() {
+        gamePhase = "playing";
+        shuffleTiles();
+        initSlots();
+    }
+
+    function resetGame() {
+        // Reset tiles except M and C
+        tiles = tiles.map((t) => ({
+            ...t,
+            selected: t.letter === "M" || t.letter === "C",
+        }));
+        initSlots();
+        errorMessage = "";
     }
 </script>
 
-<div class="finale-page" in:fade={{ duration: 1000 }}>
-    <div class="content-card glass-panel">
-        <div class="signal-indicator">
-            <div class="dot"></div>
-            <span>INKOMEND SIGNAAL...</span>
-        </div>
-
-        <h1>NIEUWE INSTRUCTIES</h1>
-
-        {#if isScanning}
-            <div class="scanner-wrapper" transition:slide>
-                <div id="reader"></div>
-                <button class="cancel-scan-btn" onclick={stopScanner}>
-                    ❌ Stop Scannen
+<div class="puzzle-page" in:fade>
+    <GameContainer
+        bind:this={gameContainer}
+        gameId="pottenberg-puzzle"
+        title="🧩 POTTENBERG PUZZEL"
+    >
+        {#if gamePhase === "intro"}
+            <div class="intro-card" in:scale>
+                <div class="location-badge">📍 POTTENBERG</div>
+                <h2>ALIEN CODEBREAKER</h2>
+                <p>
+                    De ontsnapte aliens hebben zich verschanst in Pottenberg. Om
+                    hun schuilplaats te onthullen, moet je de geheime code
+                    ontcijferen.
+                </p>
+                <div class="hint-box">
+                    <p>
+                        💡 <strong>HINT:</strong> Combineer de naam van een ruimte
+                        met de naam van een persoon.
+                    </p>
+                </div>
+                <button class="start-btn" onclick={startGame}>
+                    🔓 START PUZZEL
                 </button>
             </div>
-        {:else}
-            <div class="message-container">
-                <p in:fly={{ y: 20, duration: 800, delay: 500 }}>
-                    Agenten, dit was nog maar het begin. De neutralisatie van
-                    Rho System heeft een kettingreactie veroorzaakt.
-                </p>
-                <p in:fly={{ y: 20, duration: 800, delay: 1500 }}>
-                    We ontvangen coördinaten van Alien-activiteit in de
-                    Kazematten.
-                </p>
-                <p in:fly={{ y: 20, duration: 800, delay: 2500 }}>
-                    Ga zo snel mogelijk naar de locatie om te onderzoeken wat er
-                    aan de hand is. Wees op uw hoede!
-                </p>
+        {:else if gamePhase === "playing"}
+            <div class="game-area">
+                <div class="code-display">
+                    <h3>GESELECTEERDE CODE:</h3>
+                    <div class="selected-word">
+                        {#each TARGET_WORD.split("") as char, i}
+                            <div
+                                class="letter-slot"
+                                class:filled={slots[i] !== null}
+                                class:prefilled={PREFILLED.some(
+                                    (p) => p.pos === i,
+                                )}
+                                class:space={char === " "}
+                            >
+                                {#if char === " "}
+                                    <span class="space-indicator">␣</span>
+                                {:else}
+                                    {slots[i] || "_"}
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                    {#if errorMessage}
+                        <p class="error-text" transition:slide>
+                            {errorMessage}
+                        </p>
+                    {/if}
+                </div>
+
+                <div class="tiles-container">
+                    <h3>TAP DE LETTERS IN DE JUISTE VOLGORDE:</h3>
+                    <div class="tiles-grid">
+                        {#each tiles as tile (tile.id)}
+                            <button
+                                class="tile"
+                                class:selected={tile.selected}
+                                class:space-tile={tile.letter === " "}
+                                onclick={() => selectTile(tile.id)}
+                                disabled={tile.selected}
+                            >
+                                {#if tile.letter === " "}
+                                    <span class="space-label">SPATIE</span>
+                                {:else}
+                                    {tile.letter}
+                                {/if}
+                            </button>
+                        {/each}
+                    </div>
+                </div>
 
                 <button
-                    class="extra-info-btn"
-                    onclick={() => (showExtraInfo = !showExtraInfo)}
-                    class:active={showExtraInfo}
+                    class="hint-toggle"
+                    onclick={() => (showHint = !showHint)}
                 >
-                    ℹ️ Extra Informatie {showExtraInfo ? "▲" : "▼"}
+                    {showHint ? "❌ VERBERG HINT" : "💡 TOON HINT"}
                 </button>
 
-                {#if showExtraInfo}
-                    <div class="extra-info-panel" transition:slide>
+                {#if showHint}
+                    <div class="hint-panel" transition:slide>
                         <p>
-                            ❄️ Ga naar de <strong>koudste plek</strong> van de
-                            <strong>laagste ruimte</strong> en scan de code.
+                            🏠 <strong>KAMER</strong> + 👤 <strong>LUCA</strong>
+                            = ???
                         </p>
                     </div>
                 {/if}
 
-                <p in:fly={{ y: 20, duration: 800, delay: 3500 }}>
-                    <strong>Tijd:</strong> T-minus 10 minuten
+                <button class="reset-btn" onclick={resetGame}>
+                    🔄 RESET LETTERS
+                </button>
+            </div>
+        {:else if gamePhase === "success"}
+            <div class="success-card" in:scale>
+                <div class="success-icon">🎉</div>
+                <h2>CODE GEKRAAKT!</h2>
+                <div class="code-reveal">KAMERLUCA</div>
+                <p>
+                    De aliens zijn gelokaliseerd! Op naar de volgende missie...
                 </p>
             </div>
-
-            <button class="action-button" onclick={startScanner}>
-                📷 SCAN OMGEVING
-            </button>
         {/if}
-
-        <div class="loading-bar">
-            <div class="progress"></div>
-        </div>
-
-        <p class="status-text">Decorcyclering...</p>
-    </div>
+    </GameContainer>
 </div>
 
 <style>
-    .finale-page {
-        min-height: 80vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .puzzle-page {
+        min-height: 90vh;
         padding: 1rem;
     }
 
-    .content-card {
-        max-width: 600px;
-        width: 100%;
-        padding: 3rem 2rem;
-        background: rgba(0, 0, 0, 0.7);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+    .intro-card,
+    .success-card {
         text-align: center;
+        padding: 2rem;
     }
 
-    .signal-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        color: #ef4444;
+    .location-badge {
+        display: inline-block;
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
         font-family: "Orbitron", sans-serif;
         font-size: 0.9rem;
-        margin-bottom: 2rem;
-        animation: blink 2s infinite;
-    }
-
-    .dot {
-        width: 10px;
-        height: 10px;
-        background: #ef4444;
-        border-radius: 50%;
-    }
-
-    h1 {
-        font-family: "Orbitron", sans-serif;
-        color: white;
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        letter-spacing: 2px;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
-
-    .message-container {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #cbd5e1;
-        margin-bottom: 3rem;
-        min-height: 150px;
-        text-align: center;
-    }
-
-    .message-container p {
         margin-bottom: 1.5rem;
+        border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
-    .extra-info-btn {
-        background: none;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        color: rgba(255, 255, 255, 0.7);
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        cursor: pointer;
+    h2 {
         font-family: "Orbitron", sans-serif;
-        font-size: 0.85rem;
-        margin-bottom: 1.5rem;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-
-    .extra-info-btn:hover {
-        background: rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.6);
-        color: white;
-    }
-
-    .extra-info-btn.active {
-        background: rgba(59, 130, 246, 0.2);
-        border-color: #3b82f6;
         color: #60a5fa;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
     }
 
-    .extra-info-panel {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid #3b82f6;
-        padding: 1rem;
-        margin-bottom: 2rem;
-        border-radius: 0 8px 8px 0;
-        text-align: center;
-    }
-
-    .extra-info-panel p {
-        margin: 0 !important;
-        color: white;
-        font-size: 1rem;
-    }
-
-    strong {
-        color: white;
-    }
-
-    .loading-bar {
-        width: 100%;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 2px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-    }
-
-    .progress {
-        width: 100%;
-        height: 100%;
-        background: var(--primary);
-        transform-origin: left;
-        animation: load 5s linear infinite;
-    }
-
-    .status-text {
+    h3 {
         font-family: "Orbitron", sans-serif;
-        font-size: 0.8rem;
-        color: var(--text-muted);
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
         letter-spacing: 1px;
     }
 
-    .action-button {
-        width: 100%;
-        padding: 1.5rem;
-        background: var(--primary);
-        color: white;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        font-size: 1.2rem;
-        letter-spacing: 2px;
-        border: none;
+    p {
+        color: #cbd5e1;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .hint-box {
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.3);
         border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        padding: 1rem;
         margin-bottom: 2rem;
     }
 
-    .action-button:hover {
+    .hint-box p {
+        margin: 0;
+        color: #fbbf24;
+    }
+
+    .start-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .start-btn:hover {
+        background: #2563eb;
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
     }
 
-    /* Scanner Styles */
-    .scanner-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        width: 100%;
+    .game-area {
+        padding: 1.5rem;
+    }
+
+    .code-display {
+        text-align: center;
         margin-bottom: 2rem;
     }
 
-    #reader {
-        width: 100%;
-        min-height: 250px;
-        background: black;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid var(--primary);
+    .selected-word {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
-    .cancel-scan-btn {
-        background: #ef4444;
-        color: white;
-        border: none;
-        padding: 0.8rem 1.5rem;
+    .letter-slot {
+        width: 40px;
+        height: 50px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #3b82f6;
         border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        font-size: 1.5rem;
+        color: #64748b;
     }
 
-    .cancel-scan-btn:hover {
-        background: #dc2626;
+    .letter-slot.filled {
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        border-color: #60a5fa;
+    }
+
+    .letter-slot.prefilled {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+        border-color: #22c55e;
+    }
+
+    .letter-slot.space {
+        width: 30px;
+        background: rgba(251, 191, 36, 0.1);
+        border-color: #fbbf24;
+        border-style: dashed;
+    }
+
+    .space-indicator {
+        color: #fbbf24;
+        font-size: 1rem;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        margin-bottom: 0;
+    }
+
+    .tiles-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .tiles-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+
+    .tile {
+        aspect-ratio: 1;
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 2px solid #475569;
+        border-radius: 12px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .tile:hover:not(.selected) {
+        border-color: #3b82f6;
+        background: linear-gradient(145deg, #334155, #1e293b);
         transform: scale(1.05);
     }
 
-    @keyframes blink {
-        0%,
-        100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
+    .tile.selected {
+        background: #22c55e;
+        border-color: #16a34a;
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: scale(0.95);
     }
 
-    @keyframes load {
-        0% {
-            transform: scaleX(0);
-        }
-        50% {
-            transform: scaleX(0.5);
-        }
-        100% {
-            transform: scaleX(1);
-        }
+    .tile.space-tile {
+        background: linear-gradient(145deg, #44403c, #292524);
+        border-color: #fbbf24;
+        border-style: dashed;
+    }
+
+    .tile.space-tile:hover:not(.selected) {
+        background: linear-gradient(145deg, #57534e, #44403c);
+        border-color: #fcd34d;
+    }
+
+    .space-label {
+        font-size: 0.7rem;
+        color: #fbbf24;
+    }
+
+    .hint-toggle {
+        width: 100%;
+        padding: 0.8rem;
+        background: transparent;
+        border: 1px dashed rgba(251, 191, 36, 0.5);
+        border-radius: 8px;
+        color: #fbbf24;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+
+    .hint-toggle:hover {
+        background: rgba(251, 191, 36, 0.1);
+    }
+
+    .hint-panel {
+        background: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .hint-panel p {
+        margin: 0;
+        color: #fbbf24;
+        font-size: 1.2rem;
+    }
+
+    .reset-btn {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid #ef4444;
+        border-radius: 12px;
+        color: #f87171;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
+
+    .success-card {
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+    }
+
+    .code-reveal {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2rem;
+        font-weight: 900;
+        color: #22c55e;
+        letter-spacing: 4px;
+        padding: 1rem;
+        background: rgba(34, 197, 94, 0.1);
+        border: 2px solid #22c55e;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
     }
 </style>

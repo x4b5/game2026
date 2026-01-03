@@ -1,114 +1,48 @@
 <script lang="ts">
     import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
 
     let visible = $state(false);
     let showExtraInfo = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
-    let adminPassword = $state("");
+    let locationCode = $state("");
+    let errorMessage = $state("");
+    let showSuccess = $state(false);
+
+    // Valid passwords for this location (Zolder/Start)
+    const VALID_CODES = ["zet-uit"];
 
     onMount(() => {
         visible = true;
     });
 
-    onDestroy(() => {
-        if (scanner) {
-            scanner.clear().catch(console.error);
-        }
-    });
+    function handleCodeSubmit() {
+        const code = locationCode.toLowerCase().trim();
 
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }
-        }
-    }
+        if (VALID_CODES.includes(code)) {
+            showSuccess = true;
+            errorMessage = "";
 
-    function onScanSuccess(decodedText: string, decodedResult: any) {
-        console.log(`Code scanned = ${decodedText}`, decodedResult);
-
-        // Stop scanning
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        }
-
-        // Handle navigation
-        let targetPath = "";
-        if (decodedText.startsWith("http")) {
-            try {
-                const url = new URL(decodedText);
-                if (url.pathname.startsWith("/game")) {
-                    targetPath = url.pathname;
+            // Navigate to next mission after brief delay
+            setTimeout(() => {
+                const currentPath = window.location.pathname.replace(/\/$/, "");
+                const idx = MISSION_ORDER.indexOf(currentPath);
+                if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                    const nextPath = MISSION_ORDER[idx + 1];
+                    fetch("/api/mission", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ navTo: nextPath }),
+                    }).catch(console.error);
+                    goto(nextPath);
+                } else {
+                    goto("/game/rho-system-88");
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            }, 1000);
         } else {
-            targetPath = `/game/${decodedText.toLowerCase()}`;
-        }
-
-        if (targetPath) {
-            // Tell everyone else to follow
-            fetch("/api/mission", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ navTo: targetPath }),
-            }).catch(console.error);
-
-            goto(targetPath);
-        } else if (decodedText.startsWith("http")) {
-            window.location.href = decodedText;
-        }
-    }
-
-    function onScanFailure(error: any) {
-        // handle scan failure, usually better to ignore and keep scanning.
-        // console.warn(`Code scan error = ${error}`);
-    }
-
-    function startScanner() {
-        isScanning = true;
-        // Wait for DOM to update
-        setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                /* verbose= */ false,
-            );
-            scanner.render(onScanSuccess, onScanFailure);
-        }, 100);
-    }
-
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        } else {
-            isScanning = false;
+            errorMessage = "Onjuiste code. Zoek goed rond in de ruimte!";
+            showSuccess = false;
         }
     }
 </script>
@@ -133,13 +67,10 @@
         <h1>KAPPA GRID 27</h1>
         <h2 class="mission-title">MISSIE BRIEFING</h2>
 
-        <!-- Scanner Container -->
-        {#if isScanning}
-            <div class="scanner-wrapper" transition:slide>
-                <div id="reader"></div>
-                <button class="cancel-scan-btn" onclick={stopScanner}>
-                    ❌ Stop Scannen
-                </button>
+        {#if showSuccess}
+            <div class="success-message" transition:slide>
+                <span class="success-icon">✅</span>
+                <p>Locatie bevestigd! Voorbereiden op volgende missie...</p>
             </div>
         {:else}
             <div class="briefing-text">
@@ -181,20 +112,27 @@
                 </div>
             </div>
 
-            <button class="action-button primary-action" onclick={startScanner}>
-                <span class="icon">📷</span>
-                <span class="text">SCAN OMGEVING</span>
-            </button>
-
-            <!-- Admin Password Field -->
-            <div class="admin-bypass">
+            <div class="code-entry">
+                <label for="location-code">🔐 VOER LOCATIECODE IN:</label>
                 <input
-                    type="password"
-                    bind:value={adminPassword}
-                    placeholder="Admin wachtwoord..."
-                    onkeydown={(e) => e.key === "Enter" && handleAdminBypass()}
+                    id="location-code"
+                    type="text"
+                    bind:value={locationCode}
+                    placeholder="Type de code..."
+                    onkeydown={(e) => e.key === "Enter" && handleCodeSubmit()}
+                    autocomplete="off"
+                    autocapitalize="none"
                 />
-                <button onclick={handleAdminBypass}>Doorgaan</button>
+                {#if errorMessage}
+                    <p class="error-text" transition:slide>{errorMessage}</p>
+                {/if}
+                <button
+                    class="action-button primary-action"
+                    onclick={handleCodeSubmit}
+                >
+                    <span class="icon">🔓</span>
+                    <span class="text">BEVESTIG CODE</span>
+                </button>
             </div>
         {/if}
     </div>
@@ -346,11 +284,60 @@
         border-left: 3px solid #60a5fa;
     }
 
+    /* Code Entry */
+    .code-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .code-entry label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        color: #10b981;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .code-entry input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #10b981;
+        color: white;
+        font-size: 1.3rem;
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        border-radius: 8px;
+    }
+
+    .code-entry input:focus {
+        outline: none;
+        border-color: #34d399;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .code-entry input::placeholder {
+        color: #64748b;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
+    }
+
     /* Buttons */
     .primary-action {
         width: 100%;
         padding: 1.5rem;
-        background: linear-gradient(135deg, var(--primary), #2563eb);
+        background: linear-gradient(135deg, #10b981, #059669);
         color: white;
         border: none;
         border-radius: 12px;
@@ -378,7 +365,7 @@
 
     .primary-action:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
     }
 
     .primary-action::after {
@@ -477,45 +464,6 @@
         }
     }
 
-    /* Scanner & Other UI */
-    .scanner-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        padding: 1rem;
-        border-radius: 12px;
-    }
-
-    #reader {
-        width: 100%;
-        background: black;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 2px solid #3b82f6;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-    }
-
-    .cancel-scan-btn {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-        border: 1px solid #ef4444;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .cancel-scan-btn:hover {
-        background: rgba(239, 68, 68, 0.4);
-        color: white;
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-    }
-
     .extra-info-panel {
         background: rgba(59, 130, 246, 0.1);
         border-left: 3px solid #3b82f6;
@@ -526,42 +474,25 @@
         animation: slideIn 0.3s ease-out;
     }
 
-    .admin-bypass {
-        margin-top: 2rem;
-        padding: 1rem;
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+    .success-message {
         display: flex;
-        gap: 0.5rem;
-        opacity: 0.5;
-        transition: opacity 0.3s;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid #10b981;
+        border-radius: 16px;
     }
 
-    .admin-bypass:hover {
-        opacity: 1;
+    .success-icon {
+        font-size: 4rem;
     }
 
-    .admin-bypass input {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.8rem;
-        border-radius: 6px;
-        color: white;
+    .success-message p {
         font-family: "Orbitron", sans-serif;
-        font-size: 0.9rem;
-    }
-
-    .admin-bypass button {
-        background: rgba(59, 130, 246, 0.2);
-        border: 1px solid #3b82f6;
-        color: #60a5fa;
-        padding: 0.8rem 1.2rem;
-        border-radius: 6px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
+        font-size: 1.2rem;
+        color: #10b981;
+        text-align: center;
     }
 </style>

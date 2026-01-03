@@ -1,106 +1,43 @@
 <script lang="ts">
     import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
 
     let showExtraInfo = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
-    let adminPassword = $state("");
+    let locationCode = $state("");
+    let errorMessage = $state("");
+    let showSuccess = $state(false);
 
-    onDestroy(() => {
-        if (scanner) {
-            scanner.clear().catch(console.error);
-        }
-    });
+    // Valid passwords for this location
+    const VALID_CODES = ["noorderbrug"];
 
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }
-        }
-    }
+    function handleCodeSubmit() {
+        const code = locationCode.toLowerCase().trim();
 
-    function onScanSuccess(decodedText: string, decodedResult: any) {
-        console.log(`Code scanned = ${decodedText}`, decodedResult);
+        if (VALID_CODES.includes(code)) {
+            showSuccess = true;
+            errorMessage = "";
 
-        // Stop scanning
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        }
-
-        // Handle navigation
-        let targetPath = "";
-        if (decodedText.startsWith("http")) {
-            try {
-                const url = new URL(decodedText);
-                if (url.pathname.startsWith("/game")) {
-                    targetPath = url.pathname;
+            // Navigate to next mission after brief delay
+            setTimeout(() => {
+                const currentPath = window.location.pathname.replace(/\/$/, "");
+                const idx = MISSION_ORDER.indexOf(currentPath);
+                if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
+                    const nextPath = MISSION_ORDER[idx + 1];
+                    fetch("/api/mission", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ navTo: nextPath }),
+                    }).catch(console.error);
+                    goto(nextPath);
+                } else {
+                    goto("/game/iota-stream-6");
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            }, 1000);
         } else {
-            targetPath = `/game/${decodedText.toLowerCase()}`;
-        }
-
-        if (targetPath) {
-            fetch("/api/mission", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ navTo: targetPath }),
-            }).catch(console.error);
-
-            goto(targetPath);
-        } else if (decodedText.startsWith("http")) {
-            window.location.href = decodedText;
-        }
-    }
-
-    function onScanFailure(error: any) {
-        // console.warn(`Code scan error = ${error}`);
-    }
-
-    function startScanner() {
-        isScanning = true;
-        setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                false,
-            );
-            scanner.render(onScanSuccess, onScanFailure);
-        }, 100);
-    }
-
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        } else {
-            isScanning = false;
+            errorMessage = "Onjuiste code. Zoek goed rond op de locatie!";
+            showSuccess = false;
         }
     }
 </script>
@@ -111,24 +48,21 @@
 
     <div class="glass-panel content-card">
         <h1>RHO SYSTEM 88</h1>
-        <h2 class="mission-title">DOELWIT SCAN</h2>
+        <h2 class="mission-title">LOCATIE VERIFICATIE</h2>
 
-        <!-- Scanner Container -->
-        {#if isScanning}
-            <div class="scanner-wrapper" transition:slide>
-                <div id="reader"></div>
-                <button class="cancel-scan-btn" onclick={stopScanner}>
-                    ❌ Stop Scannen
-                </button>
+        {#if showSuccess}
+            <div class="success-message" transition:slide>
+                <span class="success-icon">✅</span>
+                <p>Locatie bevestigd! Doorgaan naar volgende missie...</p>
             </div>
         {:else}
             <div class="briefing-text">
                 <p>
-                    <strong>LOCATIE:</strong> KAZEMATTEN (THE MINCK)
+                    <strong>LOCATIE:</strong> KAZEMATTEN 
                 </p>
                 <p>
-                    U bevindt zich in de gevarenzone. Zoek de QR-code om het
-                    systeem te ontgrendelen.
+                    U bevindt zich in de gevarenzone. Voer de locatiecode in om
+                    het systeem te ontgrendelen.
                 </p>
                 <p class="clue-text">
                     > TIP: Koudste plek van de laagste ruimte.
@@ -146,37 +80,40 @@
             {#if showExtraInfo}
                 <div class="extra-info-panel" transition:slide>
                     <p>
-                        🔦 Gebruik je zaklamp indien nodig. Deze ruimte bevat
-                        historische resten die de scanner kunnen verstoren.
+                        🔦 Zoek naar aanwijzingen in de ruimte. De code staat
+                        ergens op de locatie vermeld.
                     </p>
                 </div>
             {/if}
 
             <div class="mission-status">
                 <div class="status-item">
-                    <span class="label">Sector:</span>
-                    <span class="value">MINCK</span>
-                </div>
-                <div class="status-item">
                     <span class="label">Status:</span>
-                    <span class="value high">ACTIVE</span>
+                    <span class="value high">WACHTEND</span>
                 </div>
             </div>
 
-            <button class="action-button primary-action" onclick={startScanner}>
-                <span class="icon">📷</span>
-                <span class="text">START SCAN</span>
-            </button>
-
-            <!-- Admin Password Field -->
-            <div class="admin-bypass">
+            <div class="code-entry">
+                <label for="location-code">🔐 VOER LOCATIECODE IN:</label>
                 <input
-                    type="password"
-                    bind:value={adminPassword}
-                    placeholder="Override Code..."
-                    onkeydown={(e) => e.key === "Enter" && handleAdminBypass()}
+                    id="location-code"
+                    type="text"
+                    bind:value={locationCode}
+                    placeholder="Type de code..."
+                    onkeydown={(e) => e.key === "Enter" && handleCodeSubmit()}
+                    autocomplete="off"
+                    autocapitalize="none"
                 />
-                <button onclick={handleAdminBypass}>AUTO-AUTH</button>
+                {#if errorMessage}
+                    <p class="error-text" transition:slide>{errorMessage}</p>
+                {/if}
+                <button
+                    class="action-button primary-action"
+                    onclick={handleCodeSubmit}
+                >
+                    <span class="icon">🔓</span>
+                    <span class="text">BEVESTIG CODE</span>
+                </button>
             </div>
         {/if}
     </div>
@@ -301,6 +238,53 @@
         color: #10b981;
     }
 
+    .code-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .code-entry label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        color: #10b981;
+        letter-spacing: 1px;
+    }
+
+    .code-entry input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #10b981;
+        color: white;
+        font-size: 1.3rem;
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        border-radius: 8px;
+    }
+
+    .code-entry input:focus {
+        outline: none;
+        border-color: #34d399;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .code-entry input::placeholder {
+        color: #64748b;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
+    }
+
     .primary-action {
         width: 100%;
         padding: 1.5rem;
@@ -399,11 +383,33 @@
     }
 
     .value.high {
-        color: #ef4444;
-        animation: pulse-red 2s infinite;
+        color: #fbbf24;
+        animation: pulse-yellow 2s infinite;
     }
 
-    @keyframes pulse-red {
+    .success-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid #10b981;
+        border-radius: 16px;
+    }
+
+    .success-icon {
+        font-size: 4rem;
+    }
+
+    .success-message p {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.2rem;
+        color: #10b981;
+        text-align: center;
+    }
+
+    @keyframes pulse-yellow {
         0%,
         100% {
             opacity: 1;
@@ -411,61 +417,5 @@
         50% {
             opacity: 0.5;
         }
-    }
-
-    .scanner-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 1rem;
-        border: 1px solid #10b981;
-    }
-
-    #reader {
-        width: 100%;
-        background: black;
-        border: 1px solid #10b981;
-    }
-
-    .cancel-scan-btn {
-        background: transparent;
-        color: #ef4444;
-        border: 1px solid #ef4444;
-        padding: 0.8rem 1.5rem;
-        cursor: pointer;
-        font-family: "Orbitron", sans-serif;
-    }
-
-    .admin-bypass {
-        margin-top: 2rem;
-        display: flex;
-        gap: 0.5rem;
-        opacity: 0.3;
-        transition: opacity 0.3s;
-    }
-
-    .admin-bypass:hover {
-        opacity: 1;
-    }
-
-    .admin-bypass input {
-        flex: 1;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        padding: 0.8rem;
-        color: #10b981;
-        font-family: monospace;
-    }
-
-    .admin-bypass button {
-        background: rgba(16, 185, 129, 0.2);
-        border: 1px solid #10b981;
-        color: #10b981;
-        padding: 0.8rem;
-        cursor: pointer;
-        font-family: "Orbitron", sans-serif;
     }
 </style>

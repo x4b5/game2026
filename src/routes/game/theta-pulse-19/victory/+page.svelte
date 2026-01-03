@@ -6,6 +6,8 @@
 
     let visible = $state(false);
     let intelRevealed = $state(false);
+    let showAlienImage = $state(false);
+    let enlargedImage = $state(false);
     let isStella = $derived($gameProgress.player?.avatar === "stella");
 
     onMount(() => {
@@ -58,6 +60,33 @@
                         alien-vloot volledig gedestabiliseerd. Het Vrijthof is
                         bevrijd!
                     </p>
+
+                    <button
+                        class="reveal-btn"
+                        onclick={() => (showAlienImage = !showAlienImage)}
+                    >
+                        {showAlienImage
+                            ? "🙈 VERBERG"
+                            : "👀 WAT GEBEURDE ER MET DE ALIENS?"}
+                    </button>
+
+                    {#if showAlienImage}
+                        <div class="alien-image-container">
+                            <img
+                                src="/alien-diarree.png"
+                                alt="Alien Diarree"
+                                class="alien-image"
+                                onclick={() => (enlargedImage = true)}
+                                role="button"
+                                tabindex="0"
+                            />
+                            <p class="image-caption">
+                                De aliens konden de sonische golven niet aan...
+                                💩
+                            </p>
+                            <p class="tap-hint">🔍 Tap om te vergroten</p>
+                        </div>
+                    {/if}
                     <div class="objective-box warning">
                         <strong>WAARSCHUWING:</strong> Sensoren detecteren een
                         klein restant van de vloot. De aliens blijken te
@@ -78,6 +107,21 @@
         </div>
     </div>
 </div>
+
+<!-- Lightbox Modal -->
+{#if enlargedImage}
+    <div class="lightbox" onclick={() => (enlargedImage = false)}>
+        <button class="close-btn" onclick={() => (enlargedImage = false)}
+            >✕</button
+        >
+        <img
+            src="/alien-diarree.png"
+            alt="Alien Diarree Vergroot"
+            class="lightbox-image"
+        />
+        <p class="lightbox-caption">Tap ergens om te sluiten</p>
+    </div>
+{/if}
 
 <style>
     .victory-page {
@@ -215,6 +259,110 @@
         line-height: 1.6;
         margin-bottom: 1.5rem;
         font-size: 1.05rem;
+    }
+
+    .reveal-btn {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(168, 85, 247, 0.2);
+        border: 2px solid #a855f7;
+        border-radius: 12px;
+        color: #c084fc;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 1.5rem;
+    }
+
+    .reveal-btn:hover {
+        background: rgba(168, 85, 247, 0.3);
+        transform: scale(1.02);
+    }
+
+    .alien-image-container {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid #a855f7;
+    }
+
+    .alien-image {
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .alien-image:hover {
+        transform: scale(1.02);
+    }
+
+    .image-caption {
+        color: #a855f7;
+        font-size: 0.9rem;
+        font-style: italic;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .tap-hint {
+        color: #64748b;
+        font-size: 0.8rem;
+        text-align: center;
+        margin: 0;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        cursor: pointer;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid white;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+
+    .lightbox-image {
+        max-width: 95%;
+        max-height: 80vh;
+        border-radius: 16px;
+        box-shadow: 0 0 50px rgba(168, 85, 247, 0.5);
+    }
+
+    .lightbox-caption {
+        color: #94a3b8;
+        margin-top: 1rem;
+        font-size: 0.9rem;
     }
 
     .objective-box {

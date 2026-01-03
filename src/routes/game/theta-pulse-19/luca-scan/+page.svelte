@@ -1,124 +1,35 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
+    import { onMount } from "svelte";
     import { fade, fly, slide } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { Html5QrcodeScanner } from "html5-qrcode";
     import { gameProgress, MISSION_ORDER } from "$lib/stores/gameStore";
 
     let visible = $state(false);
-    let isScanning = $state(false);
-    let scanner: any = null;
+    let locationCode = $state("");
+    let errorMessage = $state("");
+    let showSuccess = $state(false);
 
-    let isNewMission = $state(true);
-    let adminPassword = $state("");
-
-    function handleAdminBypass() {
-        if (adminPassword.toLowerCase() === "xavier") {
-            const currentPath = window.location.pathname.replace(/\/$/, "");
-            const idx = MISSION_ORDER.indexOf(currentPath);
-            if (idx !== -1 && idx < MISSION_ORDER.length - 1) {
-                const nextPath = MISSION_ORDER[idx + 1];
-                fetch("/api/mission", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ navTo: nextPath }),
-                }).catch(console.error);
-                goto(nextPath);
-            }
-        }
-    }
+    // Valid passwords for this location (Luca's room / Wyck)
+    const VALID_CODES = ["luca", "wyck", "slaapkamer", "geheim", "brug"];
 
     onMount(() => {
         visible = true;
     });
 
-    onDestroy(() => {
-        if (scanner) {
-            scanner.clear().catch(console.error);
-        }
-    });
+    function handleCodeSubmit() {
+        const code = locationCode.toLowerCase().trim();
 
-    function onScanSuccess(decodedText: string) {
-        console.log("QR Scanned:", decodedText);
+        if (VALID_CODES.includes(code)) {
+            showSuccess = true;
+            errorMessage = "";
 
-        const rawCode = decodedText.trim();
-        const code = rawCode.toLowerCase();
-
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                    handleNavigation(rawCode, code);
-                })
-                .catch((err: any) => {
-                    console.error("Scanner clear failed:", err);
-                    handleNavigation(rawCode, code);
-                });
+            // Navigate to Mosa Bridge after brief delay
+            setTimeout(() => {
+                goto("/game/mosa-bridge-44");
+            }, 1000);
         } else {
-            handleNavigation(rawCode, code);
-        }
-    }
-
-    function handleNavigation(rawCode: string, code: string) {
-        // Here we can define where the player goes after scanning the bedroom code
-        // For now, let's go back to the dashboard or a placeholder for the final mission
-
-        if (
-            code === "slaapkamerluca" ||
-            code === "luca" ||
-            code === "geheim" ||
-            code === "hidden"
-        ) {
-            // Success! Head to the bridge for Mosa's part of the mission
-            goto("/game/mosa-bridge-44");
-            return;
-        }
-
-        // Generic navigation fallback
-        if (rawCode.startsWith("http")) {
-            try {
-                const url = new URL(rawCode);
-                if (url.pathname.startsWith("/game")) {
-                    goto(url.pathname);
-                } else {
-                    window.location.href = rawCode;
-                }
-            } catch (e) {
-                window.location.href = rawCode;
-            }
-        } else {
-            const cleanCode = rawCode.startsWith("/")
-                ? rawCode.slice(1)
-                : rawCode;
-            goto(`/game/${cleanCode}`);
-        }
-    }
-
-    function startScanner() {
-        isScanning = true;
-        setTimeout(() => {
-            scanner = new Html5QrcodeScanner(
-                "reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                false,
-            );
-            scanner.render(onScanSuccess, () => {});
-        }, 100);
-    }
-
-    function stopScanner() {
-        if (scanner) {
-            scanner
-                .clear()
-                .then(() => {
-                    isScanning = false;
-                    scanner = null;
-                })
-                .catch(console.error);
-        } else {
-            isScanning = false;
+            errorMessage = "Onjuiste code. Zoek in de buurt van de brug!";
+            showSuccess = false;
         }
     }
 </script>
@@ -132,7 +43,12 @@
 
         <h1>MISSIE: WYCK</h1>
 
-        {#if isNewMission}
+        {#if showSuccess}
+            <div class="success-message" transition:slide>
+                <span class="success-icon">✅</span>
+                <p>Coördinaten ontvangen! Aliens gedetecteerd bij de brug...</p>
+            </div>
+        {:else}
             <div class="new-mission-briefing" in:fly={{ y: 20 }}>
                 <div class="mission-header">
                     <span class="pulse-tag">NIEUWE OPDRACHT: ACHTERVOLGING</span
@@ -140,7 +56,7 @@
                 </div>
                 <p>
                     De aliens zijn ontsnapt! We moeten ze onmiddellijk
-                    terugvinden. Scan de QR-code om de coördinaten van de
+                    terugvinden. Voer de locatiecode in om de coördinaten van de
                     ontsnapte aliens te achterhalen.
                 </p>
                 <div class="objective-list">
@@ -150,37 +66,31 @@
                     </div>
                     <div class="objective-item">
                         <span class="icon">🌉</span>
-                        <span>Vind de verborgen QR-code bij de brug.</span>
+                        <span>Vind de locatiecode bij de brug.</span>
                     </div>
                 </div>
-                <button class="scan-btn pulse" onclick={startScanner}>
-                    📷 START SCAN & ONDERSCHEP
-                </button>
-            </div>
-        {:else if isScanning}
-            <div class="scanner-container" transition:slide>
-                <div class="scanner-info">
-                    <p>
-                        Scan de QR-code om de coördinaten van de ontsnapte
-                        aliens te achterhalen.
-                    </p>
+
+                <div class="code-entry">
+                    <label for="location-code">🔐 VOER LOCATIECODE IN:</label>
+                    <input
+                        id="location-code"
+                        type="text"
+                        bind:value={locationCode}
+                        placeholder="Type de code..."
+                        onkeydown={(e) =>
+                            e.key === "Enter" && handleCodeSubmit()}
+                        autocomplete="off"
+                        autocapitalize="none"
+                    />
+                    {#if errorMessage}
+                        <p class="error-text" transition:slide>
+                            {errorMessage}
+                        </p>
+                    {/if}
+                    <button class="scan-btn pulse" onclick={handleCodeSubmit}>
+                        🔓 BEVESTIG & ONDERSCHEP
+                    </button>
                 </div>
-                <div id="reader"></div>
-                <button class="cancel-btn" onclick={stopScanner}>
-                    ❌ ANNULEER SCAN
-                </button>
-            </div>
-        {:else}
-            <div class="briefing">
-                <p>
-                    Het signaal is bevestigd! De aliens vluchten vanuit de
-                    slaapkamer richting Wyck. <br />
-                    De superhelden hebben de achtervolging ingezet via de Servaasbrug!
-                </p>
-                <div class="location-hint">📍 LOCATIE: Wyck</div>
-                <button class="scan-btn" onclick={() => (isNewMission = true)}>
-                    📷 BEVESTIG ARRIVAL
-                </button>
             </div>
         {/if}
 
@@ -244,109 +154,6 @@
         text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
     }
 
-    .briefing p {
-        color: #cbd5e1;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
-
-    .location-hint {
-        background: rgba(59, 130, 246, 0.1);
-        color: #60a5fa;
-        padding: 0.75rem;
-        border-radius: 8px;
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.9rem;
-        margin-bottom: 2rem;
-        border: 1px dashed rgba(59, 130, 246, 0.4);
-    }
-
-    .scan-btn {
-        width: 100%;
-        padding: 1.4rem;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 900;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
-    }
-
-    .scan-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
-        filter: brightness(1.1);
-    }
-
-    .scanner-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        width: 100%;
-    }
-
-    .scanner-info {
-        background: rgba(59, 130, 246, 0.1);
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .scanner-info p {
-        color: #dbeafe;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-
-    #reader {
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid #3b82f6;
-    }
-
-    .cancel-btn {
-        background: rgba(239, 68, 68, 0.1);
-        color: #f87171;
-        border: 1px solid #ef4444;
-        padding: 1rem;
-        border-radius: 12px;
-        font-family: "Orbitron", sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .cancel-btn:hover {
-        background: #ef4444;
-        color: white;
-    }
-
-    .footer-meta {
-        margin-top: auto;
-    }
-
-    .line {
-        width: 100%;
-        height: 1px;
-        background: rgba(255, 255, 255, 0.1);
-        margin-bottom: 0.8rem;
-    }
-
-    .footer-meta span {
-        font-family: "Orbitron", sans-serif;
-        font-size: 0.7rem;
-        color: #64748b;
-        letter-spacing: 1px;
-    }
-
     .new-mission-briefing {
         padding: 1.5rem;
         background: rgba(59, 130, 246, 0.05);
@@ -400,8 +207,119 @@
         font-size: 1.2rem;
     }
 
+    .code-entry {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    .code-entry label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        color: #60a5fa;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .code-entry input {
+        width: 100%;
+        padding: 1.2rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #3b82f6;
+        color: white;
+        font-size: 1.3rem;
+        font-family: "Orbitron", sans-serif;
+        text-align: center;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        border-radius: 8px;
+    }
+
+    .code-entry input:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .code-entry input::placeholder {
+        color: #64748b;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.9rem;
+        text-align: center;
+        margin: 0;
+    }
+
+    .scan-btn {
+        width: 100%;
+        padding: 1.4rem;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .scan-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+        filter: brightness(1.1);
+    }
+
     .scan-btn.pulse {
         animation: subtlePulse 2s infinite;
+    }
+
+    .success-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 3rem;
+        background: rgba(59, 130, 246, 0.1);
+        border: 2px solid #3b82f6;
+        border-radius: 16px;
+    }
+
+    .success-icon {
+        font-size: 4rem;
+    }
+
+    .success-message p {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.2rem;
+        color: #60a5fa;
+        text-align: center;
+    }
+
+    .footer-meta {
+        margin-top: auto;
+    }
+
+    .line {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin-bottom: 0.8rem;
+    }
+
+    .footer-meta span {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.7rem;
+        color: #64748b;
+        letter-spacing: 1px;
     }
 
     @keyframes subtlePulse {
@@ -416,6 +334,18 @@
         }
     }
 
+    @keyframes pulse {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.6;
+        }
+    }
+
     @media (max-width: 600px) {
         .content-panel {
             padding: 2rem 1.5rem;
@@ -426,26 +356,9 @@
             font-size: 1.8rem;
         }
 
-        .briefing p {
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
         .scan-btn {
             padding: 1.1rem;
             font-size: 1.1rem;
-        }
-    }
-
-    @keyframes pulse {
-        0%,
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.2);
-            opacity: 0.6;
         }
     }
 </style>

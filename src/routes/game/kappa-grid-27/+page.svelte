@@ -49,6 +49,7 @@
     let isStarting = $state(false);
     let mounted = $state(false);
     let addedPlayers = $state<string[]>([]); // Track which heroes have players
+    let videoElement: HTMLVideoElement;
 
     let briefingText =
         "Systeem geactiveerd... (v2.1) Verbinding maken met satellieten... Aliens hebben strategische punten bezet. Jouw missie: kraak het slot van de badkamer, en spoel ze weg bij de Servaasbrug!";
@@ -63,10 +64,9 @@
         // Show briefing text immediately
         displayedBriefing = briefingText;
 
-        // Check if players already exist
-        if ($gameProgress.players.length > 0) {
-            addedPlayers = $gameProgress.players.map((p) => p.avatar);
-        }
+        // Reset players when this page opens - it's the start of a new game
+        gameProgress.reset();
+        addedPlayers = [];
 
         return () => {
             soundManager.stopAmbientMusic();
@@ -117,6 +117,11 @@
         isStarting = true;
         soundManager.playClick();
         soundManager.stopAmbientMusic();
+
+        // Stop the video
+        if (videoElement) {
+            videoElement.pause();
+        }
 
         // Navigate to next game after short delay
         setTimeout(() => {
@@ -189,6 +194,14 @@
                 zijn lokale superhelden en worden nu als agenten ingezet om
                 Maaastricht te bevrijden.
             </div>
+            <video
+                bind:this={videoElement}
+                src="/alien-attack.mp4"
+                class="hero-video-banner"
+                autoplay
+                muted
+                playsinline
+            ></video>
         </div>
     </div>
 
@@ -762,6 +775,43 @@
         margin: 0 auto;
         line-height: 1.5;
         padding: 0 1rem;
+    }
+
+    .hero-image-banner {
+        display: block;
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        border-radius: 20px;
+        margin: 2rem auto 0 auto;
+        border: 3px solid rgba(59, 130, 246, 0.4);
+        box-shadow:
+            0 0 40px rgba(59, 130, 246, 0.3),
+            0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: floatImage 4s ease-in-out infinite;
+    }
+
+    @keyframes floatImage {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .hero-video-banner {
+        display: block;
+        width: 100%;
+        max-width: 500px;
+        height: auto;
+        border-radius: 20px;
+        margin: 2rem auto 0 auto;
+        border: 3px solid rgba(59, 130, 246, 0.4);
+        box-shadow:
+            0 0 40px rgba(59, 130, 246, 0.3),
+            0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .mission-brief {

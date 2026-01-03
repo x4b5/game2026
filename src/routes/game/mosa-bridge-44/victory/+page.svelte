@@ -7,53 +7,68 @@
 
     let gameContainer: any;
 
-    // Alien apologies
-    const apologies = [
-        '"Sorry! De Maas is te nat!"',
-        '"Wij komen in vrede... nu!"',
-        '"Geen water meer, alstublieft!"',
-        '"Wij gaan terug naar Mars!"',
-        '"Sorry Lord Mosa!"',
+    // Alien intercepts
+    const intercepts = [
+        '"Retreat naar sector Pottenberg!"',
+        '"De anderen zijn ontsnapt..."',
+        '"Coördinaten: 50.8421, 5.7012"',
+        '"Ze hergroeperen zich!"',
+        '"Laatste kans om te stoppen!"',
     ];
 
     onMount(() => {
-        soundManager.playWin();
+        soundManager.playSuccess();
     });
 
-    async function handleHome() {
-        goto("/game");
+    async function handleContinue() {
+        goto("/game/rho-system-88/finale");
     }
 </script>
 
 <GameContainer
     bind:this={gameContainer}
     gameId="mosa-victory"
-    title="🏆 MISSIE GESLAAGD"
+    title="⚠️ GEDEELTELIJK SUCCES"
 >
     <div class="victory-content" in:fade>
-        <div class="hero-image">🦁🌊</div>
+        <div class="hero-image">🌊💥👾</div>
 
-        <h2>MAASTRICHT IS VEILIG!</h2>
+        <h2>ALIENS WEGGESPOELD!</h2>
 
         <p class="story-text">
-            Dankzij jouw snelle reacties bij de Servaasbrug zijn de aliens
-            weggespoeld. Lord Mosa heeft de stad beschermd.
+            Dankzij jouw snelle reacties bij de Servaasbrug zijn de meeste
+            aliens weggespoeld. Maar <strong>wacht!</strong> Onze sensoren detecteren
+            dat een aantal aliens zijn ontsnapt...
         </p>
 
-        <div class="aliens-apology">
-            <h3>👾 Berichten van de Aliens:</h3>
+        <div class="alert-box">
+            <span class="alert-icon">🚨</span>
+            <p>
+                <strong>WAARSCHUWING:</strong> Ontsnapte aliens gelocaliseerd in
+                <strong>POTTENBERG</strong>! Ze hergroeperen zich voor een
+                tegenaanval.
+            </p>
+        </div>
+
+        <div class="aliens-intercept">
+            <h3>📡 Onderschepte Communicatie:</h3>
             <div class="chat-bubbles">
-                {#each apologies as apology, i}
+                {#each intercepts as message, i}
                     <div class="bubble" style:animation-delay="{i * 0.5}s">
-                        {apology}
+                        {message}
                     </div>
                 {/each}
             </div>
         </div>
 
+        <p class="mission-text">
+            Vertrek naar <strong>Pottenberg</strong> en los de puzzel op om de aliens
+            op de juiste locatie te overmannen!
+        </p>
+
         <div class="actions">
-            <button class="action-btn primary" onclick={handleHome}>
-                TERUG NAAR DE KAART
+            <button class="action-btn primary" onclick={handleContinue}>
+                🎯 NAAR POTTENBERG
             </button>
         </div>
     </div>
@@ -94,15 +109,60 @@
         font-size: 1.1rem;
         line-height: 1.6;
         color: #e2e8f0;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
-    .aliens-apology {
-        background: rgba(255, 255, 255, 0.1);
+    .alert-box {
+        background: rgba(239, 68, 68, 0.2);
+        border: 2px solid #ef4444;
         border-radius: 12px;
         padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        text-align: left;
+    }
+
+    .alert-icon {
+        font-size: 2rem;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .alert-box p {
+        margin: 0;
+        color: #fca5a5;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .mission-text {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #86efac;
         margin-bottom: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(34, 197, 94, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #22c55e;
+    }
+
+    .aliens-intercept {
+        background: rgba(139, 92, 246, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
     h3 {

@@ -20,7 +20,7 @@
     function startFinalAssault() {
         missionStarted = true;
         setTimeout(() => {
-            goto("/airborne-concerto");
+            goto("/game/theta-pulse-19/airborne-concerto");
         }, 2000);
     }
 </script>
